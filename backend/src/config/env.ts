@@ -24,7 +24,7 @@ const envSchema = z.object({
   SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().positive().default(10000),
   BODY_LIMIT: z.string().default("100kb"),
 
-  RATE_LIMIT_WRITE_TEST: z.coerce.boolean().optional(),
+  RATE_LIMIT_WRITE_TEST: z.stringbool().optional(),
 
   GITHUB_TOKEN: z.string().optional(),
 

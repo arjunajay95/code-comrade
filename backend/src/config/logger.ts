@@ -7,6 +7,7 @@ export const logger = pino({
   redact: {
     paths: [
       "req.headers.authorization",
+      "req.headers.cookie",
       "clerkId",
       "*.clerkId",
       "token",
