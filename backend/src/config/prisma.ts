@@ -3,7 +3,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { env } from "./env.js";
 
-const pool = new Pool({
+// Exported so shutdown (backend/index.ts) can close it.
+export const pool = new Pool({
   connectionString: env.DATABASE_URL,
 });
 
