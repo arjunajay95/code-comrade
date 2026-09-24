@@ -39,13 +39,18 @@ export const errorHandler = (
   err: unknown,
   req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ): void => {
-  // If part of the response already went out, a second response cannot be
-  // sent. Handing off to Express's built-in handler lets it close the
-  // connection cleanly instead of throwing "headers already sent".
+  // A response already started, typically because requestTimeout sent a
+  // 503 and the route handler tried to respond afterwards. Logging here
+  // keeps the error in Pino with its request id, instead of Express's
+  // default handler printing a bare stack to stderr.
   if (res.headersSent) {
-    next(err);
+    req.log.error({ err }, "Error after response was already sent");
+    // Mirrors what Express's default handler does: if the response is
+    // still mid-stream, cut the connection so the client is not left
+    // waiting on a half-written body.
+    if (!res.writableEnded) req.socket.destroy();
     return;
   }
 
@@ -54,6 +59,15 @@ export const errorHandler = (
   // Known, intentional errors. The message was written for the client, so
   // it is safe to return as-is.
   if (appError?.isOperational) {
+    // A known 5xx still means something on the server side is wrong, a
+    // dependency down or a request timing out. Logging it here, through
+    // req.log, ties the line to the same request id the client receives.
+    // 4xx errors are the client's mistake and are already covered by the
+    // request log line.
+    if (appError.statusCode >= 500) {
+      req.log.error({ err: appError }, "Operational server error");
+    }
+
     res.status(appError.statusCode).json({
       success: false,
       error: {
