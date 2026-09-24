@@ -20,6 +20,24 @@ const eslintConfig = defineConfig([
       "no-console": "error",
     },
   },
+  {
+    // Scoped to TypeScript files, since that's where eslint-config-next
+    // registers the typescript-eslint plugin. Applying it globally could
+    // fail on plain .js or .mjs files, such as this config itself.
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      // A leading underscore marks a parameter or variable as intentionally
+      // unused, typically because a signature requires it.
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
