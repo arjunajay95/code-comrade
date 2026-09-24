@@ -8,7 +8,8 @@ export class AppError extends Error {
     statusCode: number,
     code: string,
     isOperational = true,
-    options?: ErrorOptions, //options.cause carries the underlying error, a failed database call for example. The error handler logs it, but it never reaches the client.
+    // options.cause carries the underlying error, a failed database call for example. The error handler logs it, but it never reaches the client.
+    options?: ErrorOptions,
   ) {
     super(message, options);
     this.statusCode = statusCode;

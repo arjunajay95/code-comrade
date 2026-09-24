@@ -34,17 +34,19 @@ const toAppError = (err: unknown): AppError | null => {
 };
 
 // Express only treats a middleware as an error handler when it declares
-// all four parameters, so next has to stay in the signature.
+// all four parameters, so _next stays in the signature even though it is
+// unused. The underscore marks that as intentional.
 export const errorHandler = (
   err: unknown,
   req: Request,
   res: Response,
   _next: NextFunction,
 ): void => {
-  // A response already started, typically because requestTimeout sent a
-  // 503 and the route handler tried to respond afterwards. Logging here
-  // keeps the error in Pino with its request id, instead of Express's
-  // default handler printing a bare stack to stderr.
+  // A response already started and then something failed, for example a
+  // streamed response that errors partway through. Timed-out async
+  // handlers never reach this branch, catchAsync handles those before
+  // they get here. Logging here keeps the error in Pino with its request
+  // id instead of Express's default handler printing to stderr.
   if (res.headersSent) {
     req.log.error({ err }, "Error after response was already sent");
     // Mirrors what Express's default handler does: if the response is
