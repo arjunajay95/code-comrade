@@ -2,8 +2,13 @@
 # ---- Base: shared by both stages ------------------------------------------
 # Debian slim rather than Alpine. Prisma's schema engine, which migrations
 # run through, needs OpenSSL, and on Alpine it hits known compatibility
-# problems. Slim avoids them at a small size cost. Node 22 matches CI.
-FROM node:22-slim AS base
+# problems. Slim avoids them at a small size cost.
+#
+# .nvmrc at the repo root is the Node version source of truth. Render builds
+# with backend/ as the context and cannot see that file, so the version is
+# repeated here, and the CI Docker job fails if the two ever differ.
+ARG NODE_VERSION=22
+FROM node:${NODE_VERSION}-slim AS base
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
