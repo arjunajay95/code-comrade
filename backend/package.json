@@ -5,9 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "typecheck:seed": "tsc --noEmit -p tsconfig.prisma.json",
     "lint": "eslint src",
     "format": "prettier --write .",
     "test": "echo \"Error: no test specified\" && exit 1",

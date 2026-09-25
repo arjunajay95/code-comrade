@@ -1,5 +1,10 @@
-import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
+
+try {
+  process.loadEnvFile();
+} catch {
+  // No .env file: running in production, nothing to load.
+}
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -8,6 +13,6 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    url: env("DIRECT_URL"),
   },
 });
