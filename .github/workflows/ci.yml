@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version-file: ".nvmrc"
           cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
@@ -47,7 +47,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version-file: ".nvmrc"
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
@@ -113,13 +113,37 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  docker:
+    name: Docker image build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # The image is built exactly as Render builds it, from the Dockerfile's
+      # own NODE_VERSION, so this check keeps that value equal to .nvmrc.
+      - name: Check Dockerfile Node version matches .nvmrc
+        run: |
+          expected="$(tr -d '[:space:]' < .nvmrc)"
+          actual="$(sed -n 's/^ARG NODE_VERSION=//p' backend/Dockerfile | tr -d '[:space:]')"
+          if [ "$actual" != "$expected" ]; then
+            echo "::error file=backend/Dockerfile::NODE_VERSION is '$actual' but .nvmrc says '$expected'"
+            exit 1
+          fi
+
+      # Builds the production image without pushing it anywhere. A broken
+      # Dockerfile or a missing file fails the pull request here, instead
+      # of failing on Render during a release.
+      - name: Build backend image
+        run: docker build -t codecomrade-api:ci backend
+
   deploy:
     name: Deploy to production
     runs-on: ubuntu-latest
 
     # Runs only after every check succeeds. If any listed job fails or is
     # cancelled, this job is skipped and nothing deploys.
-    needs: [backend, frontend, codeql, npm-audit, gitleaks]
+    needs: [backend, frontend, codeql, npm-audit, gitleaks, docker]
 
     # Only a push to main deploys. Pull requests and pushes to development
     # run every check, but this job is skipped for them.

@@ -29,10 +29,8 @@ services:
       # works from the host machine, not from inside another container.
       DATABASE_URL: postgresql://postgres:postgres@db:5432/codecomrade?schema=public
       DIRECT_URL: postgresql://postgres:postgres@db:5432/codecomrade?schema=public
-      # .env says development, which turns on pino-pretty. That package is
-      # a dev dependency and is not in the production image, so the
-      # container would crash at startup without this override. Production
-      # mode also means raw JSON logs, exactly what Render will show.
+      # Runs the image exactly as production does, so local behavior,
+      # including JSON logs, matches what Render shows.
       NODE_ENV: production
     ports:
       - "4000:4000"
