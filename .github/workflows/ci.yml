@@ -112,3 +112,40 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+
+    # Runs only after every check succeeds. If any listed job fails or is
+    # cancelled, this job is skipped and nothing deploys.
+    needs: [backend, frontend, codeql, npm-audit, gitleaks]
+
+    # Only a push to main deploys. Pull requests and pushes to development
+    # run every check, but this job is skipped for them.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    # Two releases merged back to back must not deploy at the same time.
+    # The second waits for the first instead of racing it.
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+
+    # This job only calls two URLs. It needs no access to the repository,
+    # so it gets none.
+    permissions: {}
+
+    steps:
+      - name: Trigger Render deploy
+        # Secrets go in through env, never pasted into the command itself,
+        # which keeps them out of the shell's command text entirely.
+        # --fail-with-body turns an HTTP error from the hook into a failed
+        # step instead of a silent success.
+        env:
+          HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl --fail-with-body -sS -X POST "$HOOK_URL"
+
+      - name: Trigger Vercel deploy
+        env:
+          HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: curl --fail-with-body -sS -X POST "$HOOK_URL"
