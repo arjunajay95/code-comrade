@@ -1,0 +1,120 @@
+generator client {
+    provider = "prisma-client"
+    output   = "../src/generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+model User {
+    id        Int      @id @default(autoincrement())
+    clerkId   String   @unique
+    username  String   @unique
+    bio       String?
+    karma     Int      @default(0)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    submissions  Submission[]
+    reviews      Review[]
+    technologies Technology[]
+}
+
+model Technology {
+    id   Int    @id @default(autoincrement())
+    name String @unique // lowercase, trimmed. Identity AND label
+
+    users       User[]
+    submissions Submission[]
+}
+
+model Submission {
+    id          Int      @id @default(autoincrement())
+    title       String
+    description String
+    githubUrl   String
+    githubOwner String // parsed and validated, never echoed back into a request
+    githubRepo  String
+    authorId    Int
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    author       User          @relation(fields: [authorId], references: [id], onDelete: Restrict)
+    criteria     Criterion[]
+    reviews      Review[]
+    technologies Technology[]
+    repoSnapshot RepoSnapshot?
+
+    @@index([createdAt(sort: Desc), id(sort: Desc)]) // feed ordering and window query
+    @@index([authorId])
+}
+
+model Criterion {
+    id           Int    @id @default(autoincrement())
+    label        String
+    submissionId Int
+
+    submission Submission        @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+    ratings    CriterionRating[]
+
+    @@index([submissionId])
+}
+
+model Review {
+    id           Int      @id @default(autoincrement())
+    feedback     String
+    reviewerId   Int
+    submissionId Int
+    createdAt    DateTime @default(now())
+    // no updatedAt: reviews are immutable
+
+    reviewer   User              @relation(fields: [reviewerId], references: [id], onDelete: Restrict)
+    submission Submission        @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+    ratings    CriterionRating[]
+
+    @@unique([reviewerId, submissionId]) // INV-2, and the backbone of the karma equation
+    @@index([submissionId])
+    @@index([reviewerId])
+}
+
+model CriterionRating {
+    id          Int @id @default(autoincrement())
+    rating      Int // 1 to 5, enforced by CHECK constraint
+    reviewId    Int
+    criterionId Int
+
+    review    Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+    criterion Criterion @relation(fields: [criterionId], references: [id], onDelete: Restrict)
+
+    @@unique([reviewId, criterionId]) // one rating per criterion per review
+    @@index([criterionId])
+}
+
+model RepoSnapshot {
+    id              Int       @id @default(autoincrement())
+    submissionId    Int       @unique
+    stars           Int
+    primaryLanguage String?
+    lastPushedAt    DateTime?
+    fetchedAt       DateTime  @default(now())
+
+    submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+    @@index([fetchedAt]) // the staleness scan for the refresh job
+}
+
+model IdempotencyKey {
+    id           Int      @id @default(autoincrement())
+    key          String
+    userId       Int
+    endpoint     String
+    requestHash  String
+    status       String // "IN_FLIGHT" | "COMPLETED"
+    responseCode Int?
+    responseBody Json?
+    createdAt    DateTime @default(now())
+
+    @@unique([userId, endpoint, key]) // INV-5: the constraint is what makes concurrent replay safe
+    @@index([createdAt]) // the expiry scan
+}

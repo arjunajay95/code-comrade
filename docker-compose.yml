@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: codecomrade
+    ports:
+      - "5433:5432"
+    volumes:
+      - codecomrade_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+    # Reuses the local variables so they are defined in one place. The
+    # entries under environment below override the few that must differ
+    # inside Docker.
+    env_file: ./backend/.env
+    environment:
+      # Inside the compose network, the database is reached by its service
+      # name, "db", on the container's own port 5432. localhost:5433 only
+      # works from the host machine, not from inside another container.
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/codecomrade?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@db:5432/codecomrade?schema=public
+      # .env says development, which turns on pino-pretty. That package is
+      # a dev dependency and is not in the production image, so the
+      # container would crash at startup without this override. Production
+      # mode also means raw JSON logs, exactly what Render will show.
+      NODE_ENV: production
+    ports:
+      - "4000:4000"
+    depends_on:
+      # Waits for the db healthcheck to pass, not just for the container to
+      # start. Otherwise the migration step could run before Postgres
+      # accepts connections and fail on the first boot.
+      db:
+        condition: service_healthy
+
+volumes:
+  codecomrade_pgdata:

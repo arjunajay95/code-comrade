@@ -1,0 +1,11 @@
+{
+  // Inherits every compiler option from tsconfig.json, then narrows the
+  // scope back to the application code that actually ships.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "noEmit": false
+  },
+  "include": ["src/**/*.ts"]
+}

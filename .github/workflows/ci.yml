@@ -1,0 +1,151 @@
+name: CI
+
+on:
+  push:
+    branches: [development, main]
+  pull_request:
+    branches: [development, main]
+
+jobs:
+  backend:
+    name: Backend lint, typecheck, build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Lint
+        working-directory: backend
+        run: npm run lint
+
+      - name: Type check
+        working-directory: backend
+        run: npm run typecheck
+
+      - name: Build
+        working-directory: backend
+        run: npm run build
+
+  frontend:
+    name: Frontend lint, typecheck, build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Type check
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+
+  codeql:
+    name: CodeQL analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Run CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+
+  npm-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Audit backend dependencies
+        working-directory: backend
+        run: npm audit --audit-level=high
+
+      - name: Audit frontend dependencies
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+  gitleaks:
+    name: Secret scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+
+    # Runs only after every check succeeds. If any listed job fails or is
+    # cancelled, this job is skipped and nothing deploys.
+    needs: [backend, frontend, codeql, npm-audit, gitleaks]
+
+    # Only a push to main deploys. Pull requests and pushes to development
+    # run every check, but this job is skipped for them.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    # Two releases merged back to back must not deploy at the same time.
+    # The second waits for the first instead of racing it.
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+
+    # This job only calls two URLs. It needs no access to the repository,
+    # so it gets none.
+    permissions: {}
+
+    steps:
+      - name: Trigger Render deploy
+        # Secrets go in through env, never pasted into the command itself,
+        # which keeps them out of the shell's command text entirely.
+        # --fail-with-body turns an HTTP error from the hook into a failed
+        # step instead of a silent success.
+        env:
+          HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl --fail-with-body -sS -X POST "$HOOK_URL"
+
+      - name: Trigger Vercel deploy
+        env:
+          HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: curl --fail-with-body -sS -X POST "$HOOK_URL"
