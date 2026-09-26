@@ -36,4 +36,31 @@ export const userService = {
     // cached profile with the response directly.
     return userService.getMe(userId);
   },
+
+  // Public view of any user. Built field by field, rather than by removing
+  // fields from the database row, so a field added to the profile query
+  // later can never reach the public response by accident.
+  async getPublicProfile(username: string) {
+    const profile = await userRepository.findProfileByUsername(username);
+    if (!profile) {
+      throw new NotFoundError("User not found", "NOT_FOUND");
+    }
+
+    const reviewsReceived = await userRepository.countReviewsReceived(
+      profile.id,
+    );
+
+    return {
+      username: profile.username,
+      bio: profile.bio,
+      karma: profile.karma,
+      createdAt: profile.createdAt,
+      technologies: profile.technologies,
+      stats: {
+        submissions: profile._count.submissions,
+        reviewsGiven: profile._count.reviews,
+        reviewsReceived,
+      },
+    };
+  },
 };

@@ -6,6 +6,19 @@ import type { AuthUser } from "../types/express.js";
 // cannot leak into req.user or any response built from it.
 const authUserSelect = { id: true, username: true, karma: true } as const;
 
+// Everything a profile view needs, shared by the own-profile and public
+// lookups. clerkId is never selected. Technologies come back sorted,
+// so the order is stable.
+const profileSelect = {
+  id: true,
+  username: true,
+  bio: true,
+  karma: true,
+  createdAt: true,
+  technologies: { select: { id: true, name: true }, orderBy: { name: "asc" } },
+  _count: { select: { submissions: true, reviews: true } },
+} as const;
+
 const isUniqueViolation = (err: unknown): boolean =>
   err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002";
 
@@ -35,23 +48,15 @@ export const userRepository = {
     }
   },
 
-  // Everything the own-profile view needs, in one query. clerkId is never
-  // selected. Technologies come back sorted, so the order is stable.
+  // Everything the own-profile view needs, in one query.
   findProfileById(id: number) {
+    return prisma.user.findUnique({ where: { id }, select: profileSelect });
+  },
+
+  findProfileByUsername(username: string) {
     return prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        username: true,
-        bio: true,
-        karma: true,
-        createdAt: true,
-        technologies: {
-          select: { id: true, name: true },
-          orderBy: { name: "asc" },
-        },
-        _count: { select: { submissions: true, reviews: true } },
-      },
+      where: { username },
+      select: profileSelect,
     });
   },
 

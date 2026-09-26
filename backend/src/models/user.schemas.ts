@@ -62,3 +62,18 @@ export const updateMeSchema = requestSchema({ body: updateMeBody });
 // The parsed shape, after trimming, lowercasing and de-duplicating. validate
 // replaces req.body with exactly this, so the controller can rely on it.
 export type UpdateMeBody = z.infer<typeof updateMeBody>;
+
+// The username in the path goes through the same normalization as edits,
+// so /users/Arjuna_Dev finds arjuna_dev. Anything that could never be a
+// valid username is rejected with 400 before touching the database.
+export const getPublicProfileSchema = requestSchema({
+  params: z
+    .object({
+      username: z
+        .string()
+        .trim()
+        .toLowerCase()
+        .regex(USERNAME_PATTERN, "Not a valid username"),
+    })
+    .strict(),
+});

@@ -4,7 +4,11 @@ import { requireAuth } from "../middlewares/requireAuth.js";
 import { validate } from "../middlewares/validate.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import { writeLimiter } from "../middlewares/rateLimiter.js";
-import { getMeSchema, updateMeSchema } from "../models/user.schemas.js";
+import {
+  getMeSchema,
+  getPublicProfileSchema,
+  updateMeSchema,
+} from "../models/user.schemas.js";
 
 export const userRouter = Router();
 
@@ -24,4 +28,12 @@ userRouter.patch(
   writeLimiter,
   validate(updateMeSchema),
   catchAsync(userController.updateMe),
+);
+
+// Must stay below every /me route. Express matches in registration order,
+// and /:username would otherwise capture "me" as a username.
+userRouter.get(
+  "/:username",
+  validate(getPublicProfileSchema),
+  catchAsync(userController.getPublicProfile),
 );

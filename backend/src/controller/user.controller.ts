@@ -19,4 +19,13 @@ export const userController = {
     const data = await userService.updateMe(user.id, req.body as UpdateMeBody);
     res.status(200).json({ success: true, data });
   },
+
+  // Public: no requireAuth, and nothing about the caller is read. The
+  // username has already been validated and normalized.
+  async getPublicProfile(req: Request, res: Response): Promise<void> {
+    const data = await userService.getPublicProfile(
+      req.params.username as string,
+    );
+    res.status(200).json({ success: true, data });
+  },
 };
