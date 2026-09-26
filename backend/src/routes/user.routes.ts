@@ -2,8 +2,9 @@ import { Router } from "express";
 import { userController } from "../controller/user.controller.js";
 import { requireAuth } from "../middlewares/requireAuth.js";
 import { validate } from "../middlewares/validate.js";
-import { getMeSchema } from "../models/user.schemas.js";
 import { catchAsync } from "../utils/catchAsync.js";
+import { writeLimiter } from "../middlewares/rateLimiter.js";
+import { getMeSchema, updateMeSchema } from "../models/user.schemas.js";
 
 export const userRouter = Router();
 
@@ -15,4 +16,12 @@ userRouter.get(
   requireAuth,
   validate(getMeSchema),
   catchAsync(userController.getMe),
+);
+
+userRouter.patch(
+  "/me",
+  requireAuth,
+  writeLimiter,
+  validate(updateMeSchema),
+  catchAsync(userController.updateMe),
 );

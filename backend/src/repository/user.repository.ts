@@ -60,4 +60,48 @@ export const userRepository = {
   countReviewsReceived(authorId: number): Promise<number> {
     return prisma.review.count({ where: { submission: { authorId } } });
   },
+
+  // Applies a profile update in one transaction, so a failure leaves nothing
+  // half written. Returns false when a unique constraint rejects it, which
+  // here can only mean the username is taken. Any other error propagates.
+  async updateProfile(
+    id: number,
+    changes: {
+      username?: string;
+      bio?: string | null;
+      technologies?: string[];
+    },
+  ): Promise<boolean> {
+    try {
+      await prisma.$transaction(async (tx) => {
+        // Creates any technology that does not exist yet. skipDuplicates
+        // makes this safe when two users add the same new tag at the same
+        // moment: the loser of that race just skips it (D-17).
+        if (changes.technologies?.length) {
+          await tx.technology.createMany({
+            data: changes.technologies.map((name) => ({ name })),
+            skipDuplicates: true,
+          });
+        }
+
+        await tx.user.update({
+          where: { id },
+          data: {
+            // undefined leaves a field unchanged, so omitted fields are
+            // untouched.
+            username: changes.username,
+            bio: changes.bio,
+            // set replaces the whole stack. An empty array clears it.
+            technologies: changes.technologies
+              ? { set: changes.technologies.map((name) => ({ name })) }
+              : undefined,
+          },
+        });
+      });
+      return true;
+    } catch (err) {
+      if (isUniqueViolation(err)) return false;
+      throw err;
+    }
+  },
 };
