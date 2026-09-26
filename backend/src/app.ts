@@ -10,6 +10,9 @@ import { globalLimiter } from "./middlewares/rateLimiter.js";
 import { REQUEST_ID_HEADER, requestId } from "./middlewares/requestId.js";
 import { requestTimeout } from "./middlewares/requestTimeout.js";
 import { apiRouter } from "./routes/index.js";
+import { clerkMiddleware } from "@clerk/express";
+import { clerkClient } from "./config/clerk.js";
+import { stripClerkAuthHeaders } from "./middlewares/stripClerkAuthHeaders.js";
 
 // Builds the app without starting a server, so integration tests can
 // import it and send requests directly without binding a port.
@@ -58,8 +61,32 @@ export const createApp = (): Express => {
   app.use(requestTimeout);
   app.use("/api/v1", globalLimiter);
 
-  // Phase 3: clerkMiddleware() is registered here, after the global
-  // limiter and before the routes.
+  // Verifies the Clerk session token on every request, if there is one, and
+  // attaches the result for getAuth() to read. It rejects nothing by itself:
+  // requireAuth, applied per route, is the gate.
+  app.use(
+    clerkMiddleware({
+      // Passed explicitly so nothing outside env.ts reads process.env.
+      // Without these, Clerk's SDK would read the environment on its own.
+      clerkClient,
+      publishableKey: env.CLERK_PUBLISHABLE_KEY,
+      secretKey: env.CLERK_SECRET_KEY,
+
+      // Production only. Clerk rejects any token without an azp claim when
+      // this is set, and tokens minted through the Backend API for local
+      // testing never have one (Clerk reserves the claim). Every production
+      // token comes from the real frontend and carries azp, so production
+      // keeps the full check.
+      authorizedParties:
+        env.NODE_ENV === "production" ? env.ALLOWED_ORIGINS : undefined,
+    }),
+  );
+
+  // Production only. Locally, these headers are how token problems get
+  // debugged, so they stay.
+  if (env.NODE_ENV === "production") {
+    app.use(stripClerkAuthHeaders);
+  }
 
   app.use("/api/v1", apiRouter);
 

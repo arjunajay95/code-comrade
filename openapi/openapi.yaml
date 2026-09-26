@@ -13,13 +13,15 @@ info:
     response carries an X-Request-Id header whose value matches the
     requestId in any error body.
 
-# Relative, so the same spec works against local, staging, and production.
+# Relative, so the same spec works against local and production.
 servers:
   - url: /api/v1
 
 tags:
   - name: Health
-    description: Liveness and readiness probes (D-25). Public, not rate limited, not request logged.
+    description: Liveness and readiness probes. Public, not rate limited, not request logged.
+  - name: Users
+    description: Profiles, the signed-in user's own data, and their lists.
 
 paths:
   /health/live:
@@ -68,6 +70,37 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
+  /users/me:
+    get:
+      tags: [Users]
+      operationId: getMe
+      summary: Own profile and stats
+      description: >
+        Returns the signed-in user's local profile. On a user's first
+        authenticated request, the local profile is created first (D-12).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: The signed-in user's profile.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
 components:
   headers:
     XRequestId:
@@ -78,6 +111,13 @@ components:
       schema:
         type: string
         format: uuid
+
+  securitySchemes:
+    # Clerk session token, sent by the frontend as Authorization: Bearer.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
   schemas:
     # Every code the API can return (D-10). Kept as one enum so clients
@@ -152,6 +192,46 @@ components:
             status:
               const: ready
 
+    Technology:
+      type: object
+      required: [id, name]
+      additionalProperties: false
+      properties:
+        id: { type: integer }
+        name: { type: string }
+
+    MeResponse:
+      type: object
+      required: [success, data]
+      additionalProperties: false
+      properties:
+        success:
+          const: true
+        data:
+          type: object
+          # No clerkId, ever (D-08). additionalProperties false makes any
+          # extra field a spec violation.
+          required: [id, username, bio, karma, createdAt, technologies, stats]
+          additionalProperties: false
+          properties:
+            id: { type: integer }
+            username: { type: string, pattern: "^[a-z0-9_]{3,30}$" }
+            bio: { type: [string, "null"] }
+            karma: { type: integer, minimum: 0 }
+            createdAt: { type: string, format: date-time }
+            technologies:
+              type: array
+              items:
+                $ref: "#/components/schemas/Technology"
+            stats:
+              type: object
+              required: [submissions, reviewsGiven, reviewsReceived]
+              additionalProperties: false
+              properties:
+                submissions: { type: integer, minimum: 0 }
+                reviewsGiven: { type: integer, minimum: 0 }
+                reviewsReceived: { type: integer, minimum: 0 }
+
   # Reusable error responses, so every route references the same
   # definition instead of redeclaring the envelope.
   responses:
@@ -189,3 +269,45 @@ components:
               code: SERVICE_UNAVAILABLE
               message: Service is not ready
               requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
+
+    Unauthorized:
+      description: No valid session. The Authorization header is missing, invalid, or expired.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            success: false
+            error:
+              code: UNAUTHORIZED
+              message: Authentication required
+              requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
+
+    BadRequest:
+      description: The request did not match the route's schema, including any unexpected field.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            success: false
+            error:
+              code: VALIDATION_ERROR
+              message: 'query: Unrecognized key: "foo"'
+              requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
+
+    TooManyRequests:
+      description: Rate limit exceeded. The RateLimit headers say when the window resets.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
