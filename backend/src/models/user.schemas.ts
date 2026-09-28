@@ -4,6 +4,7 @@ import {
   USERNAME_PATTERN,
 } from "../utils/deriveUsername.js";
 import { requestSchema } from "./requestSchema.js";
+import { paginationQuery } from "./pagination.js";
 
 export const BIO_MAX_LENGTH = 500;
 export const STACK_MAX_TECHNOLOGIES = 20;
@@ -77,3 +78,6 @@ export const getPublicProfileSchema = requestSchema({
     })
     .strict(),
 });
+
+// Shared by all three /users/me/* lists: pagination and nothing else.
+export const myListSchema = requestSchema({ query: paginationQuery });

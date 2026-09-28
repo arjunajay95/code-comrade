@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { userService } from "../service/user.service.js";
 import { requireUser } from "../utils/requireUser.js";
 import type { UpdateMeBody } from "../models/user.schemas.js";
+import type { Pagination } from "../models/pagination.js";
 
 export const userController = {
   // Self-scoped by construction: the id comes from the session, never from
@@ -27,5 +28,34 @@ export const userController = {
       req.params.username as string,
     );
     res.status(200).json({ success: true, data });
+  },
+
+  // All three lists are self-scoped by construction: the user id comes from
+  // the session, and nothing in the request can point at another user.
+  async listMySubmissions(req: Request, res: Response): Promise<void> {
+    const user = requireUser(req);
+    const result = await userService.listMySubmissions(
+      user.id,
+      req.query as unknown as Pagination,
+    );
+    res.status(200).json({ success: true, ...result });
+  },
+
+  async listMyReviews(req: Request, res: Response): Promise<void> {
+    const user = requireUser(req);
+    const result = await userService.listMyReviews(
+      user.id,
+      req.query as unknown as Pagination,
+    );
+    res.status(200).json({ success: true, ...result });
+  },
+
+  async listReviewsReceived(req: Request, res: Response): Promise<void> {
+    const user = requireUser(req);
+    const result = await userService.listReviewsReceived(
+      user.id,
+      req.query as unknown as Pagination,
+    );
+    res.status(200).json({ success: true, ...result });
   },
 };

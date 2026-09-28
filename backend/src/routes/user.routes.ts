@@ -7,6 +7,7 @@ import { writeLimiter } from "../middlewares/rateLimiter.js";
 import {
   getMeSchema,
   getPublicProfileSchema,
+  myListSchema,
   updateMeSchema,
 } from "../models/user.schemas.js";
 
@@ -28,6 +29,25 @@ userRouter.patch(
   writeLimiter,
   validate(updateMeSchema),
   catchAsync(userController.updateMe),
+);
+
+userRouter.get(
+  "/me/submissions",
+  requireAuth,
+  validate(myListSchema),
+  catchAsync(userController.listMySubmissions),
+);
+userRouter.get(
+  "/me/reviews",
+  requireAuth,
+  validate(myListSchema),
+  catchAsync(userController.listMyReviews),
+);
+userRouter.get(
+  "/me/reviews-received",
+  requireAuth,
+  validate(myListSchema),
+  catchAsync(userController.listReviewsReceived),
 );
 
 // Must stay below every /me route. Express matches in registration order,

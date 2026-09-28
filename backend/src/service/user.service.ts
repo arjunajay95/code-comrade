@@ -1,6 +1,43 @@
 import { userRepository } from "../repository/user.repository.js";
 import { ConflictError, NotFoundError } from "../errors/index.js";
 import type { UpdateMeBody } from "../models/user.schemas.js";
+import { buildMeta, toSkip, type Pagination } from "../models/pagination.js";
+import { reviewRepository } from "../repository/review.repository.js";
+import { submissionRepository } from "../repository/submission.repository.js";
+
+type SubmissionRow = Awaited<
+  ReturnType<typeof submissionRepository.listByAuthor>
+>["items"][number];
+type ReviewRow = Awaited<
+  ReturnType<typeof reviewRepository.listByReviewer>
+>["items"][number];
+
+// List item shapes, built field by field so nothing new in a repository
+// select can reach a response unless it is added here on purpose.
+const toSubmissionSummary = (row: SubmissionRow) => ({
+  id: row.id,
+  title: row.title,
+  githubUrl: row.githubUrl,
+  createdAt: row.createdAt,
+  technologies: row.technologies,
+  reviewCount: row._count.reviews,
+});
+
+const toReviewSummary = (row: ReviewRow) => ({
+  id: row.id,
+  feedback: row.feedback,
+  createdAt: row.createdAt,
+  ratings: row.ratings.map((r) => ({
+    criterion: r.criterion.label,
+    rating: r.rating,
+  })),
+  submission: {
+    id: row.submission.id,
+    title: row.submission.title,
+    author: row.submission.author.username,
+  },
+  reviewer: row.reviewer.username,
+});
 
 export const userService = {
   async getMe(userId: number) {
@@ -61,6 +98,42 @@ export const userService = {
         reviewsGiven: profile._count.reviews,
         reviewsReceived,
       },
+    };
+  },
+
+  async listMySubmissions(userId: number, pagination: Pagination) {
+    const { items, total } = await submissionRepository.listByAuthor(
+      userId,
+      toSkip(pagination),
+      pagination.limit,
+    );
+    return {
+      data: items.map(toSubmissionSummary),
+      meta: buildMeta(total, pagination),
+    };
+  },
+
+  async listMyReviews(userId: number, pagination: Pagination) {
+    const { items, total } = await reviewRepository.listByReviewer(
+      userId,
+      toSkip(pagination),
+      pagination.limit,
+    );
+    return {
+      data: items.map(toReviewSummary),
+      meta: buildMeta(total, pagination),
+    };
+  },
+
+  async listReviewsReceived(userId: number, pagination: Pagination) {
+    const { items, total } = await reviewRepository.listReceivedByAuthor(
+      userId,
+      toSkip(pagination),
+      pagination.limit,
+    );
+    return {
+      data: items.map(toReviewSummary),
+      meta: buildMeta(total, pagination),
     };
   },
 };

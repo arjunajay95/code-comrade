@@ -174,6 +174,99 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 
+  /users/me/submissions:
+    get:
+      tags: [Users]
+      operationId: listMySubmissions
+      summary: Submissions I have posted
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: One page of the signed-in user's submissions, newest first.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /users/me/reviews:
+    get:
+      tags: [Users]
+      operationId: listMyReviews
+      summary: Reviews I have written
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: One page of the signed-in user's submissions, newest first.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /users/me/reviews-received:
+    get:
+      tags: [Users]
+      operationId: listReviewsReceived
+      summary: Reviews on my submissions
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: One page of the signed-in user's submissions, newest first.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
 components:
   headers:
     XRequestId:
@@ -360,6 +453,84 @@ components:
                 reviewsGiven: { type: integer, minimum: 0 }
                 reviewsReceived: { type: integer, minimum: 0 }
 
+    PaginationMeta:
+      type: object
+      required: [totalItems, currentPage, totalPages, itemsPerPage]
+      additionalProperties: false
+      properties:
+        totalItems: { type: integer, minimum: 0 }
+        currentPage: { type: integer, minimum: 1 }
+        totalPages: { type: integer, minimum: 0 }
+        itemsPerPage: { type: integer, minimum: 1 }
+
+    SubmissionSummary:
+      type: object
+      required: [id, title, githubUrl, createdAt, technologies, reviewCount]
+      additionalProperties: false
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        githubUrl: { type: string, format: uri }
+        createdAt: { type: string, format: date-time }
+        technologies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Technology"
+        reviewCount: { type: integer, minimum: 0 }
+
+    ReviewSummary:
+      type: object
+      required: [id, feedback, createdAt, ratings, submission, reviewer]
+      additionalProperties: false
+      properties:
+        id: { type: integer }
+        feedback: { type: string }
+        createdAt: { type: string, format: date-time }
+        ratings:
+          type: array
+          items:
+            type: object
+            required: [criterion, rating]
+            additionalProperties: false
+            properties:
+              criterion: { type: string }
+              rating: { type: integer, minimum: 1, maximum: 5 }
+        submission:
+          type: object
+          required: [id, title, author]
+          additionalProperties: false
+          properties:
+            id: { type: integer }
+            title: { type: string }
+            author: { type: string, description: Username of the submission's author }
+        reviewer: { type: string, description: Username of the review's author }
+
+    SubmissionListResponse:
+      type: object
+      required: [success, data, meta]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubmissionSummary"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    ReviewListResponse:
+      type: object
+      required: [success, data, meta]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewSummary"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
   # Reusable error responses, so every route references the same
   # definition instead of redeclaring the envelope.
   responses:
@@ -471,3 +642,16 @@ components:
               code: NOT_FOUND
               message: User not found
               requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100000, default: 1 }
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Above 50 is rejected with 400, never clamped.
+      schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
