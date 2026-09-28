@@ -101,6 +101,9 @@ export const userRepository = {
               ? { set: changes.technologies.map((name) => ({ name })) }
               : undefined,
           },
+          // The result is not used, but no query loads more than it needs,
+          // clerkId least of all (D-08).
+          select: { id: true },
         });
       });
       return true;

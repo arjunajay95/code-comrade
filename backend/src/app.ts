@@ -19,10 +19,10 @@ import { stripClerkAuthHeaders } from "./middlewares/stripClerkAuthHeaders.js";
 export const createApp = (): Express => {
   const app = express();
 
-  // The exact number of proxies in front of the app 0
-  // locally, 1 behind Render's proxy. Too low and every client shares the
-  // proxy's IP and one rate limit bucket. Too high and a forged
-  // X-Forwarded-For header can pick its own bucket.
+  // The exact number of proxies in front of the app (D-19, T-14), set per
+  // environment. Too low and every client shares a proxy's IP and one rate
+  // limit bucket. Too high and a forged X-Forwarded-For header can pick its
+  // own bucket.
   app.set("trust proxy", env.TRUST_PROXY_HOPS);
 
   // The binding order starts here.
