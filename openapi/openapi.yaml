@@ -22,6 +22,8 @@ tags:
     description: Liveness and readiness probes. Public, not rate limited, not request logged.
   - name: Users
     description: Profiles, the signed-in user's own data, and their lists.
+  - name: Technologies
+    description: The shared technology tag list.
 
 paths:
   /health/live:
@@ -266,6 +268,33 @@ paths:
           $ref: "#/components/responses/InternalError"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
+
+  /technologies:
+    get:
+      tags: [Technologies]
+      operationId: listTechnologies
+      summary: Technology tag list
+      description: All technology tags, alphabetical, for pickers and filters. Public.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: One page of technology tags.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TechnologyListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
 components:
   headers:
@@ -528,6 +557,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ReviewSummary"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    TechnologyListResponse:
+      type: object
+      required: [success, data, meta]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Technology"
         meta:
           $ref: "#/components/schemas/PaginationMeta"
 
