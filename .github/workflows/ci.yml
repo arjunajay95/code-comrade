@@ -166,8 +166,10 @@ jobs:
           NODE_ENV: test
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
           ALLOWED_ORIGINS: http://localhost:3000
-          CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk
-          CLERK_SECRET_KEY: sk_test_placeholder
+          # Placeholders, not credentials: this check never contacts Clerk.
+          # gitleaks:allow marks each line as a reviewed false positive.
+          CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk # gitleaks:allow
+          CLERK_SECRET_KEY: sk_test_placeholder # gitleaks:allow
         run: npm run check:drift
 
   deploy:
