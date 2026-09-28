@@ -26,13 +26,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/health/live",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "health",
-                    "live"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["health", "live"]
                 },
                 "description": "Confirms the process is running. Touches nothing external, so it keeps passing even when the database is down.\n"
               },
@@ -49,13 +44,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/health/live",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "health",
-                        "live"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["health", "live"]
                     }
                   },
                   "status": "OK",
@@ -91,13 +81,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/health/live",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "health",
-                        "live"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["health", "live"]
                     }
                   },
                   "status": "Internal Server Error",
@@ -140,13 +125,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/health/ready",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "health",
-                    "ready"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["health", "ready"]
                 },
                 "description": "Confirms the service can reach its database and serve traffic. Returns 503 when the database is unreachable.\n"
               },
@@ -163,13 +143,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/health/ready",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "health",
-                        "ready"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["health", "ready"]
                     }
                   },
                   "status": "OK",
@@ -205,13 +180,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/health/ready",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "health",
-                        "ready"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["health", "ready"]
                     }
                   },
                   "status": "Internal Server Error",
@@ -247,13 +217,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/health/ready",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "health",
-                        "ready"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["health", "ready"]
                     }
                   },
                   "status": "Service Unavailable",
@@ -300,7 +265,7 @@
                       "bearer": [
                         {
                           "key": "token",
-                          "value": "{{bearerToken}}",
+                          "value": "{{token}}",
                           "type": "string"
                         }
                       ]
@@ -314,14 +279,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/me/submissions?page=1&limit=20",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me",
-                        "submissions"
-                      ],
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me", "submissions"],
                       "query": [
                         {
                           "key": "page",
@@ -353,14 +312,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/submissions?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "submissions"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "submissions"],
                           "query": [
                             {
                               "key": "page",
@@ -412,14 +365,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/submissions?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "submissions"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "submissions"],
                           "query": [
                             {
                               "key": "page",
@@ -471,14 +418,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/submissions?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "submissions"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "submissions"],
                           "query": [
                             {
                               "key": "page",
@@ -530,14 +471,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/submissions?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "submissions"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "submissions"],
                           "query": [
                             {
                               "key": "page",
@@ -589,14 +524,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/submissions?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "submissions"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "submissions"],
                           "query": [
                             {
                               "key": "page",
@@ -648,14 +577,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/submissions?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "submissions"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "submissions"],
                           "query": [
                             {
                               "key": "page",
@@ -705,7 +628,7 @@
                       "bearer": [
                         {
                           "key": "token",
-                          "value": "{{bearerToken}}",
+                          "value": "{{token}}",
                           "type": "string"
                         }
                       ]
@@ -719,14 +642,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/me/reviews?page=1&limit=20",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me",
-                        "reviews"
-                      ],
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me", "reviews"],
                       "query": [
                         {
                           "key": "page",
@@ -758,14 +675,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews"],
                           "query": [
                             {
                               "key": "page",
@@ -817,14 +728,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews"],
                           "query": [
                             {
                               "key": "page",
@@ -876,14 +781,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews"],
                           "query": [
                             {
                               "key": "page",
@@ -935,14 +834,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews"],
                           "query": [
                             {
                               "key": "page",
@@ -994,14 +887,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews"],
                           "query": [
                             {
                               "key": "page",
@@ -1053,14 +940,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews"],
                           "query": [
                             {
                               "key": "page",
@@ -1110,7 +991,7 @@
                       "bearer": [
                         {
                           "key": "token",
-                          "value": "{{bearerToken}}",
+                          "value": "{{token}}",
                           "type": "string"
                         }
                       ]
@@ -1124,14 +1005,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/me/reviews-received?page=1&limit=20",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me",
-                        "reviews-received"
-                      ],
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me", "reviews-received"],
                       "query": [
                         {
                           "key": "page",
@@ -1163,14 +1038,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews-received?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews-received"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews-received"],
                           "query": [
                             {
                               "key": "page",
@@ -1222,14 +1091,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews-received?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews-received"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews-received"],
                           "query": [
                             {
                               "key": "page",
@@ -1281,14 +1144,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews-received?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews-received"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews-received"],
                           "query": [
                             {
                               "key": "page",
@@ -1340,14 +1197,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews-received?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews-received"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews-received"],
                           "query": [
                             {
                               "key": "page",
@@ -1399,14 +1250,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews-received?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews-received"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews-received"],
                           "query": [
                             {
                               "key": "page",
@@ -1458,14 +1303,8 @@
                         ],
                         "url": {
                           "raw": "{{baseUrl}}/users/me/reviews-received?page=1&limit=20",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "users",
-                            "me",
-                            "reviews-received"
-                          ],
+                          "host": ["{{baseUrl}}"],
+                          "path": ["users", "me", "reviews-received"],
                           "query": [
                             {
                               "key": "page",
@@ -1512,7 +1351,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{bearerToken}}",
+                      "value": "{{token}}",
                       "type": "string"
                     }
                   ]
@@ -1526,13 +1365,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/users/me",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "users",
-                    "me"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "me"]
                 },
                 "description": "Returns the signed-in user's local profile. On a user's first authenticated request, the local profile is created first (D-12).\n"
               },
@@ -1554,13 +1388,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "OK",
@@ -1601,13 +1430,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Bad Request",
@@ -1648,13 +1472,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Unauthorized",
@@ -1695,13 +1514,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Too Many Requests",
@@ -1742,13 +1556,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Internal Server Error",
@@ -1789,13 +1598,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Service Unavailable",
@@ -1829,7 +1633,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{bearerToken}}",
+                      "value": "{{token}}",
                       "type": "string"
                     }
                   ]
@@ -1857,13 +1661,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/users/me",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "users",
-                    "me"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "me"]
                 },
                 "description": "Updates the signed-in user's locally owned fields: username, bio, and technology stack. Returns the updated profile, the same shape as GET /users/me. Subject to the write rate limit.\n"
               },
@@ -1899,13 +1698,8 @@
                     },
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "OK",
@@ -1960,13 +1754,8 @@
                     },
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Bad Request",
@@ -2021,13 +1810,8 @@
                     },
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Unauthorized",
@@ -2082,13 +1866,8 @@
                     },
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Conflict",
@@ -2143,13 +1922,8 @@
                     },
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Too Many Requests",
@@ -2204,13 +1978,8 @@
                     },
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Internal Server Error",
@@ -2265,13 +2034,8 @@
                     },
                     "url": {
                       "raw": "{{baseUrl}}/users/me",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        "me"
-                      ]
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", "me"]
                     }
                   },
                   "status": "Service Unavailable",
@@ -2314,13 +2078,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/users/:username",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "users",
-                    ":username"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", ":username"],
                   "variable": [
                     {
                       "key": "username",
@@ -2343,13 +2102,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/:username",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        ":username"
-                      ],
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", ":username"],
                       "variable": [
                         {
                           "key": "username",
@@ -2391,13 +2145,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/:username",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        ":username"
-                      ],
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", ":username"],
                       "variable": [
                         {
                           "key": "username",
@@ -2439,13 +2188,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/:username",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        ":username"
-                      ],
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", ":username"],
                       "variable": [
                         {
                           "key": "username",
@@ -2487,13 +2231,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/:username",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        ":username"
-                      ],
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", ":username"],
                       "variable": [
                         {
                           "key": "username",
@@ -2535,13 +2274,8 @@
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/users/:username",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "users",
-                        ":username"
-                      ],
+                      "host": ["{{baseUrl}}"],
+                      "path": ["users", ":username"],
                       "variable": [
                         {
                           "key": "username",
@@ -2592,12 +2326,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/technologies?page=1&limit=20",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "technologies"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["technologies"],
               "query": [
                 {
                   "key": "page",
@@ -2625,12 +2355,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/technologies?page=1&limit=20",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "technologies"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["technologies"],
                   "query": [
                     {
                       "key": "page",
@@ -2677,12 +2403,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/technologies?page=1&limit=20",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "technologies"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["technologies"],
                   "query": [
                     {
                       "key": "page",
@@ -2729,12 +2451,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/technologies?page=1&limit=20",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "technologies"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["technologies"],
                   "query": [
                     {
                       "key": "page",
@@ -2781,12 +2499,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/technologies?page=1&limit=20",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "technologies"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["technologies"],
                   "query": [
                     {
                       "key": "page",
@@ -2843,9 +2557,7 @@
         "type": "text/javascript",
         "packages": {},
         "requests": {},
-        "exec": [
-          ""
-        ]
+        "exec": [""]
       }
     },
     {
@@ -2854,16 +2566,14 @@
         "type": "text/javascript",
         "packages": {},
         "requests": {},
-        "exec": [
-          ""
-        ]
+        "exec": [""]
       }
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
-      "value": "/api/v1"
+      "value": "http://localhost:4000/api/v1"
     },
     {
       "key": "token",
