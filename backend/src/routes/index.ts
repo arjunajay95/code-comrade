@@ -1,12 +1,12 @@
-import { Router } from "express";
-import { healthRouter } from "./health.routes.js";
-import { userRouter } from "./user.routes.js";
-import { technologyRouter } from "./technology.routes.js";
+import { healthRoutes } from "./health.routes.js";
+import { mountRoutes } from "./registry.js";
+import { technologyRoutes } from "./technology.routes.js";
+import { userRoutes } from "./user.routes.js";
 
-// Every /api/v1 route registers here. app.ts mounts this router once, so
+// Every /api/v1 feature is listed here. app.ts mounts the result once, so
 // adding a feature never means touching the global middleware chain.
-export const apiRouter = Router();
-
-apiRouter.use("/health", healthRouter);
-apiRouter.use("/users", userRouter);
-apiRouter.use("/technologies", technologyRouter);
+export const apiRouter = mountRoutes([
+  healthRoutes,
+  userRoutes,
+  technologyRoutes,
+]);

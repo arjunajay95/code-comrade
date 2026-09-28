@@ -12,7 +12,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch --env-file=.env src/index.ts",
     "start": "node dist/index.js",
-    "token": "tsx --env-file=.env scripts/mintSessionToken.ts"
+    "token": "tsx --env-file=.env scripts/mintSessionToken.ts",
+    "check:drift": "tsx scripts/checkApiDrift.ts"
   },
   "keywords": [],
   "author": "",
@@ -31,7 +32,8 @@
     "prettier": "^3.9.7",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.70.0"
+    "typescript-eslint": "^8.70.0",
+    "yaml": "^2.9.1"
   },
   "dependencies": {
     "@clerk/express": "^2.1.72",

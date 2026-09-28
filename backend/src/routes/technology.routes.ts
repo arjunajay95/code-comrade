@@ -1,12 +1,12 @@
-import { Router } from "express";
+import { createRouter } from "./registry.js";
 import { technologyController } from "../controller/technology.controller.js";
 import { validate } from "../middlewares/validate.js";
 import { listTechnologiesSchema } from "../models/technology.schemas.js";
 import { catchAsync } from "../utils/catchAsync.js";
 
-export const technologyRouter = Router();
+export const technologyRoutes = createRouter("/technologies");
 
-technologyRouter.get(
+technologyRoutes.get(
   "/",
   validate(listTechnologiesSchema),
   catchAsync(technologyController.list),

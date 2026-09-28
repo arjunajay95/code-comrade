@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { createRouter } from "./registry.js";
 import { userController } from "../controller/user.controller.js";
 import { requireAuth } from "../middlewares/requireAuth.js";
 import { validate } from "../middlewares/validate.js";
@@ -11,19 +11,19 @@ import {
   updateMeSchema,
 } from "../models/user.schemas.js";
 
-export const userRouter = Router();
+export const userRoutes = createRouter("/users");
 
 // /me routes must be registered before /:username, which comes later in
 // this phase. Express matches in order, so /:username registered first
 // would swallow /me as a username.
-userRouter.get(
+userRoutes.get(
   "/me",
   requireAuth,
   validate(getMeSchema),
   catchAsync(userController.getMe),
 );
 
-userRouter.patch(
+userRoutes.patch(
   "/me",
   requireAuth,
   writeLimiter,
@@ -31,19 +31,19 @@ userRouter.patch(
   catchAsync(userController.updateMe),
 );
 
-userRouter.get(
+userRoutes.get(
   "/me/submissions",
   requireAuth,
   validate(myListSchema),
   catchAsync(userController.listMySubmissions),
 );
-userRouter.get(
+userRoutes.get(
   "/me/reviews",
   requireAuth,
   validate(myListSchema),
   catchAsync(userController.listMyReviews),
 );
-userRouter.get(
+userRoutes.get(
   "/me/reviews-received",
   requireAuth,
   validate(myListSchema),
@@ -52,7 +52,7 @@ userRouter.get(
 
 // Must stay below every /me route. Express matches in registration order,
 // and /:username would otherwise capture "me" as a username.
-userRouter.get(
+userRoutes.get(
   "/:username",
   validate(getPublicProfileSchema),
   catchAsync(userController.getPublicProfile),
