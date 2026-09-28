@@ -13,13 +13,17 @@ info:
     response carries an X-Request-Id header whose value matches the
     requestId in any error body.
 
-# Relative, so the same spec works against local, staging, and production.
+# Relative, so the same spec works against local and production.
 servers:
   - url: /api/v1
 
 tags:
   - name: Health
-    description: Liveness and readiness probes (D-25). Public, not rate limited, not request logged.
+    description: Liveness and readiness probes. Public, not rate limited, not request logged.
+  - name: Users
+    description: Profiles, the signed-in user's own data, and their lists.
+  - name: Technologies
+    description: The shared technology tag list.
 
 paths:
   /health/live:
@@ -68,6 +72,230 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
+  /users/me:
+    get:
+      tags: [Users]
+      operationId: getMe
+      summary: Own profile and stats
+      description: >
+        Returns the signed-in user's local profile. On a user's first
+        authenticated request, the local profile is created first (D-12).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: The signed-in user's profile.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+    patch:
+      tags: [Users]
+      operationId: updateMe
+      summary: Update own profile
+      description: >
+        Updates the signed-in user's locally owned fields: username, bio,
+        and technology stack. Returns the updated profile, the same shape
+        as GET /users/me. Subject to the write rate limit.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMeRequest"
+      responses:
+        "200":
+          description: The updated profile.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /users/{username}:
+    get:
+      tags: [Users]
+      operationId: getPublicProfile
+      summary: Public profile
+      description: >
+        Any user's public profile. No authentication needed. The username is
+        matched case-insensitively.
+      security: []
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The user's public profile.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicProfileResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /users/me/submissions:
+    get:
+      tags: [Users]
+      operationId: listMySubmissions
+      summary: Submissions I have posted
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: One page of the signed-in user's submissions, newest first.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /users/me/reviews:
+    get:
+      tags: [Users]
+      operationId: listMyReviews
+      summary: Reviews I have written
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: One page of the signed-in user's submissions, newest first.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /users/me/reviews-received:
+    get:
+      tags: [Users]
+      operationId: listReviewsReceived
+      summary: Reviews on my submissions
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: One page of the signed-in user's submissions, newest first.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /technologies:
+    get:
+      tags: [Technologies]
+      operationId: listTechnologies
+      summary: Technology tag list
+      description: All technology tags, alphabetical, for pickers and filters. Public.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: One page of technology tags.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TechnologyListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
 components:
   headers:
     XRequestId:
@@ -78,6 +306,13 @@ components:
       schema:
         type: string
         format: uuid
+
+  securitySchemes:
+    # Clerk session token, sent by the frontend as Authorization: Bearer.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
   schemas:
     # Every code the API can return (D-10). Kept as one enum so clients
@@ -152,6 +387,192 @@ components:
             status:
               const: ready
 
+    Technology:
+      type: object
+      required: [id, name]
+      additionalProperties: false
+      properties:
+        id: { type: integer }
+        name: { type: string }
+
+    MeResponse:
+      type: object
+      required: [success, data]
+      additionalProperties: false
+      properties:
+        success:
+          const: true
+        data:
+          type: object
+          # No clerkId, ever (D-08). additionalProperties false makes any
+          # extra field a spec violation.
+          required: [id, username, bio, karma, createdAt, technologies, stats]
+          additionalProperties: false
+          properties:
+            id: { type: integer }
+            username: { type: string, pattern: "^[a-z0-9_]{3,30}$" }
+            bio: { type: [string, "null"] }
+            karma: { type: integer, minimum: 0 }
+            createdAt: { type: string, format: date-time }
+            technologies:
+              type: array
+              items:
+                $ref: "#/components/schemas/Technology"
+            stats:
+              type: object
+              required: [submissions, reviewsGiven, reviewsReceived]
+              additionalProperties: false
+              properties:
+                submissions: { type: integer, minimum: 0 }
+                reviewsGiven: { type: integer, minimum: 0 }
+                reviewsReceived: { type: integer, minimum: 0 }
+
+    UpdateMeRequest:
+      type: object
+      # Only these three fields. Anything else, karma, clerkId or id
+      # included, is rejected with 400 (D-11).
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        username:
+          type: string
+          description: Trimmed and lowercased, then must match the pattern. Reserved names are rejected.
+          pattern: "^[a-z0-9_]{3,30}$"
+        bio:
+          type: [string, "null"]
+          maxLength: 500
+          description: Trimmed. An empty string or null clears it.
+        technologies:
+          type: array
+          maxItems: 20
+          description: Replaces the whole stack. Names are trimmed, lowercased and de-duplicated. Unknown names are created.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 40
+
+    PublicProfileResponse:
+      type: object
+      required: [success, data]
+      additionalProperties: false
+      properties:
+        success:
+          const: true
+        data:
+          type: object
+          # Deliberately no id and no clerkId. additionalProperties false
+          # makes either one a spec violation.
+          required: [username, bio, karma, createdAt, technologies, stats]
+          additionalProperties: false
+          properties:
+            username: { type: string, pattern: "^[a-z0-9_]{3,30}$" }
+            bio: { type: [string, "null"] }
+            karma: { type: integer, minimum: 0 }
+            createdAt: { type: string, format: date-time }
+            technologies:
+              type: array
+              items:
+                $ref: "#/components/schemas/Technology"
+            stats:
+              type: object
+              required: [submissions, reviewsGiven, reviewsReceived]
+              additionalProperties: false
+              properties:
+                submissions: { type: integer, minimum: 0 }
+                reviewsGiven: { type: integer, minimum: 0 }
+                reviewsReceived: { type: integer, minimum: 0 }
+
+    PaginationMeta:
+      type: object
+      required: [totalItems, currentPage, totalPages, itemsPerPage]
+      additionalProperties: false
+      properties:
+        totalItems: { type: integer, minimum: 0 }
+        currentPage: { type: integer, minimum: 1 }
+        totalPages: { type: integer, minimum: 0 }
+        itemsPerPage: { type: integer, minimum: 1 }
+
+    SubmissionSummary:
+      type: object
+      required: [id, title, githubUrl, createdAt, technologies, reviewCount]
+      additionalProperties: false
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        githubUrl: { type: string, format: uri }
+        createdAt: { type: string, format: date-time }
+        technologies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Technology"
+        reviewCount: { type: integer, minimum: 0 }
+
+    ReviewSummary:
+      type: object
+      required: [id, feedback, createdAt, ratings, submission, reviewer]
+      additionalProperties: false
+      properties:
+        id: { type: integer }
+        feedback: { type: string }
+        createdAt: { type: string, format: date-time }
+        ratings:
+          type: array
+          items:
+            type: object
+            required: [criterion, rating]
+            additionalProperties: false
+            properties:
+              criterion: { type: string }
+              rating: { type: integer, minimum: 1, maximum: 5 }
+        submission:
+          type: object
+          required: [id, title, author]
+          additionalProperties: false
+          properties:
+            id: { type: integer }
+            title: { type: string }
+            author: { type: string, description: Username of the submission's author }
+        reviewer: { type: string, description: Username of the review's author }
+
+    SubmissionListResponse:
+      type: object
+      required: [success, data, meta]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubmissionSummary"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    ReviewListResponse:
+      type: object
+      required: [success, data, meta]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewSummary"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    TechnologyListResponse:
+      type: object
+      required: [success, data, meta]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Technology"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
   # Reusable error responses, so every route references the same
   # definition instead of redeclaring the envelope.
   responses:
@@ -189,3 +610,90 @@ components:
               code: SERVICE_UNAVAILABLE
               message: Service is not ready
               requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
+
+    Unauthorized:
+      description: No valid session. The Authorization header is missing, invalid, or expired.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            success: false
+            error:
+              code: UNAUTHORIZED
+              message: Authentication required
+              requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
+
+    BadRequest:
+      description: The request did not match the route's schema, including any unexpected field.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            success: false
+            error:
+              code: VALIDATION_ERROR
+              message: 'query: Unrecognized key: "foo"'
+              requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
+
+    TooManyRequests:
+      description: Rate limit exceeded. The RateLimit headers say when the window resets.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+
+    Conflict:
+      description: The request conflicts with existing data, such as a username that is already taken.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            success: false
+            error:
+              code: CONFLICT
+              message: That username is already taken
+              requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
+
+    NotFound:
+      description: The requested resource does not exist.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            success: false
+            error:
+              code: NOT_FOUND
+              message: User not found
+              requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100000, default: 1 }
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Above 50 is rejected with 400, never clamped.
+      schema: { type: integer, minimum: 1, maximum: 50, default: 20 }

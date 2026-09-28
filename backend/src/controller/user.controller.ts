@@ -1,0 +1,61 @@
+import type { Request, Response } from "express";
+import { userService } from "../service/user.service.js";
+import { requireUser } from "../utils/requireUser.js";
+import type { UpdateMeBody } from "../models/user.schemas.js";
+import type { Pagination } from "../models/pagination.js";
+
+export const userController = {
+  // Self-scoped by construction: the id comes from the session, never from
+  // the request, so there is nothing to check ownership against
+  async getMe(req: Request, res: Response): Promise<void> {
+    const user = requireUser(req);
+    const data = await userService.getMe(user.id);
+    res.status(200).json({ success: true, data });
+  },
+
+  // Self-scoped by construction, like getMe. The body has already been
+  // validated and normalized, so the cast states a fact rather than a hope.
+  async updateMe(req: Request, res: Response): Promise<void> {
+    const user = requireUser(req);
+    const data = await userService.updateMe(user.id, req.body as UpdateMeBody);
+    res.status(200).json({ success: true, data });
+  },
+
+  // Public: no requireAuth, and nothing about the caller is read. The
+  // username has already been validated and normalized.
+  async getPublicProfile(req: Request, res: Response): Promise<void> {
+    const data = await userService.getPublicProfile(
+      req.params.username as string,
+    );
+    res.status(200).json({ success: true, data });
+  },
+
+  // All three lists are self-scoped by construction: the user id comes from
+  // the session, and nothing in the request can point at another user.
+  async listMySubmissions(req: Request, res: Response): Promise<void> {
+    const user = requireUser(req);
+    const result = await userService.listMySubmissions(
+      user.id,
+      req.query as unknown as Pagination,
+    );
+    res.status(200).json({ success: true, ...result });
+  },
+
+  async listMyReviews(req: Request, res: Response): Promise<void> {
+    const user = requireUser(req);
+    const result = await userService.listMyReviews(
+      user.id,
+      req.query as unknown as Pagination,
+    );
+    res.status(200).json({ success: true, ...result });
+  },
+
+  async listReviewsReceived(req: Request, res: Response): Promise<void> {
+    const user = requireUser(req);
+    const result = await userService.listReviewsReceived(
+      user.id,
+      req.query as unknown as Pagination,
+    );
+    res.status(200).json({ success: true, ...result });
+  },
+};

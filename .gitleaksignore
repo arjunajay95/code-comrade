@@ -1,0 +1,8 @@
+# Reviewed false positives: placeholder Clerk keys for the API drift check
+
+# in CI, added in commit e460ad5. Not credentials; the check never contacts
+
+# Clerk. Later commits mark the same lines with gitleaks:allow instead.
+
+e460ad530b18f97c5c6afd3b4af1d4b642741d97:.github/workflows/ci.yml:generic-api-key:169
+e460ad530b18f97c5c6afd3b4af1d4b642741d97:.github/workflows/ci.yml:stripe-access-token:170
