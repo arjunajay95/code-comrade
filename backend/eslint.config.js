@@ -1,10 +1,11 @@
 import js from "@eslint/js";
-import tseslint from "typescript-eslint";
+import { defineConfig } from "eslint/config";
 import prettier from "eslint-config-prettier";
+import tseslint from "typescript-eslint";
 
-export default tseslint.config(
+export default defineConfig(
   js.configs.recommended,
-  ...tseslint.configs.strict,
+  tseslint.configs.strict,
   prettier,
   {
     rules: {
@@ -21,6 +22,28 @@ export default tseslint.config(
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
+  {
+    // Routes are created only through createRouter in routes/registry.ts,
+    // so every route is visible to the API drift check (D-27). Importing
+    // express's Router directly anywhere else would let a route skip it.
+    files: ["src/**/*.ts"],
+    ignores: ["src/routes/registry.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "express",
+              importNames: ["Router"],
+              message:
+                "Create routers with createRouter from routes/registry.ts so the API drift check sees every route.",
+            },
+          ],
         },
       ],
     },

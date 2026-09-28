@@ -137,13 +137,48 @@ jobs:
       - name: Build backend image
         run: docker build -t codecomrade-api:ci backend
 
+  api-drift:
+    name: API contract drift check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      # Importing the routes loads env.ts, which refuses to start without
+      # these. The values are placeholders: nothing connects to a database
+      # or to Clerk during this check. The publishable key is shaped like a
+      # real one (pk_test_ followed by a base64 domain) so Clerk's client
+      # accepts it at construction.
+      - name: Check routes against openapi.yaml
+        working-directory: backend
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+          ALLOWED_ORIGINS: http://localhost:3000
+          # Placeholders, not credentials: this check never contacts Clerk.
+          # gitleaks:allow marks each line as a reviewed false positive.
+          CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk # gitleaks:allow
+          CLERK_SECRET_KEY: sk_test_placeholder # gitleaks:allow
+        run: npm run check:drift
+
   deploy:
     name: Deploy to production
     runs-on: ubuntu-latest
 
     # Runs only after every check succeeds. If any listed job fails or is
     # cancelled, this job is skipped and nothing deploys.
-    needs: [backend, frontend, codeql, npm-audit, gitleaks, docker]
+    needs: [backend, frontend, codeql, npm-audit, gitleaks, docker, api-drift]
 
     # Only a push to main deploys. Pull requests and pushes to development
     # run every check, but this job is skipped for them.
