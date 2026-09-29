@@ -24,6 +24,10 @@ tags:
     description: Profiles, the signed-in user's own data, and their lists.
   - name: Technologies
     description: The shared technology tag list.
+  - name: Submissions
+    description: Review requests and their reviews.
+  - name: Feed
+    description: The public and personalized home feeds.
 
 paths:
   /health/live:
@@ -219,7 +223,7 @@ paths:
         - $ref: "#/components/parameters/Limit"
       responses:
         "200":
-          description: One page of the signed-in user's submissions, newest first.
+          description: One page of the reviews the signed-in user has written, newest first.
           headers:
             X-Request-Id:
               $ref: "#/components/headers/XRequestId"
@@ -250,7 +254,7 @@ paths:
         - $ref: "#/components/parameters/Limit"
       responses:
         "200":
-          description: One page of the signed-in user's submissions, newest first.
+          description: One page of the reviews other users wrote on the signed-in user's submissions, newest first.
           headers:
             X-Request-Id:
               $ref: "#/components/headers/XRequestId"
@@ -285,6 +289,10 @@ paths:
           headers:
             X-Request-Id:
               $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlFiveMinutes"
+            ETag:
+              $ref: "#/components/headers/ETag"
           content:
             application/json:
               schema:
@@ -296,6 +304,126 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 
+  /submissions/{id}:
+    get:
+      tags: [Submissions]
+      operationId: getSubmission
+      summary: Submission detail
+      description: >
+        A submission with its criteria, every review, and its repository
+        snapshot when one exists. Public.
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1, maximum: 2147483647 }
+      responses:
+        "200":
+          description: The submission.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionDetailResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /feed:
+    get:
+      tags: [Feed]
+      operationId: listFeed
+      summary: Public feed
+      description: >
+        Submissions newest first, with optional search and technology
+        filters. Public.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - name: search
+          in: query
+          required: false
+          description: Case-insensitive match against title and description.
+          schema: { type: string, minLength: 1, maxLength: 100 }
+        - name: technologies
+          in: query
+          required: false
+          description: >
+            Comma-separated technology names. Returns submissions with any of
+            them. Names are trimmed, lowercased and de-duplicated, up to 10.
+          schema: { type: string, minLength: 1 }
+      responses:
+        "200":
+          description: One page of the feed.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlRevalidate"
+            ETag:
+              $ref: "#/components/headers/ETag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedResponse"
+        "304":
+          description: Not modified. The If-None-Match value still matches the current feed.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /feed/personalized:
+    get:
+      tags: [Feed]
+      operationId: listPersonalizedFeed
+      summary: Personalized feed
+      description: >
+        The most recent 200 submissions, ranked by overlap with the signed-in
+        user's technology stack blended with recency (PROJECT_BLUEPRINT §6).
+        A user with no technologies gets recency order.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - name: debug
+          in: query
+          required: false
+          description: Set to 1 for a score breakdown per item. Ignored in production.
+          schema: { type: string, enum: ["1"] }
+      responses:
+        "200":
+          description: One page of the ranked feed.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalizedFeedResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
 components:
   headers:
     XRequestId:
@@ -306,6 +434,17 @@ components:
       schema:
         type: string
         format: uuid
+    # Every response defaults to Cache-Control: no-store. Only the public
+    # routes that reference one of these two opt into caching.
+    CacheControlRevalidate:
+      description: public, max-age=0, must-revalidate. Stored, but rechecked on every request.
+      schema: { type: string }
+    CacheControlFiveMinutes:
+      description: public, max-age=300. Reusable for five minutes without asking.
+      schema: { type: string }
+    ETag:
+      description: Send back as If-None-Match to get 304 when unchanged.
+      schema: { type: string }
 
   securitySchemes:
     # Clerk session token, sent by the frontend as Authorization: Bearer.
@@ -570,6 +709,180 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Technology"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    SubmissionDetailResponse:
+      type: object
+      required: [success, data]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: object
+          required: [id, title, description, githubUrl, createdAt, updatedAt, status, author, technologies, criteria, reviewCount, reviews, repository]
+          additionalProperties: false
+          properties:
+            id: { type: integer }
+            title: { type: string }
+            description: { type: string }
+            githubUrl: { type: string, format: uri }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+            status:
+              type: string
+              enum: [PENDING, REVIEWED]
+              description: Derived from the review count on every read (D-14).
+            author:
+              type: object
+              required: [username, karma]
+              additionalProperties: false
+              properties:
+                username: { type: string }
+                karma: { type: integer, minimum: 0 }
+            technologies:
+              type: array
+              items:
+                $ref: "#/components/schemas/Technology"
+            criteria:
+              type: array
+              items:
+                type: object
+                required: [id, label, averageRating]
+                additionalProperties: false
+                properties:
+                  id: { type: integer }
+                  label: { type: string }
+                  averageRating:
+                    type: [number, "null"]
+                    minimum: 1
+                    maximum: 5
+                    description: Mean across all reviews, two decimals. null when unreviewed.
+            reviewCount: { type: integer, minimum: 0 }
+            reviews:
+              type: array
+              description: Every review, newest first.
+              items:
+                type: object
+                required: [id, feedback, createdAt, reviewer, ratings]
+                additionalProperties: false
+                properties:
+                  id: { type: integer }
+                  feedback: { type: string }
+                  createdAt: { type: string, format: date-time }
+                  reviewer: { type: string, description: The reviewer's username }
+                  ratings:
+                    type: array
+                    items:
+                      type: object
+                      required: [criterionId, rating]
+                      additionalProperties: false
+                      properties:
+                        criterionId: { type: integer }
+                        rating: { type: integer, minimum: 1, maximum: 5 }
+            repository:
+              description: GitHub metadata. null until fetched, and possibly permanently.
+              oneOf:
+                - type: "null"
+                - type: object
+                  required: [stars, primaryLanguage, lastPushedAt, fetchedAt]
+                  additionalProperties: false
+                  properties:
+                    stars: { type: integer, minimum: 0 }
+                    primaryLanguage: { type: [string, "null"] }
+                    lastPushedAt: { type: [string, "null"], format: date-time }
+                    fetchedAt: { type: string, format: date-time }
+
+    FeedItem:
+      type: object
+      required: [id, title, description, githubUrl, createdAt, status, author, technologies, reviewCount]
+      additionalProperties: false
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        githubUrl: { type: string, format: uri }
+        createdAt: { type: string, format: date-time }
+        status:
+          type: string
+          enum: [PENDING, REVIEWED]
+        author:
+          type: object
+          required: [username, karma]
+          additionalProperties: false
+          properties:
+            username: { type: string }
+            karma: { type: integer, minimum: 0 }
+        technologies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Technology"
+        reviewCount: { type: integer, minimum: 0 }
+
+    FeedResponse:
+      type: object
+      required: [success, data, meta]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedItem"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    PersonalizedFeedItem:
+      type: object
+      required: [id, title, description, githubUrl, createdAt, status, author, technologies, reviewCount, matchedTechnologies]
+      additionalProperties: false
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        githubUrl: { type: string, format: uri }
+        createdAt: { type: string, format: date-time }
+        status:
+          type: string
+          enum: [PENDING, REVIEWED]
+        author:
+          type: object
+          required: [username, karma]
+          additionalProperties: false
+          properties:
+            username: { type: string }
+            karma: { type: integer, minimum: 0 }
+        technologies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Technology"
+        reviewCount: { type: integer, minimum: 0 }
+        matchedTechnologies:
+          type: array
+          description: Tags this submission shares with the signed-in user's stack.
+          items: { type: string }
+        _score:
+          type: object
+          description: >
+            Present only with ?debug=1 outside production. Never in
+            production responses.
+          required: [final, tag, recency]
+          additionalProperties: false
+          properties:
+            final: { type: number, minimum: 0, maximum: 1 }
+            tag: { type: number, minimum: 0, maximum: 1 }
+            recency: { type: number, minimum: 0, maximum: 1 }
+
+    PersonalizedFeedResponse:
+      type: object
+      required: [success, data, meta]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PersonalizedFeedItem"
         meta:
           $ref: "#/components/schemas/PaginationMeta"
 

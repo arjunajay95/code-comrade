@@ -13,6 +13,7 @@ import { apiRouter } from "./routes/index.js";
 import { clerkMiddleware } from "@clerk/express";
 import { clerkClient } from "./config/clerk.js";
 import { stripClerkAuthHeaders } from "./middlewares/stripClerkAuthHeaders.js";
+import { CACHE_NONE, cacheControl } from "./middlewares/cacheControl.js";
 
 // Builds the app without starting a server, so integration tests can
 // import it and send requests directly without binding a port.
@@ -25,6 +26,10 @@ export const createApp = (): Express => {
   // own bucket.
   app.set("trust proxy", env.TRUST_PROXY_HOPS);
 
+  // Weak ETags are Express's default. Stated explicitly because the public
+  // feed's 304 responses depend on them.
+  app.set("etag", "weak");
+
   // The binding order starts here.
   app.use(requestId);
   app.use(httpLogger);
@@ -32,6 +37,10 @@ export const createApp = (): Express => {
   // Security headers on every response. Also removes the X-Powered-By
   // header, which would otherwise advertise that this is Express.
   app.use(helmet());
+
+  // Nothing is cached unless a route opts in. Responses tied to a signed-in
+  // user must never be stored where someone else could see them.
+  app.use(cacheControl(CACHE_NONE));
 
   app.use(
     cors({
