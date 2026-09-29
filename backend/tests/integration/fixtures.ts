@@ -19,6 +19,8 @@ export const createUser = () =>
 export const createSubmission = (
   authorId: number,
   options: {
+    title?: string;
+    description?: string;
     criteria?: string[];
     technologies?: string[];
     createdAt?: Date;
@@ -29,8 +31,9 @@ export const createSubmission = (
 
   return prisma.submission.create({
     data: {
-      title: "Test submission",
-      description: "A submission created by an integration test.",
+      title: options.title ?? "Test submission",
+      description:
+        options.description ?? "A submission created by an integration test.",
       // Owner and repository parsed out of the URL, consistent with it, as
       // V-Q7 requires of every real submission.
       githubUrl: `https://github.com/${owner}/${repo}`,

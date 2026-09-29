@@ -26,6 +26,8 @@ tags:
     description: The shared technology tag list.
   - name: Submissions
     description: Review requests and their reviews.
+  - name: Feed
+    description: The public and personalized home feeds.
 
 paths:
   /health/live:
@@ -326,6 +328,47 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /feed:
+    get:
+      tags: [Feed]
+      operationId: listFeed
+      summary: Public feed
+      description: >
+        Submissions newest first, with optional search and technology
+        filters. Public.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - name: search
+          in: query
+          required: false
+          description: Case-insensitive match against title and description.
+          schema: { type: string, minLength: 1, maxLength: 100 }
+        - name: technologies
+          in: query
+          required: false
+          description: >
+            Comma-separated technology names. Returns submissions with any of
+            them. Names are trimmed, lowercased and de-duplicated, up to 10.
+          schema: { type: string, minLength: 1 }
+      responses:
+        "200":
+          description: One page of the feed.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "429":
           $ref: "#/components/responses/TooManyRequests"
         "500":
@@ -688,6 +731,45 @@ components:
                     primaryLanguage: { type: [string, "null"] }
                     lastPushedAt: { type: [string, "null"], format: date-time }
                     fetchedAt: { type: string, format: date-time }
+
+    FeedItem:
+      type: object
+      required: [id, title, description, githubUrl, createdAt, status, author, technologies, reviewCount]
+      additionalProperties: false
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        githubUrl: { type: string, format: uri }
+        createdAt: { type: string, format: date-time }
+        status:
+          type: string
+          enum: [PENDING, REVIEWED]
+        author:
+          type: object
+          required: [username, karma]
+          additionalProperties: false
+          properties:
+            username: { type: string }
+            karma: { type: integer, minimum: 0 }
+        technologies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Technology"
+        reviewCount: { type: integer, minimum: 0 }
+
+    FeedResponse:
+      type: object
+      required: [success, data, meta]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedItem"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
 
   # Reusable error responses, so every route references the same
   # definition instead of redeclaring the envelope.
