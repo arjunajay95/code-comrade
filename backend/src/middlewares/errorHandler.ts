@@ -70,6 +70,9 @@ export const errorHandler = (
       req.log.error({ err: appError }, "Operational server error");
     }
 
+    // An error must never be cached, even on a route that allows caching.
+    res.setHeader("Cache-Control", "no-store");
+
     res.status(appError.statusCode).json({
       success: false,
       error: {

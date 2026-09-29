@@ -6,7 +6,8 @@
 import "dotenv/config";
 import { prisma } from "../src/config/prisma.js";
 import { KARMA_PER_REVIEW } from "../src/config/constants.js";
-import { env } from "../src/config/env.js";
+import { selfCheck } from "./selfCheck.js";
+import { required } from "./seedHelpers.js";
 
 // ---------------------------------------------------------------------------
 // Source data
@@ -396,7 +397,7 @@ async function main(): Promise<void> {
         clerkId: seedUser.clerkId,
         technologies: {
           connect: seedUser.stack.map((name) => ({
-            id: technologyByName.get(name)!,
+            id: required(technologyByName.get(name), `technology ${name}`),
           })),
         },
       },
@@ -417,10 +418,15 @@ async function main(): Promise<void> {
         githubUrl: `https://github.com/${s.owner}/${s.repo}`,
         githubOwner: s.owner,
         githubRepo: s.repo,
-        authorId: userByUsername.get(s.authorUsername)!,
+        authorId: required(
+          userByUsername.get(s.authorUsername),
+          `user ${s.authorUsername}`,
+        ),
         createdAt: new Date(now.getTime() - s.ageHours * 60 * 60 * 1000),
         technologies: {
-          connect: s.tags.map((name) => ({ id: technologyByName.get(name)! })),
+          connect: s.tags.map((name) => ({
+            id: required(technologyByName.get(name), `technology ${name}`),
+          })),
         },
         criteria: {
           create: s.criteria.map((label) => ({ label })),
@@ -438,7 +444,10 @@ async function main(): Promise<void> {
   for (const [reviewIndex, r] of REVIEWS.entries()) {
     const submissionId = submissionIds[r.submissionIndex];
     const criteriaIds = criteriaBySubmission[r.submissionIndex];
-    const reviewerId = userByUsername.get(r.reviewerUsername)!;
+    const reviewerId = required(
+      userByUsername.get(r.reviewerUsername),
+      `user ${r.reviewerUsername}`,
+    );
     const ratings = ratingsFor(criteriaIds.length, reviewIndex);
 
     await prisma.review.create({
@@ -476,117 +485,6 @@ async function main(): Promise<void> {
     `Seeded ${TECHNOLOGIES.length} technologies, ${USERS.length} users, ` +
       `${SUBMISSIONS.length} submissions, ${REVIEWS.length} reviews.`,
   );
-}
-
-// ---------------------------------------------------------------------------
-// Self-check:
-// Every query must return zero rows on a healthy database. A non-empty result
-// here means the seed itself produced invalid data, so the script fails loudly
-// instead of leaving a broken fixture in place silently.
-// ---------------------------------------------------------------------------
-
-async function selfCheck(): Promise<void> {
-  const checks: { name: string; rows: unknown[] }[] = [];
-
-  checks.push({
-    name: "V-Q1 karma equation",
-    rows: await prisma.$queryRaw<unknown[]>`
-      SELECT u.id, u.username, u.karma, ${KARMA_PER_REVIEW} * COUNT(r.id) AS expected
-      FROM "User" u
-      LEFT JOIN "Review" r ON r."reviewerId" = u.id
-      GROUP BY u.id
-      HAVING u.karma <> ${KARMA_PER_REVIEW} * COUNT(r.id);
-    `,
-  });
-
-  checks.push({
-    name: "V-Q2 no self-reviews",
-    rows: await prisma.$queryRaw<unknown[]>`
-      SELECT r.id
-      FROM "Review" r
-      JOIN "Submission" s ON s.id = r."submissionId"
-      WHERE s."authorId" = r."reviewerId";
-    `,
-  });
-
-  checks.push({
-    name: "V-Q3 rating completeness",
-    rows: await prisma.$queryRaw<unknown[]>`
-      SELECT r.id AS review_id
-      FROM "Review" r
-      JOIN "Submission" s ON s.id = r."submissionId"
-      LEFT JOIN "Criterion" c ON c."submissionId" = s.id
-      LEFT JOIN "CriterionRating" cr
-        ON cr."reviewId" = r.id AND cr."criterionId" = c.id
-      GROUP BY r.id
-      HAVING COUNT(c.id) <> COUNT(cr.id);
-    `,
-  });
-
-  checks.push({
-    name: "V-Q4 no cross-submission ratings",
-    rows: await prisma.$queryRaw<unknown[]>`
-      SELECT cr.id
-      FROM "CriterionRating" cr
-      JOIN "Review" r ON r.id = cr."reviewId"
-      JOIN "Criterion" c ON c.id = cr."criterionId"
-      WHERE c."submissionId" <> r."submissionId";
-    `,
-  });
-
-  checks.push({
-    name: "V-Q5 tag normalization",
-    rows: await prisma.$queryRaw<unknown[]>`
-      SELECT id, name FROM "Technology"
-      WHERE name <> lower(btrim(name));
-    `,
-  });
-
-  checks.push({
-    name: "V-Q6 criteria bounds",
-    rows: await prisma.$queryRaw<unknown[]>`
-      SELECT s.id, COUNT(c.id) AS criteria
-      FROM "Submission" s
-      LEFT JOIN "Criterion" c ON c."submissionId" = s.id
-      GROUP BY s.id
-      HAVING COUNT(c.id) < 1 OR COUNT(c.id) > 5;
-    `,
-  });
-
-  checks.push({
-    name: "V-Q7 repository host integrity",
-    rows: await prisma.$queryRaw<unknown[]>`
-      SELECT id, "githubUrl", "githubOwner", "githubRepo"
-      FROM "Submission"
-      WHERE "githubUrl" <> 'https://github.com/' || "githubOwner" || '/' || "githubRepo";
-    `,
-  });
-
-  checks.push({
-    name: "V-Q8 stranded in-flight idempotency keys",
-    rows: await prisma.$queryRaw<unknown[]>`
-      SELECT id, key, "createdAt"
-      FROM "IdempotencyKey"
-      WHERE status = 'IN_FLIGHT'
-        AND "createdAt" < now() - ((${env.IDEMPOTENCY_INFLIGHT_TIMEOUT_MINUTES}::text || ' minutes')::interval);
-    `,
-  });
-
-  const failures = checks.filter((c) => c.rows.length > 0);
-
-  if (failures.length > 0) {
-    for (const f of failures) {
-      console.error(
-        `${f.name} failed: ${f.rows.length} row(s) returned`,
-        f.rows,
-      );
-    }
-    throw new Error(
-      `Seed self-check failed: ${failures.map((f) => f.name).join(", ")}`,
-    );
-  }
-
-  console.log("Self-check passed: V-Q1 through V-Q8 all returned zero rows.");
 }
 
 main()
