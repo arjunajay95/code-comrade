@@ -24,6 +24,8 @@ tags:
     description: Profiles, the signed-in user's own data, and their lists.
   - name: Technologies
     description: The shared technology tag list.
+  - name: Submissions
+    description: Review requests and their reviews.
 
 paths:
   /health/live:
@@ -291,6 +293,39 @@ paths:
                 $ref: "#/components/schemas/TechnologyListResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /submissions/{id}:
+    get:
+      tags: [Submissions]
+      operationId: getSubmission
+      summary: Submission detail
+      description: >
+        A submission with its criteria, every review, and its repository
+        snapshot when one exists. Public.
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1, maximum: 2147483647 }
+      responses:
+        "200":
+          description: The submission.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionDetailResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
         "500":
@@ -572,6 +607,87 @@ components:
             $ref: "#/components/schemas/Technology"
         meta:
           $ref: "#/components/schemas/PaginationMeta"
+
+    SubmissionDetailResponse:
+      type: object
+      required: [success, data]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: object
+          required: [id, title, description, githubUrl, createdAt, updatedAt, status, author, technologies, criteria, reviewCount, reviews, repository]
+          additionalProperties: false
+          properties:
+            id: { type: integer }
+            title: { type: string }
+            description: { type: string }
+            githubUrl: { type: string, format: uri }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+            status:
+              type: string
+              enum: [PENDING, REVIEWED]
+              description: Derived from the review count on every read (D-14).
+            author:
+              type: object
+              required: [username, karma]
+              additionalProperties: false
+              properties:
+                username: { type: string }
+                karma: { type: integer, minimum: 0 }
+            technologies:
+              type: array
+              items:
+                $ref: "#/components/schemas/Technology"
+            criteria:
+              type: array
+              items:
+                type: object
+                required: [id, label, averageRating]
+                additionalProperties: false
+                properties:
+                  id: { type: integer }
+                  label: { type: string }
+                  averageRating:
+                    type: [number, "null"]
+                    minimum: 1
+                    maximum: 5
+                    description: Mean across all reviews, two decimals. null when unreviewed.
+            reviewCount: { type: integer, minimum: 0 }
+            reviews:
+              type: array
+              description: Every review, newest first.
+              items:
+                type: object
+                required: [id, feedback, createdAt, reviewer, ratings]
+                additionalProperties: false
+                properties:
+                  id: { type: integer }
+                  feedback: { type: string }
+                  createdAt: { type: string, format: date-time }
+                  reviewer: { type: string, description: The reviewer's username }
+                  ratings:
+                    type: array
+                    items:
+                      type: object
+                      required: [criterionId, rating]
+                      additionalProperties: false
+                      properties:
+                        criterionId: { type: integer }
+                        rating: { type: integer, minimum: 1, maximum: 5 }
+            repository:
+              description: GitHub metadata. null until fetched, and possibly permanently.
+              oneOf:
+                - type: "null"
+                - type: object
+                  required: [stars, primaryLanguage, lastPushedAt, fetchedAt]
+                  additionalProperties: false
+                  properties:
+                    stars: { type: integer, minimum: 0 }
+                    primaryLanguage: { type: [string, "null"] }
+                    lastPushedAt: { type: [string, "null"], format: date-time }
+                    fetchedAt: { type: string, format: date-time }
 
   # Reusable error responses, so every route references the same
   # definition instead of redeclaring the envelope.

@@ -1,6 +1,7 @@
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
+import { prisma } from "../../src/config/prisma.js";
 
 const app = createApp();
 
@@ -10,13 +11,14 @@ describe("integration harness", () => {
     expect(res.status).toBe(200);
   });
 
-  // The development database has 12 seeded technologies. The freshly reset
-  // test database has none. An empty list proves the app is connected to
-  // the test database, not the development one.
-  it("runs against the freshly reset test database", async () => {
-    const res = await request(app).get("/api/v1/technologies");
-    expect(res.status).toBe(200);
-    expect(res.body.meta.totalItems).toBe(0);
+  // Asks PostgreSQL which database this connection is using. Unlike checking
+  // for an empty table, this stays true however much data other test files
+  // create.
+  it("runs against the test database, not the development one", async () => {
+    const [row] = await prisma.$queryRaw<{ current_database: string }[]>`
+      SELECT current_database()
+    `;
+    expect(row?.current_database).toBe("codecomrade_test");
   });
 
   it("rejects a protected route without a session", async () => {

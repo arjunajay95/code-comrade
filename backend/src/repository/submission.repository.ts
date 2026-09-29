@@ -31,4 +31,46 @@ export const submissionRepository = {
     ]);
     return { items, total };
   },
+
+  // Everything the detail view needs, in one query. Criteria in creation
+  // order, reviews newest first. No clerkId is selected anywhere (D-08).
+  findDetailById(id: number) {
+    return prisma.submission.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        githubUrl: true,
+        createdAt: true,
+        updatedAt: true,
+        author: { select: { username: true, karma: true } },
+        technologies: {
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        },
+        criteria: { select: { id: true, label: true }, orderBy: { id: "asc" } },
+        reviews: {
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+          select: {
+            id: true,
+            feedback: true,
+            createdAt: true,
+            reviewer: { select: { username: true } },
+            ratings: { select: { criterionId: true, rating: true } },
+          },
+        },
+        repoSnapshot: {
+          select: {
+            stars: true,
+            primaryLanguage: true,
+            lastPushedAt: true,
+            fetchedAt: true,
+          },
+        },
+        // D-14: the status is derived from this count.
+        _count: { select: { reviews: true } },
+      },
+    });
+  },
 };
