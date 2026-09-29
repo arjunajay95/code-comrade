@@ -129,4 +129,14 @@ export const submissionRepository = {
     ]);
     return { items, total };
   },
+
+  // The personalized feed's candidate window: the newest submissions, in
+  // one query, with the same fields as a public feed item.
+  listRecentWindow(size: number) {
+    return prisma.submission.findMany({
+      orderBy: [...newestFirst],
+      take: size,
+      select: feedItemSelect,
+    });
+  },
 };

@@ -61,3 +61,12 @@ export const byScoreThenRecency = (a: Scored, b: Scored): number =>
   b.score - a.score ||
   b.createdAt.getTime() - a.createdAt.getTime() ||
   b.id - a.id;
+
+// Whether the _score breakdown may appear in a response (PROJECT_BLUEPRINT
+// §6): only when ?debug=1 was requested AND the app is not in production.
+// Kept here, pure and unit-tested, because it is a rule with a security
+// edge: scoring internals must never reach production responses.
+export const isDebugScoreAllowed = (
+  debug: string | undefined,
+  nodeEnv: string,
+): boolean => debug === "1" && nodeEnv !== "production";

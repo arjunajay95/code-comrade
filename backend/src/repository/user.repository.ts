@@ -112,4 +112,13 @@ export const userRepository = {
       throw err;
     }
   },
+
+  // Just the ids of a user's stack, which is all scoring compares.
+  async findTechnologyIds(id: number): Promise<number[]> {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { technologies: { select: { id: true } } },
+    });
+    return user?.technologies.map((t) => t.id) ?? [];
+  },
 };

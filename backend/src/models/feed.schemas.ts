@@ -39,6 +39,21 @@ const feedQuery = z
   })
   .strict();
 
+// Pagination and the optional debug flag. No search or technology filters:
+// the spec defines those for the public feed only.
+const personalizedFeedQuery = z
+  .object({
+    ...paginationQuery.shape,
+    debug: z.literal("1").optional(),
+  })
+  .strict();
+
+export const personalizedFeedSchema = requestSchema({
+  query: personalizedFeedQuery,
+});
+
+export type PersonalizedFeedQuery = z.infer<typeof personalizedFeedQuery>;
+
 export const publicFeedSchema = requestSchema({ query: feedQuery });
 
 export type FeedQuery = z.infer<typeof feedQuery>;

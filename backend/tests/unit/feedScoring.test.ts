@@ -6,6 +6,7 @@ import {
   recencyScore,
   tagScore,
 } from "../../src/utils/feedScoring.js";
+import { isDebugScoreAllowed } from "../../src/utils/feedScoring.js";
 
 // The expected values below come straight from PROJECT_BLUEPRINT §6, with
 // the constants in config/constants.ts: weights 0.7 and 0.3, and a 72-hour
@@ -118,5 +119,20 @@ describe("byScoreThenRecency", () => {
       .sort(byScoreThenRecency);
 
     expect(ranked.map((r) => r.id)).toEqual([2, 3, 1]);
+  });
+});
+
+describe("isDebugScoreAllowed", () => {
+  it("allows the score outside production when debug=1", () => {
+    expect(isDebugScoreAllowed("1", "development")).toBe(true);
+    expect(isDebugScoreAllowed("1", "test")).toBe(true);
+  });
+
+  it("never allows it in production, whatever the request says", () => {
+    expect(isDebugScoreAllowed("1", "production")).toBe(false);
+  });
+
+  it("does not allow it when debug was not requested", () => {
+    expect(isDebugScoreAllowed(undefined, "development")).toBe(false);
   });
 });
