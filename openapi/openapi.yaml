@@ -223,7 +223,7 @@ paths:
         - $ref: "#/components/parameters/Limit"
       responses:
         "200":
-          description: One page of the signed-in user's submissions, newest first.
+          description: One page of the reviews the signed-in user has written, newest first.
           headers:
             X-Request-Id:
               $ref: "#/components/headers/XRequestId"
@@ -254,7 +254,7 @@ paths:
         - $ref: "#/components/parameters/Limit"
       responses:
         "200":
-          description: One page of the signed-in user's submissions, newest first.
+          description: One page of the reviews other users wrote on the signed-in user's submissions, newest first.
           headers:
             X-Request-Id:
               $ref: "#/components/headers/XRequestId"
@@ -289,6 +289,10 @@ paths:
           headers:
             X-Request-Id:
               $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlFiveMinutes"
+            ETag:
+              $ref: "#/components/headers/ETag"
           content:
             application/json:
               schema:
@@ -363,10 +367,16 @@ paths:
           headers:
             X-Request-Id:
               $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlRevalidate"
+            ETag:
+              $ref: "#/components/headers/ETag"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/FeedResponse"
+        "304":
+          description: Not modified. The If-None-Match value still matches the current feed.
         "400":
           $ref: "#/components/responses/BadRequest"
         "429":
@@ -424,6 +434,17 @@ components:
       schema:
         type: string
         format: uuid
+    # Every response defaults to Cache-Control: no-store. Only the public
+    # routes that reference one of these two opt into caching.
+    CacheControlRevalidate:
+      description: public, max-age=0, must-revalidate. Stored, but rechecked on every request.
+      schema: { type: string }
+    CacheControlFiveMinutes:
+      description: public, max-age=300. Reusable for five minutes without asking.
+      schema: { type: string }
+    ETag:
+      description: Send back as If-None-Match to get 304 when unchanged.
+      schema: { type: string }
 
   securitySchemes:
     # Clerk session token, sent by the frontend as Authorization: Bearer.

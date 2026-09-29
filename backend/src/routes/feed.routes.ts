@@ -7,11 +7,13 @@ import {
   personalizedFeedSchema,
   publicFeedSchema,
 } from "../models/feed.schemas.js";
+import { CACHE_REVALIDATE, cacheControl } from "../middlewares/cacheControl.js";
 
 export const feedRoutes = createRouter("/feed");
 
 feedRoutes.get(
   "/",
+  cacheControl(CACHE_REVALIDATE),
   validate(publicFeedSchema),
   catchAsync(feedController.listPublic),
 );
