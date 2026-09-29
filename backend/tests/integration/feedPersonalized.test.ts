@@ -80,6 +80,25 @@ describe("personalized feed ranking", () => {
       2,
     );
   });
+
+  it("leaves out the user's own submissions, but not other users' view of them", async () => {
+    const tag = unique("tag");
+    const user = await createUser();
+    const own = await createSubmission(user.id, { technologies: [tag] });
+    // The user's stack matches their own submission perfectly, which is
+    // exactly the case that would otherwise put it at the top of their feed.
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { technologies: { connect: [{ name: tag }] } },
+    });
+    const other = await withStack([tag]);
+
+    const mine = await feedService.listPersonalized(user.id, page, false);
+    const theirs = await feedService.listPersonalized(other.id, page, false);
+
+    expect(indexOf(mine.data, own.id)).toBe(-1);
+    expect(indexOf(theirs.data, own.id)).toBe(0);
+  });
 });
 
 describe("GET /feed/personalized", () => {
