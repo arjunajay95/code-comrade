@@ -48,4 +48,13 @@ export default defineConfig(
       ],
     },
   },
+  {
+    // Seeds and developer scripts are command-line tools: printing to the
+    // terminal is their entire output. App code in src/ still logs through
+    // Pino (D-20), where no-console stays an error.
+    files: ["prisma/**/*.ts", "scripts/**/*.ts"],
+    rules: {
+      "no-console": "off",
+    },
+  },
 );
