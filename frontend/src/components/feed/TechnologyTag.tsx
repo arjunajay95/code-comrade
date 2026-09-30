@@ -13,7 +13,9 @@ export function TechnologyTag({
     <span
       className={cn(
         "inline-flex h-6 items-center rounded-md border px-2 text-xs",
-        matched ? "border-addition/40 text-addition" : "text-muted-foreground",
+        matched
+          ? "border-addition/40 bg-addition/10 text-addition"
+          : "bg-muted/50 text-muted-foreground",
       )}
     >
       {name}

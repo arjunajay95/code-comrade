@@ -1,8 +1,13 @@
 import type { components } from "@/types/api.gen";
-import { publicRequest } from "./apiClient";
+import { authedRequest, publicRequest, type GetToken } from "./apiClient";
 
 type FeedResponse = components["schemas"]["FeedResponse"];
+type PersonalizedFeedResponse =
+  components["schemas"]["PersonalizedFeedResponse"];
+
 export type FeedItem = components["schemas"]["FeedItem"];
+export type PersonalizedFeedItem =
+  components["schemas"]["PersonalizedFeedItem"];
 export type PageMeta = components["schemas"]["PaginationMeta"];
 
 export interface FeedParams {
@@ -10,6 +15,11 @@ export interface FeedParams {
   limit: number;
   search?: string;
   technologies?: string[];
+}
+
+export interface PersonalizedParams {
+  page: number;
+  limit: number;
 }
 
 export async function getPublicFeed(
@@ -29,6 +39,23 @@ export async function getPublicFeed(
     },
     signal,
   });
+
+  return { items: response.data, meta: response.meta };
+}
+
+export async function getPersonalizedFeed(
+  getToken: GetToken,
+  params: PersonalizedParams,
+  signal?: AbortSignal,
+): Promise<{ items: PersonalizedFeedItem[]; meta: PageMeta }> {
+  const response = await authedRequest<PersonalizedFeedResponse>(
+    getToken,
+    "/feed/personalized",
+    {
+      query: { page: params.page, limit: params.limit },
+      signal,
+    },
+  );
 
   return { items: response.data, meta: response.meta };
 }
