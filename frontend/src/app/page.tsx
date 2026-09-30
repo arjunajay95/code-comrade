@@ -1,6 +1,16 @@
-// frontend/src/app/page.tsx
-// Placeholder. The feed replaces it in the next step.
+import { Feed } from "@/components/feed/Feed";
 
 export default function Home() {
-  return <p className="text-sm text-muted-foreground">The feed goes here.</p>;
+  return (
+    <>
+      <h1 className="text-lg font-medium">Latest submissions</h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Developers post code for feedback, and earn karma by reviewing each
+        other&apos;s work.
+      </p>
+      <div className="mt-6">
+        <Feed />
+      </div>
+    </>
+  );
 }
