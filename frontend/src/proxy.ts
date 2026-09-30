@@ -1,23 +1,11 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-// Pages that need a signed-in user. This is a
-// courtesy, so a signed-out visitor lands on sign-in instead of an empty page.
-// It is not security: the API checks every request again on its own.
-// Each family is listed as the bare path plus its children, so "/me" is
-// protected but "/members" is not.
-const isProtectedRoute = createRouteMatcher([
-  "/submissions/new",
-  "/me",
-  "/me/(.*)",
-  "/settings",
-  "/settings/(.*)",
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
-  }
-});
+// Makes the session available to every page, layout and server function.
+// It protects nothing by itself: each protected page checks the session with
+// auth.protect(), so the check lives with the page it guards and cannot drift
+// from the route list the way a path matcher could. The API still enforces
+// every rule on its own, whatever the frontend does.
+export default clerkMiddleware();
 
 export const config = {
   matcher: [

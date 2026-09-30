@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
+import { ApiError } from "@/services/apiClient";
 
 export function Providers({ children }: { children: ReactNode }) {
   // Created once per browser session. Holding it in state stops React from
@@ -10,9 +11,26 @@ export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
-        // Data counts as fresh for 30 seconds, so going back to the feed does
-        // not refetch it immediately.
-        defaultOptions: { queries: { staleTime: 30_000 } },
+        defaultOptions: {
+          queries: {
+            // Data counts as fresh for 30 seconds, so going back to the feed
+            // does not refetch it immediately.
+            staleTime: 30_000,
+            // Retrying helps with network failures and server errors. A 4xx
+            // means the request itself was wrong, and asking again gets the
+            // same answer, so it is never retried.
+            retry: (failureCount, error) => {
+              if (
+                error instanceof ApiError &&
+                error.status >= 400 &&
+                error.status < 500
+              ) {
+                return false;
+              }
+              return failureCount < 2;
+            },
+          },
+        },
       }),
   );
 

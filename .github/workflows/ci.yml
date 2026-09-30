@@ -55,6 +55,15 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      # The committed types must match openapi.yaml. If someone changes the
+      # spec without regenerating, this fails instead of the frontend
+      # silently expecting the old response shapes.
+      - name: Check generated API types are current
+        working-directory: frontend
+        run: |
+          npm run gen:api
+          git diff --exit-code src/types/api.gen.ts
+
       - name: Lint
         working-directory: frontend
         run: npm run lint
