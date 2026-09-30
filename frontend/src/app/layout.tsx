@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { Providers } from "@/components/providers";
 import { cn } from "@/lib/utils";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -20,17 +22,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={cn(
-        "h-full",
-        "antialiased",
-        geistSans.variable,
-        "font-mono",
-        jetbrainsMono.variable,
-      )}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
-    </html>
+    <ClerkProvider>
+      {/* suppressHydrationWarning: next-themes sets the theme class on <html>
+          before React loads, so React would otherwise warn that the server
+          and browser HTML differ. It silences that one element only. */}
+      <html
+        lang="en"
+        suppressHydrationWarning
+        className={cn(
+          "h-full",
+          "antialiased",
+          geistSans.variable,
+          jetbrainsMono.variable,
+          "font-mono",
+        )}
+      >
+        <body className="min-h-full flex flex-col">
+          <Providers>{children}</Providers>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
