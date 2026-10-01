@@ -74,6 +74,12 @@ jobs:
 
       - name: Build
         working-directory: frontend
+        env:
+          # Placeholders so the build can run. The real values live in Vercel.
+          # gitleaks:allow marks each line as a reviewed false positive.
+          NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk # gitleaks:allow
+          CLERK_SECRET_KEY: sk_test_placeholder # gitleaks:allow
         run: npm run build
 
   codeql:
