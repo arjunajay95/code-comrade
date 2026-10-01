@@ -283,6 +283,11 @@ paths:
       parameters:
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Limit"
+        - name: search
+          in: query
+          required: false
+          description: Case-insensitive substring match on the tag name, for type-to-filter pickers.
+          schema: { type: string, minLength: 1, maxLength: 40 }
       responses:
         "200":
           description: One page of technology tags.
@@ -390,9 +395,11 @@ paths:
       operationId: listPersonalizedFeed
       summary: Personalized feed
       description: >
-        The most recent 200 submissions, ranked by overlap with the signed-in
-        user's technology stack blended with recency (PROJECT_BLUEPRINT §6).
-        A user with no technologies gets recency order.
+        The most recent 200 submissions by other users, ranked by overlap
+        with the signed-in user's technology stack blended with recency.
+        A user with no technologies gets recency order. 
+        The user's own submissions are excluded; they appear in the
+        public feed and in /users/me/submissions.
       security:
         - bearerAuth: []
       parameters:
