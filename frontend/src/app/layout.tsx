@@ -7,6 +7,7 @@ import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/shell/SiteFooter";
 import { SiteHeader } from "@/components/shell/SiteHeader";
 import { cn } from "@/lib/utils";
+import { StackPickerHost } from "@/components/stack/StackPickerHost";
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               {children}
             </main>
             <SiteFooter />
+            <StackPickerHost />
           </Providers>
         </body>
       </html>

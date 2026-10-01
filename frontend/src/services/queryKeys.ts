@@ -11,6 +11,9 @@ export const queryKeys = {
   feed: {
     all: ["feed"] as const,
     public: (params: object) => ["feed", "public", params] as const,
+    // The prefix shared by every personalized page, for invalidating them all
+    // at once when the stack changes.
+    personalizedAll: ["feed", "personalized"] as const,
     personalized: (userId: string, params: object) =>
       ["feed", "personalized", userId, params] as const,
   },
@@ -20,6 +23,7 @@ export const queryKeys = {
   },
 
   technologies: {
+    all: ["technologies"] as const,
     list: (params: object) => ["technologies", params] as const,
   },
 };

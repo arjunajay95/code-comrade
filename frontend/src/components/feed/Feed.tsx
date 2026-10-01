@@ -16,6 +16,7 @@ import { FeedItemRow } from "./FeedItemRow";
 import { FeedItemSkeleton } from "./FeedItemSkeleton";
 import { FeedPagination } from "./FeedPagination";
 import { FeedTabs } from "./FeedTabs";
+import { useUiStore } from "@/stores/uiStore";
 
 const PAGE_SIZE = 10;
 
@@ -58,6 +59,7 @@ export function Feed() {
   const technologies = useFeedStore((state) => state.technologies);
   const resetCount = useFeedStore((state) => state.resetCount);
   const clearFilters = useFeedStore((state) => state.clearFilters);
+  const openStackPicker = useUiStore((state) => state.openStackPicker);
 
   // The public feed shows while Clerk is still loading, so visitors who are not
   // signed in, which is most of them, never wait on it. Signed-in users switch
@@ -117,11 +119,21 @@ export function Feed() {
           </>
         ) : signedIn ? (
           <>
-            <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-              {hasNoStack
-                ? "You have not added any technologies yet, so this feed is ordered by recency. Add your stack to rank submissions by how well they match it."
-                : "Ranked by how many of a submission's technologies are in your stack, and how recent it is. Green tags match yours."}
-            </p>
+            <div className="flex flex-col gap-2 rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+              <p>
+                {hasNoStack
+                  ? "You have not added any technologies yet, so this feed is ordered by recency. Add your stack to rank submissions by how well they match it."
+                  : "Ranked by how many of a submission's technologies are in your stack, and how recent it is. Green tags match yours."}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                onClick={openStackPicker}
+              >
+                {hasNoStack ? "Add your technologies" : "Edit stack"}
+              </Button>
+            </div>
             <FeedResults
               state={toListState(forYouFeed)}
               page={page}

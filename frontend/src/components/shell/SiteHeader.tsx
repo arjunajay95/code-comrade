@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Show, UserButton } from "@clerk/nextjs";
+import { Show } from "@clerk/nextjs";
+import { UserMenu } from "./UserMenu";
 import { buttonVariants } from "@/components/ui/button";
 import { KarmaBadge } from "./KarmaBadge";
 import { ThemeToggle } from "./ThemeToggle";
@@ -25,8 +26,8 @@ export function SiteHeader() {
 
         <Show when="signed-in">
           <KarmaBadge />
-          {/* Clerk's avatar menu: manage account and sign out. */}
-          <UserButton />
+          {/* Clerk's avatar menu, with an extra item for editing the stack. */}
+          <UserMenu />
         </Show>
       </div>
     </header>
