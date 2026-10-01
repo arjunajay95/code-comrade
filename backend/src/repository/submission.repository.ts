@@ -130,10 +130,13 @@ export const submissionRepository = {
     return { items, total };
   },
 
-  // The personalized feed's candidate window: the newest submissions, in
-  // one query, with the same fields as a public feed item.
-  listRecentWindow(size: number) {
+  // The personalized feed's candidate window: the newest submissions not
+  // written by the given user, in one query, with the same fields as a
+  // public feed item. Excluding here, rather than after scoring, keeps the
+  // window a full FEED_WINDOW of submissions the user could act on.
+  listRecentWindow(size: number, excludeAuthorId: number) {
     return prisma.submission.findMany({
+      where: { authorId: { not: excludeAuthorId } },
       orderBy: [...newestFirst],
       take: size,
       select: feedItemSelect,

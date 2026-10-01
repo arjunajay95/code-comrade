@@ -53,7 +53,7 @@ export const feedService = {
   ) {
     const [techIds, window] = await Promise.all([
       userRepository.findTechnologyIds(userId),
-      submissionRepository.listRecentWindow(FEED_WINDOW),
+      submissionRepository.listRecentWindow(FEED_WINDOW, userId),
     ]);
 
     const stack = new Set(techIds);
