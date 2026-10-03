@@ -236,10 +236,14 @@ jobs:
           DATABASE_URL: postgresql://unused:unused@localhost:5432/unused
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/codecomrade_test
           ALLOWED_ORIGINS: http://localhost:3000
-          # Placeholders, not credentials. No test calls Clerk yet.
+          # The app's own keys stay placeholders. The suite uses the _TEST keys
+          # of a dedicated Clerk application, never the live one.
           # gitleaks:allow marks each line as a reviewed false positive.
           CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk # gitleaks:allow
           CLERK_SECRET_KEY: sk_test_placeholder # gitleaks:allow
+          CLERK_PUBLISHABLE_KEY_TEST: ${{ secrets.CLERK_PUBLISHABLE_KEY_TEST }}
+          CLERK_SECRET_KEY_TEST: ${{ secrets.CLERK_SECRET_KEY_TEST }}
+          CLERK_TEST_USER_IDS: ${{ secrets.CLERK_TEST_USER_IDS }}
         run: npm run test:coverage
 
       # The HTML report, downloadable from the run page, for seeing exactly
