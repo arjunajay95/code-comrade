@@ -108,11 +108,11 @@ jobs:
 
       - name: Audit backend dependencies
         working-directory: backend
-        run: npm audit --audit-level=high
+        run: node ../.github/scripts/auditGate.mjs
 
       - name: Audit frontend dependencies
         working-directory: frontend
-        run: npm audit --audit-level=high
+        run: node ../.github/scripts/auditGate.mjs
 
   gitleaks:
     name: Secret scanning
