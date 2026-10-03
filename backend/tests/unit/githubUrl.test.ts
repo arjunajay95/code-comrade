@@ -37,6 +37,9 @@ const MORE_REJECTIONS: [string, string][] = [
   ["https://github.com/./r", "dot as owner"],
   ["https://github.com/o/.", "dot as repo"],
   ["https://github.com/o/..", "dot-dot as repo"],
+  ["https://github.com/o/r.git", "clone URL suffix"],
+  ["https://github.com/o/r.GIT", "clone URL suffix, uppercase"],
+  ["https://github.com/o/r\t", "trailing tab"],
 ];
 
 describe("parseGithubUrl rejects", () => {

@@ -17,6 +17,11 @@ export interface ParsedGithubUrl {
 const isDotSegment = (segment: string): boolean =>
   segment === "." || segment === "..";
 
+// A repository page URL never ends in .git. That suffix is the clone URL form
+// (https://github.com/o/r.git), which people paste from GitHub's Code button.
+// Rejecting it keeps the stored URL equal to the page URL.
+const hasCloneSuffix = (repo: string): boolean => /\.git$/i.test(repo);
+
 // Returns null for anything that is not exactly https://github.com/{owner}/{repo}.
 // The owner and repo are stored as separate columns and are what every
 // outbound request is built from. The user's string is never a request target.
@@ -28,7 +33,8 @@ export const parseGithubUrl = (input: string): ParsedGithubUrl | null => {
     string,
     string,
   ];
-  if (isDotSegment(owner) || isDotSegment(repo)) return null;
+  if (isDotSegment(owner) || isDotSegment(repo) || hasCloneSuffix(repo))
+    return null;
 
   return { owner, repo, url: `${PREFIX}${owner}/${repo}` };
 };
