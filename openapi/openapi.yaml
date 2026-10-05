@@ -382,6 +382,57 @@ paths:
           $ref: "#/components/responses/TooManyRequests"
         "500":
           $ref: "#/components/responses/InternalError"
+    put:
+      tags: [Submissions]
+      operationId: updateSubmission
+      summary: Edit own review request
+      description: >
+        Replaces the four editable fields of a submission: title, description,
+        repository URL and technologies. All four are required. Only the author
+        may edit it. Criteria cannot be changed and are not accepted at all,
+        because existing ratings point at them. When the repository URL
+        changes, the cached repository snapshot is cleared and fetched again
+        later. Returns the updated submission in the same shape as the detail
+        endpoint. Subject to the write rate limit. Does not use the
+        Idempotency-Key header, since replaying an edit changes nothing, and the
+        header is ignored.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1, maximum: 2147483647 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSubmissionRequest"
+      responses:
+        "200":
+          description: The updated submission.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionDetailResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /feed:
     get:
@@ -811,6 +862,43 @@ components:
             minLength: 1
             maxLength: 40
 
+    UpdateSubmissionRequest:
+      type: object
+      # Exactly these four fields, all required, because PUT replaces them.
+      # Criteria are absent on purpose: they are locked once ratings point at
+      # them, so sending them is rejected like any other unknown field. So are
+      # authorId and karma (D-11). Text is trimmed before the limits apply.
+      additionalProperties: false
+      required: [title, description, githubUrl, technologies]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 100
+        description:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        githubUrl:
+          type: string
+          maxLength: 200
+          description: >
+            Exactly https://github.com/{owner}/{repo}, with the same rules as
+            when posting. Changing it clears the cached repository snapshot.
+            Any other shape is rejected with 400 INVALID_REPO_URL.
+        technologies:
+          type: array
+          minItems: 1
+          maxItems: 8
+          description: >
+            Replaces the submission's technologies. Names are trimmed,
+            lowercased and de-duplicated, and the limits apply after that.
+            Unknown names are created.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 40
+
     SubmissionDetailResponse:
       type: object
       required: [success, data]
@@ -1079,6 +1167,22 @@ components:
             error:
               code: CONFLICT
               message: That username is already taken
+              requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
+
+    Forbidden:
+      description: The caller is signed in but may not do this, such as editing someone else's submission.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            success: false
+            error:
+              code: FORBIDDEN
+              message: You can only edit your own submissions
               requestId: 3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b
 
     NotFound:

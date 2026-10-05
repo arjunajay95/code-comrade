@@ -191,7 +191,11 @@ export interface paths {
          * @description A submission with its criteria, every review, and its repository snapshot when one exists. Public.
          */
         get: operations["getSubmission"];
-        put?: never;
+        /**
+         * Edit own review request
+         * @description Replaces the four editable fields of a submission: title, description, repository URL and technologies. All four are required. Only the author may edit it. Criteria cannot be changed and are not accepted at all, because existing ratings point at them. When the repository URL changes, the cached repository snapshot is cleared and fetched again later. Returns the updated submission in the same shape as the detail endpoint. Subject to the write rate limit. Does not use the Idempotency-Key header, since replaying an edit changes nothing, and the header is ignored.
+         */
+        put: operations["updateSubmission"];
         post?: never;
         delete?: never;
         options?: never;
@@ -380,6 +384,14 @@ export interface components {
                 label: string;
             }[];
             /** @description Names are trimmed, lowercased and de-duplicated, and the limits apply after that. Unknown names are created. */
+            technologies: string[];
+        };
+        UpdateSubmissionRequest: {
+            title: string;
+            description: string;
+            /** @description Exactly https://github.com/{owner}/{repo}, with the same rules as when posting. Changing it clears the cached repository snapshot. Any other shape is rejected with 400 INVALID_REPO_URL. */
+            githubUrl: string;
+            /** @description Replaces the submission's technologies. Names are trimmed, lowercased and de-duplicated, and the limits apply after that. Unknown names are created. */
             technologies: string[];
         };
         SubmissionDetailResponse: {
@@ -595,6 +607,26 @@ export interface components {
                  *       "error": {
                  *         "code": "CONFLICT",
                  *         "message": "That username is already taken",
+                 *         "requestId": "3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b"
+                 *       }
+                 *     }
+                 */
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        /** @description The caller is signed in but may not do this, such as editing someone else's submission. */
+        Forbidden: {
+            headers: {
+                "X-Request-Id": components["headers"]["XRequestId"];
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "success": false,
+                 *       "error": {
+                 *         "code": "FORBIDDEN",
+                 *         "message": "You can only edit your own submissions",
                  *         "requestId": "3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b"
                  *       }
                  *     }
@@ -949,6 +981,40 @@ export interface operations {
             404: components["responses"]["NotFound"];
             429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
+        };
+    };
+    updateSubmission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSubmissionRequest"];
+            };
+        };
+        responses: {
+            /** @description The updated submission. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionDetailResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     listFeed: {

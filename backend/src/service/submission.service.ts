@@ -1,5 +1,12 @@
-import { BadRequestError, NotFoundError } from "../errors/index.js";
-import type { CreateSubmissionBody } from "../models/submission.schemas.js";
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from "../errors/index.js";
+import type {
+  CreateSubmissionBody,
+  UpdateSubmissionBody,
+} from "../models/submission.schemas.js";
 import { submissionRepository } from "../repository/submission.repository.js";
 import { parseGithubUrl } from "../utils/githubUrl.js";
 
@@ -63,6 +70,20 @@ const toSubmissionDetail = (row: DetailRow) => ({
     : null,
 });
 
+// The strict URL parser runs here and not in the schema, so a rejected URL
+// answers INVALID_REPO_URL and not VALIDATION_ERROR (D-10). The message is
+// fixed text and never repeats the submitted string back.
+const parseRepoUrlOrThrow = (input: string) => {
+  const repo = parseGithubUrl(input);
+  if (!repo) {
+    throw new BadRequestError(
+      "githubUrl must be a repository URL like https://github.com/owner/repo",
+      "INVALID_REPO_URL",
+    );
+  }
+  return repo;
+};
+
 export const submissionService = {
   async getById(id: number) {
     const row = await submissionRepository.findDetailById(id);
@@ -72,17 +93,8 @@ export const submissionService = {
     return toSubmissionDetail(row);
   },
 
-  // The strict URL parser runs here and not in the schema, so a rejected URL
-  // answers INVALID_REPO_URL and not VALIDATION_ERROR (D-10). The message is
-  // fixed text and never repeats the submitted string back.
   async create(authorId: number, input: CreateSubmissionBody) {
-    const repo = parseGithubUrl(input.githubUrl);
-    if (!repo) {
-      throw new BadRequestError(
-        "githubUrl must be a repository URL like https://github.com/owner/repo",
-        "INVALID_REPO_URL",
-      );
-    }
+    const repo = parseRepoUrlOrThrow(input.githubUrl);
 
     const id = await submissionRepository.createWithCriteria({
       authorId,
@@ -98,6 +110,38 @@ export const submissionService = {
 
     // The same shape as GET /submissions/:id, so the client can show the new
     // submission without a second request.
+    return submissionService.getById(id);
+  },
+
+  // Ownership lives here, on local integer ids (AUTHORIZATION_MATRIX section
+  // 3). The 404 always comes before the 403, so the API never confirms a
+  // submission exists to someone who may not edit it. The URL is parsed after
+  // both, so a caller who may not edit learns nothing from the URL check.
+  async update(id: number, userId: number, input: UpdateSubmissionBody) {
+    const existing = await submissionRepository.findForEdit(id);
+    if (!existing) {
+      throw new NotFoundError("Submission not found", "NOT_FOUND");
+    }
+    if (existing.authorId !== userId) {
+      throw new ForbiddenError(
+        "You can only edit your own submissions",
+        "FORBIDDEN",
+      );
+    }
+
+    const repo = parseRepoUrlOrThrow(input.githubUrl);
+
+    await submissionRepository.updateOwn(id, {
+      title: input.title,
+      description: input.description,
+      githubUrl: repo.url,
+      githubOwner: repo.owner,
+      githubRepo: repo.repo,
+      technologies: input.technologies,
+      // The cached snapshot describes the old repository once the URL moves.
+      clearSnapshot: repo.url !== existing.githubUrl,
+    });
+
     return submissionService.getById(id);
   },
 };
