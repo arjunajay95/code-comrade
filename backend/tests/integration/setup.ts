@@ -15,6 +15,12 @@ process.env.NODE_ENV = "test";
 // Only errors reach the console during tests, so failures stay readable.
 process.env.LOG_LEVEL = "error";
 
+// The write limiter allows 5 requests a minute, and a suite sends far more
+// than that from one address. This lifts the cap for test runs only, which is
+// what the variable is for. The one test that checks the real limiter sets it
+// back to false before it loads the app.
+process.env.RATE_LIMIT_WRITE_TEST = "true";
+
 // The app verifies tokens with these keys and the tests mint them with the
 // same client, so both use the dedicated test application. globalSetup has
 // already checked they differ from the app's own keys.

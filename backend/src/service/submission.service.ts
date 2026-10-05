@@ -1,5 +1,7 @@
-import { NotFoundError } from "../errors/index.js";
+import { BadRequestError, NotFoundError } from "../errors/index.js";
+import type { CreateSubmissionBody } from "../models/submission.schemas.js";
 import { submissionRepository } from "../repository/submission.repository.js";
+import { parseGithubUrl } from "../utils/githubUrl.js";
 
 type DetailRow = NonNullable<
   Awaited<ReturnType<typeof submissionRepository.findDetailById>>
@@ -68,5 +70,34 @@ export const submissionService = {
       throw new NotFoundError("Submission not found", "NOT_FOUND");
     }
     return toSubmissionDetail(row);
+  },
+
+  // The strict URL parser runs here and not in the schema, so a rejected URL
+  // answers INVALID_REPO_URL and not VALIDATION_ERROR (D-10). The message is
+  // fixed text and never repeats the submitted string back.
+  async create(authorId: number, input: CreateSubmissionBody) {
+    const repo = parseGithubUrl(input.githubUrl);
+    if (!repo) {
+      throw new BadRequestError(
+        "githubUrl must be a repository URL like https://github.com/owner/repo",
+        "INVALID_REPO_URL",
+      );
+    }
+
+    const id = await submissionRepository.createWithCriteria({
+      authorId,
+      title: input.title,
+      description: input.description,
+      // Rebuilt from the parsed parts, never the submitted string (V-Q7).
+      githubUrl: repo.url,
+      githubOwner: repo.owner,
+      githubRepo: repo.repo,
+      criteria: input.criteria.map((criterion) => criterion.label),
+      technologies: input.technologies,
+    });
+
+    // The same shape as GET /submissions/:id, so the client can show the new
+    // submission without a second request.
+    return submissionService.getById(id);
   },
 };

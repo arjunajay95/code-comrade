@@ -159,6 +159,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Post a review request
+         * @description Creates a submission with its evaluation criteria and technology tags in one transaction. The author is always the signed-in user. The repository URL must be exactly https://github.com/{owner}/{repo}. Criteria are fixed at creation and cannot be edited afterwards. Returns the new submission in the same shape as the detail endpoint. Subject to the write rate limit.
+         */
+        post: operations["createSubmission"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/submissions/{id}": {
         parameters: {
             query?: never;
@@ -349,6 +369,18 @@ export interface components {
             success: true;
             data: components["schemas"]["Technology"][];
             meta: components["schemas"]["PaginationMeta"];
+        };
+        CreateSubmissionRequest: {
+            title: string;
+            description: string;
+            /** @description Exactly https://github.com/{owner}/{repo}: the https scheme, the host github.com in lowercase, and no trailing slash, port, query, fragment or .git suffix. Surrounding whitespace is trimmed. Any other shape is rejected with 400 INVALID_REPO_URL. */
+            githubUrl: string;
+            /** @description What reviewers will rate. Fixed once the submission exists. Labels must be unique within the submission, compared case-insensitively. */
+            criteria: {
+                label: string;
+            }[];
+            /** @description Names are trimmed, lowercased and de-duplicated, and the limits apply after that. Unknown names are created. */
+            technologies: string[];
         };
         SubmissionDetailResponse: {
             /** @constant */
@@ -860,6 +892,36 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
+        };
+    };
+    createSubmission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSubmissionRequest"];
+            };
+        };
+        responses: {
+            /** @description The new submission. */
+            201: {
+                headers: {
+                    "X-Request-Id": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionDetailResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getSubmission: {

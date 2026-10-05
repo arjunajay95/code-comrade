@@ -6,6 +6,20 @@ export interface FeedFilters {
   technologies?: string[];
 }
 
+// Everything a new submission is created from. The service has already run
+// the URL parser, so the owner and repository arrive separately and the URL
+// is the one rebuilt from them.
+export interface NewSubmission {
+  authorId: number;
+  title: string;
+  description: string;
+  githubUrl: string;
+  githubOwner: string;
+  githubRepo: string;
+  criteria: string[];
+  technologies: string[];
+}
+
 // Shared by the public and personalized feeds, so both return items with the
 // same fields.
 const feedItemSelect = {
@@ -140,6 +154,43 @@ export const submissionRepository = {
       orderBy: [...newestFirst],
       take: size,
       select: feedItemSelect,
+    });
+  },
+
+  // Creates a submission, its criteria and its technology links in one
+  // transaction, so a failure leaves nothing half written. Criteria are
+  // created here and never again: ratings point at them by id, so they lock
+  // at creation (INV-4). Returns only the new id, because the service reads
+  // the row back through the one detail query.
+  async createWithCriteria(input: NewSubmission): Promise<number> {
+    return prisma.$transaction(async (tx) => {
+      // Creates any technology that does not exist yet. skipDuplicates makes
+      // this safe when two requests add the same new tag at the same moment:
+      // the loser of that race just skips it (D-17). connectOrCreate would
+      // look first and insert second, and could lose that race with a unique
+      // violation.
+      await tx.technology.createMany({
+        data: input.technologies.map((name) => ({ name })),
+        skipDuplicates: true,
+      });
+
+      const created = await tx.submission.create({
+        data: {
+          title: input.title,
+          description: input.description,
+          githubUrl: input.githubUrl,
+          githubOwner: input.githubOwner,
+          githubRepo: input.githubRepo,
+          authorId: input.authorId,
+          criteria: { create: input.criteria.map((label) => ({ label })) },
+          technologies: {
+            connect: input.technologies.map((name) => ({ name })),
+          },
+        },
+        select: { id: true },
+      });
+
+      return created.id;
     });
   },
 };

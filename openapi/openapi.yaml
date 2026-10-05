@@ -309,6 +309,47 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 
+  /submissions:
+    post:
+      tags: [Submissions]
+      operationId: createSubmission
+      summary: Post a review request
+      description: >
+        Creates a submission with its evaluation criteria and technology tags
+        in one transaction. The author is always the signed-in user. The
+        repository URL must be exactly https://github.com/{owner}/{repo}.
+        Criteria are fixed at creation and cannot be edited afterwards. Returns
+        the new submission in the same shape as the detail endpoint. Subject to
+        the write rate limit.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubmissionRequest"
+      responses:
+        "201":
+          description: The new submission.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionDetailResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
   /submissions/{id}:
     get:
       tags: [Submissions]
@@ -718,6 +759,57 @@ components:
             $ref: "#/components/schemas/Technology"
         meta:
           $ref: "#/components/schemas/PaginationMeta"
+
+    CreateSubmissionRequest:
+      type: object
+      # Only these five fields. Anything else, authorId or karma included, is
+      # rejected with 400 (D-11). Text is trimmed before the limits apply.
+      additionalProperties: false
+      required: [title, description, githubUrl, criteria, technologies]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 100
+        description:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        githubUrl:
+          type: string
+          maxLength: 200
+          description: >
+            Exactly https://github.com/{owner}/{repo}: the https scheme, the
+            host github.com in lowercase, and no trailing slash, port, query,
+            fragment or .git suffix. Surrounding whitespace is trimmed. Any
+            other shape is rejected with 400 INVALID_REPO_URL.
+        criteria:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: >
+            What reviewers will rate. Fixed once the submission exists. Labels
+            must be unique within the submission, compared case-insensitively.
+          items:
+            type: object
+            required: [label]
+            additionalProperties: false
+            properties:
+              label:
+                type: string
+                minLength: 2
+                maxLength: 60
+        technologies:
+          type: array
+          minItems: 1
+          maxItems: 8
+          description: >
+            Names are trimmed, lowercased and de-duplicated, and the limits
+            apply after that. Unknown names are created.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 40
 
     SubmissionDetailResponse:
       type: object
