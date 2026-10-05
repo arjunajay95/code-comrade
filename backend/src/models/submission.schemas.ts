@@ -5,7 +5,7 @@ import { TECHNOLOGY_NAME_MAX_LENGTH } from "./user.schemas.js";
 // PostgreSQL's integer type tops out at 2147483647. An id beyond it could
 // never exist, and passing it to the database would raise an error rather
 // than a clean 404, so it is rejected here as a 400.
-const MAX_DB_INT = 2_147_483_647;
+export const MAX_DB_INT = 2_147_483_647;
 
 // Product limits for a submission. They are held here and nowhere else: no
 // CHECK constraint backs them, because they are not integrity rules.
@@ -22,7 +22,7 @@ export const SUBMISSION_TECHNOLOGIES_MIN_COUNT = 1;
 export const SUBMISSION_TECHNOLOGIES_MAX_COUNT = 8;
 
 // Shared by every route with a submission id in its path.
-const submissionIdParams = z
+export const submissionIdParams = z
   .object({
     id: z.coerce.number().int().positive().max(MAX_DB_INT),
   })

@@ -217,6 +217,16 @@ export const submissionRepository = {
     });
   },
 
+  // What a review needs to decide: who wrote the submission, so the author
+  // cannot review it, and which criteria exist, so the ratings can be
+  // checked against them.
+  findForReview(id: number) {
+    return prisma.submission.findUnique({
+      where: { id },
+      select: { id: true, authorId: true, criteria: { select: { id: true } } },
+    });
+  },
+
   // Applies an edit in one transaction, so a failure leaves nothing half
   // written: the new technologies, the updated fields and the snapshot
   // deletion all happen or none of them does. Throws when the submission does

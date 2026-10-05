@@ -1,7 +1,9 @@
+import { reviewController } from "../controller/review.controller.js";
 import { submissionController } from "../controller/submission.controller.js";
 import { requireAuth } from "../middlewares/requireAuth.js";
 import { writeLimiter } from "../middlewares/rateLimiter.js";
 import { validate } from "../middlewares/validate.js";
+import { createReviewSchema } from "../models/review.schemas.js";
 import {
   createSubmissionSchema,
   getSubmissionSchema,
@@ -39,4 +41,16 @@ submissionRoutes.put(
   writeLimiter,
   validate(updateSubmissionSchema),
   catchAsync(submissionController.update),
+);
+
+// The review route: the karma path (Workflow B). The same guard chain as
+// POST /submissions, with the idempotency middleware joining it when it is
+// built. Self-review, criteria checks and duplicate handling live in the
+// service and the repository, not here.
+submissionRoutes.post(
+  "/:id/reviews",
+  requireAuth,
+  writeLimiter,
+  validate(createReviewSchema),
+  catchAsync(reviewController.create),
 );

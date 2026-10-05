@@ -203,6 +203,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/submissions/{id}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Review a submission
+         * @description Posts a review and awards the reviewer karma in one transaction. The reviewer is always the signed-in user and the karma goes to the reviewer, never to the submission's author. A review rates every criterion of the submission exactly once, so ratings for a subset, or for criteria of another submission, are rejected with 400 CRITERIA_MISMATCH. The author cannot review their own submission (403), and a second review of the same submission by the same person is rejected with 409. Returns the stored review and the reviewer's new karma total, so a client can update its karma display without another request. Subject to the write rate limit.
+         */
+        post: operations["createReview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/feed": {
         parameters: {
             query?: never;
@@ -448,6 +468,36 @@ export interface components {
                 };
             };
         };
+        CreateReviewRequest: {
+            feedback: string;
+            /** @description One entry per criterion of the submission, exactly. A criterion cannot appear twice. Ratings that do not match the submission's criteria are rejected with 400 CRITERIA_MISMATCH. */
+            ratings: {
+                criterionId: number;
+                rating: number;
+            }[];
+        };
+        CreateReviewResponse: {
+            /** @constant */
+            success: true;
+            data: {
+                review: {
+                    id: number;
+                    submissionId: number;
+                    feedback: string;
+                    /** Format: date-time */
+                    createdAt: string;
+                    /** @description The reviewer's username */
+                    reviewer: string;
+                    /** @description Ordered by criterion id. */
+                    ratings: {
+                        criterionId: number;
+                        rating: number;
+                    }[];
+                };
+                /** @description The reviewer's karma total after this review. */
+                reviewerKarma: number;
+            };
+        };
         FeedItem: {
             id: number;
             title: string;
@@ -594,7 +644,7 @@ export interface components {
                 "application/json": components["schemas"]["ErrorEnvelope"];
             };
         };
-        /** @description The request conflicts with existing data, such as a username that is already taken. */
+        /** @description The request conflicts with existing data, such as a username that is already taken or a submission the caller has already reviewed. */
         Conflict: {
             headers: {
                 "X-Request-Id": components["headers"]["XRequestId"];
@@ -1012,6 +1062,41 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createReview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description The stored review and the reviewer's new karma total. */
+            201: {
+                headers: {
+                    "X-Request-Id": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateReviewResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
             429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
             503: components["responses"]["ServiceUnavailable"];

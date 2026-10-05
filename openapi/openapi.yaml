@@ -434,6 +434,62 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
+  /submissions/{id}/reviews:
+    post:
+      tags: [Submissions]
+      operationId: createReview
+      summary: Review a submission
+      description: >
+        Posts a review and awards the reviewer karma in one transaction. The
+        reviewer is always the signed-in user and the karma goes to the
+        reviewer, never to the submission's author. A review rates every
+        criterion of the submission exactly once, so ratings for a subset, or
+        for criteria of another submission, are rejected with 400
+        CRITERIA_MISMATCH. The author cannot review their own submission
+        (403), and a second review of the same submission by the same person is
+        rejected with 409. Returns the stored review and the reviewer's new
+        karma total, so a client can update its karma display without another
+        request. Subject to the write rate limit.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1, maximum: 2147483647 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReviewRequest"
+      responses:
+        "201":
+          description: The stored review and the reviewer's new karma total.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateReviewResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
   /feed:
     get:
       tags: [Feed]
@@ -980,6 +1036,69 @@ components:
                     lastPushedAt: { type: [string, "null"], format: date-time }
                     fetchedAt: { type: string, format: date-time }
 
+    CreateReviewRequest:
+      type: object
+      # Exactly these two fields. Anything else, reviewerId and karma included,
+      # is rejected with 400 (D-11). Feedback is trimmed before the limits apply.
+      additionalProperties: false
+      required: [feedback, ratings]
+      properties:
+        feedback:
+          type: string
+          minLength: 20
+          maxLength: 2000
+        ratings:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: >
+            One entry per criterion of the submission, exactly. A criterion
+            cannot appear twice. Ratings that do not match the submission's
+            criteria are rejected with 400 CRITERIA_MISMATCH.
+          items:
+            type: object
+            required: [criterionId, rating]
+            additionalProperties: false
+            properties:
+              criterionId: { type: integer, minimum: 1, maximum: 2147483647 }
+              rating: { type: integer, minimum: 1, maximum: 5 }
+
+    CreateReviewResponse:
+      type: object
+      required: [success, data]
+      additionalProperties: false
+      properties:
+        success: { const: true }
+        data:
+          type: object
+          required: [review, reviewerKarma]
+          additionalProperties: false
+          properties:
+            review:
+              type: object
+              required: [id, submissionId, feedback, createdAt, reviewer, ratings]
+              additionalProperties: false
+              properties:
+                id: { type: integer }
+                submissionId: { type: integer }
+                feedback: { type: string }
+                createdAt: { type: string, format: date-time }
+                reviewer: { type: string, description: The reviewer's username }
+                ratings:
+                  type: array
+                  description: Ordered by criterion id.
+                  items:
+                    type: object
+                    required: [criterionId, rating]
+                    additionalProperties: false
+                    properties:
+                      criterionId: { type: integer }
+                      rating: { type: integer, minimum: 1, maximum: 5 }
+            reviewerKarma:
+              type: integer
+              minimum: 0
+              description: The reviewer's karma total after this review.
+
     FeedItem:
       type: object
       required: [id, title, description, githubUrl, createdAt, status, author, technologies, reviewCount]
@@ -1154,7 +1273,7 @@ components:
             $ref: "#/components/schemas/ErrorEnvelope"
 
     Conflict:
-      description: The request conflicts with existing data, such as a username that is already taken.
+      description: The request conflicts with existing data, such as a username that is already taken or a submission the caller has already reviewed.
       headers:
         X-Request-Id:
           $ref: "#/components/headers/XRequestId"
