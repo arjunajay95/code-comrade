@@ -170,7 +170,7 @@ export interface paths {
         put?: never;
         /**
          * Post a review request
-         * @description Creates a submission with its evaluation criteria and technology tags in one transaction. The author is always the signed-in user. The repository URL must be exactly https://github.com/{owner}/{repo}. Criteria are fixed at creation and cannot be edited afterwards. Returns the new submission in the same shape as the detail endpoint. Subject to the write rate limit.
+         * @description Creates a submission with its evaluation criteria and technology tags in one transaction. The author is always the signed-in user. The repository URL must be exactly https://github.com/{owner}/{repo}. Criteria are fixed at creation and cannot be edited afterwards. Returns the new submission in the same shape as the detail endpoint. Subject to the write rate limit. Accepts an optional Idempotency-Key header, so a retry after a network failure cannot create a second submission. The same key with the same request returns the original response, the same key with a different request is rejected with 422 IDEMPOTENCY_KEY_REUSED, and a request that is still being processed is rejected with 409 REQUEST_IN_PROGRESS. A key identifies one attempt, so use a new one whenever the request changes.
          */
         post: operations["createSubmission"];
         delete?: never;
@@ -214,7 +214,7 @@ export interface paths {
         put?: never;
         /**
          * Review a submission
-         * @description Posts a review and awards the reviewer karma in one transaction. The reviewer is always the signed-in user and the karma goes to the reviewer, never to the submission's author. A review rates every criterion of the submission exactly once, so ratings for a subset, or for criteria of another submission, are rejected with 400 CRITERIA_MISMATCH. The author cannot review their own submission (403), and a second review of the same submission by the same person is rejected with 409. Returns the stored review and the reviewer's new karma total, so a client can update its karma display without another request. Subject to the write rate limit.
+         * @description Posts a review and awards the reviewer karma in one transaction. The reviewer is always the signed-in user and the karma goes to the reviewer, never to the submission's author. A review rates every criterion of the submission exactly once, so ratings for a subset, or for criteria of another submission, are rejected with 400 CRITERIA_MISMATCH. The author cannot review their own submission (403), and a second review of the same submission by the same person is rejected with 409. Returns the stored review and the reviewer's new karma total, so a client can update its karma display without another request. Subject to the write rate limit. Accepts an optional Idempotency-Key header, so a retry after a network failure cannot award karma twice. The same key with the same request returns the original response, the same key with a different request is rejected with 422 IDEMPOTENCY_KEY_REUSED, and a request that is still being processed is rejected with 409 REQUEST_IN_PROGRESS. A key identifies one attempt, so use a new one whenever the request changes.
          */
         post: operations["createReview"];
         delete?: never;
@@ -644,7 +644,7 @@ export interface components {
                 "application/json": components["schemas"]["ErrorEnvelope"];
             };
         };
-        /** @description The request conflicts with existing data, such as a username that is already taken or a submission the caller has already reviewed. */
+        /** @description The request conflicts with existing data, such as a username that is already taken or a submission the caller has already reviewed. Also returned, with code REQUEST_IN_PROGRESS, when a request with the same Idempotency-Key is still being processed. */
         Conflict: {
             headers: {
                 "X-Request-Id": components["headers"]["XRequestId"];
@@ -684,6 +684,26 @@ export interface components {
                 "application/json": components["schemas"]["ErrorEnvelope"];
             };
         };
+        /** @description The request was understood but cannot be accepted, such as an Idempotency-Key already used for a different request. */
+        Unprocessable: {
+            headers: {
+                "X-Request-Id": components["headers"]["XRequestId"];
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "success": false,
+                 *       "error": {
+                 *         "code": "IDEMPOTENCY_KEY_REUSED",
+                 *         "message": "This Idempotency-Key was already used for a different request",
+                 *         "requestId": "3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b"
+                 *       }
+                 *     }
+                 */
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
         /** @description The requested resource does not exist. */
         NotFound: {
             headers: {
@@ -706,6 +726,8 @@ export interface components {
         };
     };
     parameters: {
+        /** @description Makes a retry of this request safe. Send the same key with the same request after a network failure and the original response comes back instead of the work being done twice. 1 to 128 characters: letters, digits, hyphen and underscore, so a UUID fits. A key identifies one attempt, so use a new one whenever the request changes. The same key for a different request is rejected with 422 IDEMPOTENCY_KEY_REUSED, and a request that is still being processed with 409 REQUEST_IN_PROGRESS. Keys belong to one user and one endpoint. */
+        IdempotencyKey: string;
         Page: number;
         /** @description Above 50 is rejected with 400, never clamped. */
         Limit: number;
@@ -979,7 +1001,10 @@ export interface operations {
     createSubmission: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Makes a retry of this request safe. Send the same key with the same request after a network failure and the original response comes back instead of the work being done twice. 1 to 128 characters: letters, digits, hyphen and underscore, so a UUID fits. A key identifies one attempt, so use a new one whenever the request changes. The same key for a different request is rejected with 422 IDEMPOTENCY_KEY_REUSED, and a request that is still being processed with 409 REQUEST_IN_PROGRESS. Keys belong to one user and one endpoint. */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -1001,6 +1026,8 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["Unprocessable"];
             429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
             503: components["responses"]["ServiceUnavailable"];
@@ -1070,7 +1097,10 @@ export interface operations {
     createReview: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Makes a retry of this request safe. Send the same key with the same request after a network failure and the original response comes back instead of the work being done twice. 1 to 128 characters: letters, digits, hyphen and underscore, so a UUID fits. A key identifies one attempt, so use a new one whenever the request changes. The same key for a different request is rejected with 422 IDEMPOTENCY_KEY_REUSED, and a request that is still being processed with 409 REQUEST_IN_PROGRESS. Keys belong to one user and one endpoint. */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
             path: {
                 id: number;
             };
@@ -1097,6 +1127,7 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+            422: components["responses"]["Unprocessable"];
             429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
             503: components["responses"]["ServiceUnavailable"];

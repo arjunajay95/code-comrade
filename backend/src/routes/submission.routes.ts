@@ -1,5 +1,6 @@
 import { reviewController } from "../controller/review.controller.js";
 import { submissionController } from "../controller/submission.controller.js";
+import { idempotency } from "../middlewares/idempotency.js";
 import { requireAuth } from "../middlewares/requireAuth.js";
 import { writeLimiter } from "../middlewares/rateLimiter.js";
 import { validate } from "../middlewares/validate.js";
@@ -15,13 +16,14 @@ import { createRouter } from "./registry.js";
 export const submissionRoutes = createRouter("/submissions");
 
 // The write limiter sits after requireAuth, so anonymous traffic cannot spend
-// the sensitive budget (D-19). The idempotency middleware joins the chain
-// between the limiter and validate when it is built, on this route and on the
-// review route only.
+// the sensitive budget (D-19). The idempotency middleware sits between the
+// limiter and validate, so a request rejected earlier never consumes a key
+// (D-29). It is on this route and on the review route only.
 submissionRoutes.post(
   "/",
   requireAuth,
   writeLimiter,
+  idempotency,
   validate(createSubmissionSchema),
   catchAsync(submissionController.create),
 );
@@ -43,14 +45,15 @@ submissionRoutes.put(
   catchAsync(submissionController.update),
 );
 
-// The review route: the karma path (Workflow B). The same guard chain as
-// POST /submissions, with the idempotency middleware joining it when it is
-// built. Self-review, criteria checks and duplicate handling live in the
-// service and the repository, not here.
+// The review route: the karma path (Workflow B), with the same guard chain as
+// POST /submissions. Idempotency matters most here, because a retried review
+// must not pay karma twice. Self-review, criteria checks and duplicate handling
+// live in the service and the repository, not here.
 submissionRoutes.post(
   "/:id/reviews",
   requireAuth,
   writeLimiter,
+  idempotency,
   validate(createReviewSchema),
   catchAsync(reviewController.create),
 );
