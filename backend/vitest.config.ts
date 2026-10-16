@@ -1,7 +1,10 @@
 import { defineConfig } from "vitest/config";
+import AuditLastSequencer from "./tests/integration/sequencer.js";
 
 export default defineConfig({
   test: {
+    // Runs the post-suite audit after every other file (see the sequencer).
+    sequence: { sequencer: AuditLastSequencer },
     projects: [
       {
         test: {
@@ -36,8 +39,27 @@ export default defineConfig({
       // Generated code and type declarations are not our logic to measure.
       exclude: ["src/generated/**", "src/**/*.d.ts"],
       reporter: ["text", "html", "lcov"],
-      // No thresholds yet. The scoped thresholds from D-23 are enforced from
-      // Phase 4, once the service and repository layers have their tests.
+      // D-23: thresholds are scoped by path, not global, so the pressure sits
+      // on the layers that hold invariants and transactions and not on thin
+      // wrappers. Each glob is measured on its own, over all the files that
+      // match it, and a global number is deliberately not set. The run fails
+      // when any of these is missed.
+      thresholds: {
+        "src/service/**": { lines: 90, branches: 85 },
+        "src/repository/**": { lines: 90, branches: 85 },
+        "src/utils/feedScoring.ts": {
+          lines: 100,
+          branches: 100,
+          functions: 100,
+          statements: 100,
+        },
+        "src/utils/githubUrl.ts": {
+          lines: 100,
+          branches: 100,
+          functions: 100,
+          statements: 100,
+        },
+      },
     },
   },
 });

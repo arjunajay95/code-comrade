@@ -1,7 +1,7 @@
 // Builders for integration test data. Each test creates exactly what it
 // needs, with generated unique names, so tests never depend on the seed, on
 // each other, or on the order they run in.
-
+import { KARMA_PER_REVIEW } from "../../src/config/constants.js";
 import { prisma } from "../../src/config/prisma.js";
 
 let counter = 0;
@@ -58,24 +58,34 @@ export const createSubmission = (
 };
 
 // One rating per criterion, in criteria order, so every review is complete
-// the way V-Q3 requires.
-export const createReview = (
+// the way V-Q3 requires. The reviewer is paid in the same transaction, so a
+// fixture review obeys the karma equation like a real one (V-Q1): a review
+// that exists without its karma would fail the audit that runs after the suite.
+export const createReview = async (
   submission: { id: number; criteria: { id: number }[] },
   reviewerId: number,
   ratings: number[],
   createdAt?: Date,
-) =>
-  prisma.review.create({
-    data: {
-      feedback: "Feedback from an integration test.",
-      reviewerId,
-      submissionId: submission.id,
-      createdAt,
-      ratings: {
-        create: submission.criteria.map((criterion, i) => ({
-          criterionId: criterion.id,
-          rating: ratings[i] ?? 3,
-        })),
+) => {
+  const [review] = await prisma.$transaction([
+    prisma.review.create({
+      data: {
+        feedback: "Feedback from an integration test.",
+        reviewerId,
+        submissionId: submission.id,
+        createdAt,
+        ratings: {
+          create: submission.criteria.map((criterion, i) => ({
+            criterionId: criterion.id,
+            rating: ratings[i] ?? 3,
+          })),
+        },
       },
-    },
-  });
+    }),
+    prisma.user.update({
+      where: { id: reviewerId },
+      data: { karma: { increment: KARMA_PER_REVIEW } },
+    }),
+  ]);
+  return review;
+};
