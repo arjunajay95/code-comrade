@@ -4,6 +4,7 @@ import {
   canonicalJson,
   endpointOf,
   hashRequest,
+  resolvedPathOf,
 } from "../../src/utils/idempotency.js";
 
 describe("IDEMPOTENCY_KEY_PATTERN", () => {
@@ -216,5 +217,29 @@ describe("endpointOf", () => {
     expect(endpointOf(req({ route: { path: 42 } }))).toBe(
       "POST /api/v1/submissions/7/reviews",
     );
+  });
+});
+
+describe("resolvedPathOf", () => {
+  it("is the mount prefix plus the real path, ids included", () => {
+    expect(
+      resolvedPathOf({ baseUrl: "/api/v1/submissions", path: "/7/reviews" }),
+    ).toBe("/api/v1/submissions/7/reviews");
+  });
+
+  it("drops the trailing slash of a collection route, so both spellings hash alike", () => {
+    expect(resolvedPathOf({ baseUrl: "/api/v1/submissions", path: "/" })).toBe(
+      "/api/v1/submissions",
+    );
+    expect(resolvedPathOf({ baseUrl: "/api/v1/submissions/", path: "/" })).toBe(
+      "/api/v1/submissions",
+    );
+    expect(
+      resolvedPathOf({ baseUrl: "/api/v1/submissions", path: "/7/reviews/" }),
+    ).toBe("/api/v1/submissions/7/reviews");
+  });
+
+  it("is a single slash for the root", () => {
+    expect(resolvedPathOf({ baseUrl: "", path: "/" })).toBe("/");
   });
 });

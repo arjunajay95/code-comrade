@@ -287,6 +287,31 @@ describe("Idempotency-Key on the POST routes", () => {
       expect(await reviewsBy(reviewer.id)).toBe(1);
     });
 
+    it("treats a trailing slash as the same request, because Express routes both alike", async () => {
+      const reviewer = await reviewerOn("b");
+      const submission = await newSubmission();
+      const body = reviewFor(submission);
+      const key = unique("key");
+
+      const plain = await postReview(
+        reviewer.authorization,
+        submission.id,
+        body,
+        key,
+      );
+      const slashed = await request(app)
+        .post(`/api/v1/submissions/${submission.id}/reviews/`)
+        .set("Authorization", reviewer.authorization)
+        .set("Idempotency-Key", key)
+        .send(body);
+
+      expect(plain.status).toBe(201);
+      expect(slashed.status).toBe(201);
+      expect(slashed.body).toEqual(plain.body);
+      expect(await reviewsBy(reviewer.id)).toBe(1);
+      expect(await karmaOf(reviewer.id)).toBe(KARMA_PER_REVIEW);
+    });
+
     it("stores the response under the route pattern", async () => {
       const reviewer = await reviewerOn("b");
       const submission = await newSubmission();

@@ -1,7 +1,10 @@
 import { defineConfig } from "vitest/config";
+import AuditLastSequencer from "./tests/integration/sequencer.js";
 
 export default defineConfig({
   test: {
+    // Runs the post-suite audit after every other file (see the sequencer).
+    sequence: { sequencer: AuditLastSequencer },
     projects: [
       {
         test: {

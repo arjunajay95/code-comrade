@@ -44,6 +44,14 @@ export const hashRequest = (
     .update(`${method}\n${path}\n${canonicalJson(body)}`)
     .digest("hex");
 
+// The path the request was sent to: the mount prefix and the real ids, and no
+// trailing slash. Express routes "/submissions" and "/submissions/" to the same
+// handler, so they must hash the same, or a retry through the other spelling
+// would be refused as a different request.
+export const resolvedPathOf = (
+  req: Pick<Request, "baseUrl" | "path">,
+): string => `${req.baseUrl}${req.path}`.replace(/\/+$/, "") || "/";
+
 // The method plus the route pattern, with the parameters left in:
 // "POST /api/v1/submissions/:id/reviews". A key is scoped to this, so the same
 // key on two different endpoints is two different keys. The pattern comes

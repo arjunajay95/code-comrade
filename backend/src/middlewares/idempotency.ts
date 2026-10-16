@@ -6,6 +6,7 @@ import {
   IDEMPOTENCY_KEY_PATTERN,
   endpointOf,
   hashRequest,
+  resolvedPathOf,
 } from "../utils/idempotency.js";
 import { requireUser } from "../utils/requireUser.js";
 
@@ -75,7 +76,7 @@ export const idempotency = catchAsync(async (req, res, next) => {
     userId: user.id,
     endpoint: endpointOf(req),
     key,
-    requestHash: hashRequest(req.method, `${req.baseUrl}${req.path}`, req.body),
+    requestHash: hashRequest(req.method, resolvedPathOf(req), req.body),
   });
 
   if (outcome.kind === "replay") {
