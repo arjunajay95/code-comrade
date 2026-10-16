@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Show } from "@clerk/nextjs";
+import { Plus } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { buttonVariants } from "@/components/ui/button";
 import { KarmaBadge } from "./KarmaBadge";
@@ -25,6 +26,16 @@ export function SiteHeader() {
         </Show>
 
         <Show when="signed-in">
+          <Link
+            href="/submissions/new"
+            aria-label="Post a request"
+            className={buttonVariants({ size: "sm" })}
+          >
+            <Plus aria-hidden />
+            {/* Icon only on the narrowest screens, so the header fits at
+                320px. */}
+            <span className="hidden min-[400px]:inline">New request</span>
+          </Link>
           <KarmaBadge />
           {/* Clerk's avatar menu, with an extra item for editing the stack. */}
           <UserMenu />
