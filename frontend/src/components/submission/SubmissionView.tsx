@@ -1,3 +1,5 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
 import { ExternalLink } from "lucide-react";
 import { ReviewStatus } from "@/components/feed/ReviewStatus";
 import { TechnologyTag } from "@/components/feed/TechnologyTag";
@@ -19,8 +21,14 @@ const WRAP = "[overflow-wrap:anywhere]";
 
 export function SubmissionView({
   submission,
+  actions,
+  reviewSlot,
 }: {
   submission: SubmissionDetail;
+  // Buttons for the signed-in viewer, next to the GitHub link.
+  actions?: ReactNode;
+  // The review form or the reason there is none, above the review list.
+  reviewSlot?: ReactNode;
 }) {
   // A review stores ratings by criterion id. This turns an id back into the
   // label shown to the reader.
@@ -76,6 +84,7 @@ export function SubmissionView({
               <ExternalLink className="size-4" aria-hidden />
               Open on GitHub
             </a>
+            {actions}
             <span className="min-w-0 truncate text-xs text-muted-foreground">
               {repositoryPath}
             </span>
@@ -112,9 +121,12 @@ export function SubmissionView({
 
           <div className="mt-4 flex h-9 items-center justify-between gap-3 rounded-lg bg-muted/50 px-3 text-xs">
             <span className="flex min-w-0 items-center gap-2">
-              <span className="truncate text-foreground">
+              <Link
+                href={`/profile/${submission.author.username}`}
+                className="truncate text-foreground underline-offset-4 hover:underline"
+              >
                 {submission.author.username}
-              </span>
+              </Link>
               <KarmaChip value={submission.author.karma} size="sm" />
             </span>
             <time
@@ -155,6 +167,8 @@ export function SubmissionView({
           </ul>
         </CardContent>
       </Card>
+
+      {reviewSlot}
 
       <section aria-labelledby="reviews-heading" className="pt-2">
         <h2 id="reviews-heading" className="text-sm font-medium">
@@ -201,7 +215,12 @@ function ReviewCard({
       <Card className="gap-0 py-0">
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3 text-xs">
-            <span className="truncate text-foreground">{review.reviewer}</span>
+            <Link
+              href={`/profile/${review.reviewer}`}
+              className="truncate text-foreground underline-offset-4 hover:underline"
+            >
+              {review.reviewer}
+            </Link>
             <time
               dateTime={review.createdAt}
               className="shrink-0 text-muted-foreground"
