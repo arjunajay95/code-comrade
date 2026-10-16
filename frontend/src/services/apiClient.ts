@@ -32,6 +32,9 @@ interface RequestOptions {
   query?: Query;
   body?: unknown;
   signal?: AbortSignal;
+  // Sent as the Idempotency-Key header on the two POST routes that accept it
+  // (D-29). One key identifies one attempt, see useIdempotencyKey.
+  idempotencyKey?: string;
 }
 
 const buildUrl = (path: string, query?: Query): string => {
@@ -51,6 +54,8 @@ async function request<T>(
   const headers: Record<string, string> = { Accept: "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
+  if (options.idempotencyKey)
+    headers["Idempotency-Key"] = options.idempotencyKey;
 
   let response: Response;
   try {
