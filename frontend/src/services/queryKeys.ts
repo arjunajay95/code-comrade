@@ -19,7 +19,22 @@ export const queryKeys = {
   },
 
   submissions: {
+    all: ["submissions"] as const,
     detail: (id: number) => ["submissions", id] as const,
+  },
+
+  users: {
+    all: ["users"] as const,
+    // Public profiles are the same for every viewer, so no user id.
+    profile: (username: string) => ["users", "profile", username] as const,
+    // The prefix shared by the three /users/me lists of every user, for
+    // invalidating them after a write.
+    mineAll: ["users", "mine"] as const,
+    mine: (
+      userId: string,
+      list: "submissions" | "reviews" | "reviews-received",
+      params: object,
+    ) => ["users", "mine", userId, list, params] as const,
   },
 
   technologies: {

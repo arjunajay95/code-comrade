@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useSubmission } from "@/hooks/useSubmission";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/services/apiClient";
+import { OwnerEditLink } from "./OwnerEditLink";
+import { ReviewSection } from "./ReviewSection";
 import { SubmissionSkeleton } from "./SubmissionSkeleton";
 import { SubmissionView } from "./SubmissionView";
 
@@ -63,5 +65,16 @@ export function SubmissionDetail({ id }: { id: number }) {
     );
   }
 
-  return <SubmissionView submission={query.data} />;
+  return (
+    <SubmissionView
+      submission={query.data}
+      actions={
+        <OwnerEditLink
+          submissionId={query.data.id}
+          authorUsername={query.data.author.username}
+        />
+      }
+      reviewSlot={<ReviewSection submission={query.data} />}
+    />
+  );
 }

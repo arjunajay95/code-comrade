@@ -4,6 +4,9 @@ interface FeedPaginationProps {
   page: number;
   totalPages: number;
   disabled: boolean;
+  // Names the control for screen readers, since a page can hold more than one
+  // list.
+  label?: string;
   onPageChange: (page: number) => void;
 }
 
@@ -11,15 +14,13 @@ export function FeedPagination({
   page,
   totalPages,
   disabled,
+  label = "Feed pages",
   onPageChange,
 }: FeedPaginationProps) {
   if (totalPages <= 1) return null;
 
   return (
-    <nav
-      aria-label="Feed pages"
-      className="flex items-center justify-between pt-6"
-    >
+    <nav aria-label={label} className="flex items-center justify-between pt-6">
       <Button
         variant="outline"
         size="sm"

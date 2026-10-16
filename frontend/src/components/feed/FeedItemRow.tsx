@@ -51,9 +51,12 @@ export function FeedItemRow({ item }: { item: RowItem }) {
               preset uses inside its cards. */}
           <div className="mt-3 flex h-9 items-center justify-between gap-3 rounded-lg bg-muted/50 px-3 text-xs">
             <span className="flex min-w-0 items-center gap-2">
-              <span className="truncate text-foreground">
+              <Link
+                href={`/profile/${item.author.username}`}
+                className="truncate text-foreground underline-offset-4 hover:underline"
+              >
                 {item.author.username}
-              </span>
+              </Link>
               <KarmaChip value={item.author.karma} size="sm" />
             </span>
             <time
