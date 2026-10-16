@@ -77,6 +77,20 @@ describe("idempotencyRepository", () => {
       ).toBe(1);
     });
 
+    it("lets any other database refusal through instead of calling it a duplicate", async () => {
+      const input = await newKey();
+
+      // A user id that does not fit the column is refused by the database for
+      // a reason that is not a unique violation, so it must surface as an
+      // error and never as the null that means "this key already exists".
+      await expect(
+        idempotencyRepository.insertInFlight({
+          ...input,
+          userId: 2_147_483_648,
+        }),
+      ).rejects.toThrow();
+    });
+
     it.each<
       [string, (input: Awaited<ReturnType<typeof newKey>>) => Promise<unknown>]
     >([
