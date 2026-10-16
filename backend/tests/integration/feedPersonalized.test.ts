@@ -1,29 +1,45 @@
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
+import {
+  FEED_RECENCY_WEIGHT,
+  FEED_TAG_WEIGHT,
+  FEED_WINDOW,
+} from "../../src/config/constants.js";
 import { prisma } from "../../src/config/prisma.js";
 import { feedService } from "../../src/service/feed.service.js";
 import { createSubmission, createUser, unique } from "./fixtures.js";
 
 const app = createApp();
-const hoursAgo = (hours: number) =>
-  new Date(Date.now() - hours * 60 * 60 * 1000);
-const page = { page: 1, limit: 50 };
 
-// A user whose stack is exactly one unique tag, plus two submissions: one
-// older that matches the stack, one newer that does not. Unique tags keep
-// other test files' submissions from ever matching.
+// The feed ranks the newest FEED_WINDOW submissions in the whole database,
+// and every other test file adds submissions to that same database. A
+// submission dated hours ago is not "a little older" than they are, it is
+// outside the window altogether once enough newer ones exist, and the suite
+// passed that point long ago. So everything these tests create is dated a
+// moment ago, in a known order, which keeps it among the newest however much
+// other files have added, and every call asks for the whole window, so no
+// test depends on which page someone else's rows pushed it onto.
+const justNow = (millisecondsAgo: number) =>
+  new Date(Date.now() - millisecondsAgo);
+const page = { page: 1, limit: FEED_WINDOW };
+
+// A user whose stack is exactly one unique tag, plus two submissions: an older
+// one that carries that tag and one other, so the user knows half of its tags,
+// and a newer one that does not match at all. The unique tags keep other test
+// files' submissions from ever matching.
 const setup = async () => {
   const tag = unique("tag");
+  const unknownTag = unique("tag");
   const otherTag = unique("tag");
   const author = await createUser();
   const matching = await createSubmission(author.id, {
-    technologies: [tag],
-    createdAt: hoursAgo(10),
+    technologies: [tag, unknownTag],
+    createdAt: justNow(20),
   });
   const unmatched = await createSubmission(author.id, {
     technologies: [otherTag],
-    createdAt: hoursAgo(1),
+    createdAt: justNow(10),
   });
   return { tag, matching, unmatched };
 };
@@ -47,8 +63,11 @@ describe("personalized feed ranking", () => {
 
     const { data } = await feedService.listPersonalized(user.id, page, false);
 
-    // 0.7 x 1 + 0.3 x recency(10h) is about 0.97, and nothing else in the
-    // database shares this unique tag, so it ranks first.
+    // Half the tag weight plus almost all of the recency weight, about 0.65,
+    // against at most 0.3 for anything else, and nothing else shares this
+    // unique tag. The newer submission has to be on the page for the
+    // comparison to mean anything, which is what the second check proves.
+    // Only the shared tag is reported as matched, not the submission's other.
     expect(indexOf(data, matching.id)).toBe(0);
     expect(indexOf(data, unmatched.id)).toBeGreaterThan(0);
     expect(data[0]?.matchedTechnologies).toEqual([tag]);
@@ -60,10 +79,13 @@ describe("personalized feed ranking", () => {
 
     const { data } = await feedService.listPersonalized(user.id, page, false);
 
-    // With no stack, every tag score is 0, so the newer submission wins.
-    expect(indexOf(data, unmatched.id)).toBeLessThan(
-      indexOf(data, matching.id),
-    );
+    // With no stack, every tag score is 0, so the newer submission wins. Both
+    // must be found first: a missing one is -1, which sorts below everything.
+    const newer = indexOf(data, unmatched.id);
+    const older = indexOf(data, matching.id);
+    expect(newer).toBeGreaterThanOrEqual(0);
+    expect(older).toBeGreaterThanOrEqual(0);
+    expect(newer).toBeLessThan(older);
   });
 
   it("includes the score breakdown only when allowed", async () => {
@@ -74,10 +96,17 @@ describe("personalized feed ranking", () => {
     const shown = await feedService.listPersonalized(user.id, page, true);
 
     expect(hidden.data[0]).not.toHaveProperty("_score");
-    expect(shown.data[0]?._score?.tag).toBe(1);
+    // The user knows one of the submission's two tags, so the tag score is
+    // 0.5. It is moments old, so recency is still almost exactly 1. The final
+    // score is the weighted blend of the two. The exact decay and the weights
+    // are pinned, to ten decimal places, by the unit tests in
+    // feedScoring.test.ts. What this checks is that the breakdown is wired
+    // through to the response and that the parts add up.
+    expect(shown.data[0]?._score?.tag).toBe(0.5);
+    expect(shown.data[0]?._score?.recency).toBeCloseTo(1, 3);
     expect(shown.data[0]?._score?.final).toBeCloseTo(
-      0.7 + 0.3 * Math.exp((-Math.LN2 / 72) * 10),
-      2,
+      FEED_TAG_WEIGHT * 0.5 + FEED_RECENCY_WEIGHT * 1,
+      3,
     );
   });
 

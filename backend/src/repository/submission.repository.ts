@@ -6,6 +6,34 @@ export interface FeedFilters {
   technologies?: string[];
 }
 
+// Everything a new submission is created from. The service has already run
+// the URL parser, so the owner and repository arrive separately and the URL
+// is the one rebuilt from them.
+export interface NewSubmission {
+  authorId: number;
+  title: string;
+  description: string;
+  githubUrl: string;
+  githubOwner: string;
+  githubRepo: string;
+  criteria: string[];
+  technologies: string[];
+}
+
+// The four editable fields of an existing submission, with the URL already
+// parsed. Criteria are deliberately absent: they lock at creation (INV-4).
+export interface SubmissionEdit {
+  title: string;
+  description: string;
+  githubUrl: string;
+  githubOwner: string;
+  githubRepo: string;
+  technologies: string[];
+  // True when the URL changed, so the cached repository snapshot now describes
+  // a different repository and has to go (D-03).
+  clearSnapshot: boolean;
+}
+
 // Shared by the public and personalized feeds, so both return items with the
 // same fields.
 const feedItemSelect = {
@@ -140,6 +168,99 @@ export const submissionRepository = {
       orderBy: [...newestFirst],
       take: size,
       select: feedItemSelect,
+    });
+  },
+
+  // Creates a submission, its criteria and its technology links in one
+  // transaction, so a failure leaves nothing half written. Criteria are
+  // created here and never again: ratings point at them by id, so they lock
+  // at creation (INV-4). Returns only the new id, because the service reads
+  // the row back through the one detail query.
+  async createWithCriteria(input: NewSubmission): Promise<number> {
+    return prisma.$transaction(async (tx) => {
+      // Creates any technology that does not exist yet. skipDuplicates makes
+      // this safe when two requests add the same new tag at the same moment:
+      // the loser of that race just skips it (D-17). connectOrCreate would
+      // look first and insert second, and could lose that race with a unique
+      // violation.
+      await tx.technology.createMany({
+        data: input.technologies.map((name) => ({ name })),
+        skipDuplicates: true,
+      });
+
+      const created = await tx.submission.create({
+        data: {
+          title: input.title,
+          description: input.description,
+          githubUrl: input.githubUrl,
+          githubOwner: input.githubOwner,
+          githubRepo: input.githubRepo,
+          authorId: input.authorId,
+          criteria: { create: input.criteria.map((label) => ({ label })) },
+          technologies: {
+            connect: input.technologies.map((name) => ({ name })),
+          },
+        },
+        select: { id: true },
+      });
+
+      return created.id;
+    });
+  },
+
+  // Just what an edit needs to decide: who owns the submission, and which URL
+  // it has now, so the service can tell whether the URL is changing.
+  findForEdit(id: number) {
+    return prisma.submission.findUnique({
+      where: { id },
+      select: { id: true, authorId: true, githubUrl: true },
+    });
+  },
+
+  // What a review needs to decide: who wrote the submission, so the author
+  // cannot review it, and which criteria exist, so the ratings can be
+  // checked against them.
+  findForReview(id: number) {
+    return prisma.submission.findUnique({
+      where: { id },
+      select: { id: true, authorId: true, criteria: { select: { id: true } } },
+    });
+  },
+
+  // Applies an edit in one transaction, so a failure leaves nothing half
+  // written: the new technologies, the updated fields and the snapshot
+  // deletion all happen or none of them does. Throws when the submission does
+  // not exist, which rolls the whole transaction back.
+  async updateOwn(id: number, edit: SubmissionEdit): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+      // Creates any technology that does not exist yet, safe under a race for
+      // the same reason as in createWithCriteria (D-17).
+      await tx.technology.createMany({
+        data: edit.technologies.map((name) => ({ name })),
+        skipDuplicates: true,
+      });
+
+      await tx.submission.update({
+        where: { id },
+        data: {
+          title: edit.title,
+          description: edit.description,
+          githubUrl: edit.githubUrl,
+          githubOwner: edit.githubOwner,
+          githubRepo: edit.githubRepo,
+          // set replaces the whole list. Criteria are never touched: ratings
+          // point at them by id.
+          technologies: { set: edit.technologies.map((name) => ({ name })) },
+        },
+        select: { id: true },
+      });
+
+      // The one deletion in this method (D-03). The snapshot is cached
+      // third-party data, not user content, and enrichment recreates it.
+      // deleteMany does nothing when there is no snapshot.
+      if (edit.clearSnapshot) {
+        await tx.repoSnapshot.deleteMany({ where: { submissionId: id } });
+      }
     });
   },
 };

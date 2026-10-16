@@ -159,6 +159,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Post a review request
+         * @description Creates a submission with its evaluation criteria and technology tags in one transaction. The author is always the signed-in user. The repository URL must be exactly https://github.com/{owner}/{repo}. Criteria are fixed at creation and cannot be edited afterwards. Returns the new submission in the same shape as the detail endpoint. Subject to the write rate limit. Accepts an optional Idempotency-Key header, so a retry after a network failure cannot create a second submission. The same key with the same request returns the original response, the same key with a different request is rejected with 422 IDEMPOTENCY_KEY_REUSED, and a request that is still being processed is rejected with 409 REQUEST_IN_PROGRESS. A key identifies one attempt, so use a new one whenever the request changes.
+         */
+        post: operations["createSubmission"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/submissions/{id}": {
         parameters: {
             query?: never;
@@ -171,8 +191,32 @@ export interface paths {
          * @description A submission with its criteria, every review, and its repository snapshot when one exists. Public.
          */
         get: operations["getSubmission"];
-        put?: never;
+        /**
+         * Edit own review request
+         * @description Replaces the four editable fields of a submission: title, description, repository URL and technologies. All four are required. Only the author may edit it. Criteria cannot be changed and are not accepted at all, because existing ratings point at them. When the repository URL changes, the cached repository snapshot is cleared and fetched again later. Returns the updated submission in the same shape as the detail endpoint. Subject to the write rate limit. Does not use the Idempotency-Key header, since replaying an edit changes nothing, and the header is ignored.
+         */
+        put: operations["updateSubmission"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/submissions/{id}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Review a submission
+         * @description Posts a review and awards the reviewer karma in one transaction. The reviewer is always the signed-in user and the karma goes to the reviewer, never to the submission's author. A review rates every criterion of the submission exactly once, so ratings for a subset, or for criteria of another submission, are rejected with 400 CRITERIA_MISMATCH. The author cannot review their own submission (403), and a second review of the same submission by the same person is rejected with 409. Returns the stored review and the reviewer's new karma total, so a client can update its karma display without another request. Subject to the write rate limit. Accepts an optional Idempotency-Key header, so a retry after a network failure cannot award karma twice. The same key with the same request returns the original response, the same key with a different request is rejected with 422 IDEMPOTENCY_KEY_REUSED, and a request that is still being processed is rejected with 409 REQUEST_IN_PROGRESS. A key identifies one attempt, so use a new one whenever the request changes.
+         */
+        post: operations["createReview"];
         delete?: never;
         options?: never;
         head?: never;
@@ -350,6 +394,26 @@ export interface components {
             data: components["schemas"]["Technology"][];
             meta: components["schemas"]["PaginationMeta"];
         };
+        CreateSubmissionRequest: {
+            title: string;
+            description: string;
+            /** @description Exactly https://github.com/{owner}/{repo}: the https scheme, the host github.com in lowercase, and no trailing slash, port, query, fragment or .git suffix. Surrounding whitespace is trimmed. Any other shape is rejected with 400 INVALID_REPO_URL. */
+            githubUrl: string;
+            /** @description What reviewers will rate. Fixed once the submission exists. Labels must be unique within the submission, compared case-insensitively. */
+            criteria: {
+                label: string;
+            }[];
+            /** @description Names are trimmed, lowercased and de-duplicated, and the limits apply after that. Unknown names are created. */
+            technologies: string[];
+        };
+        UpdateSubmissionRequest: {
+            title: string;
+            description: string;
+            /** @description Exactly https://github.com/{owner}/{repo}, with the same rules as when posting. Changing it clears the cached repository snapshot. Any other shape is rejected with 400 INVALID_REPO_URL. */
+            githubUrl: string;
+            /** @description Replaces the submission's technologies. Names are trimmed, lowercased and de-duplicated, and the limits apply after that. Unknown names are created. */
+            technologies: string[];
+        };
         SubmissionDetailResponse: {
             /** @constant */
             success: true;
@@ -402,6 +466,36 @@ export interface components {
                     /** Format: date-time */
                     fetchedAt: string;
                 };
+            };
+        };
+        CreateReviewRequest: {
+            feedback: string;
+            /** @description One entry per criterion of the submission, exactly. A criterion cannot appear twice. Ratings that do not match the submission's criteria are rejected with 400 CRITERIA_MISMATCH. */
+            ratings: {
+                criterionId: number;
+                rating: number;
+            }[];
+        };
+        CreateReviewResponse: {
+            /** @constant */
+            success: true;
+            data: {
+                review: {
+                    id: number;
+                    submissionId: number;
+                    feedback: string;
+                    /** Format: date-time */
+                    createdAt: string;
+                    /** @description The reviewer's username */
+                    reviewer: string;
+                    /** @description Ordered by criterion id. */
+                    ratings: {
+                        criterionId: number;
+                        rating: number;
+                    }[];
+                };
+                /** @description The reviewer's karma total after this review. */
+                reviewerKarma: number;
             };
         };
         FeedItem: {
@@ -550,7 +644,7 @@ export interface components {
                 "application/json": components["schemas"]["ErrorEnvelope"];
             };
         };
-        /** @description The request conflicts with existing data, such as a username that is already taken. */
+        /** @description The request conflicts with existing data, such as a username that is already taken or a submission the caller has already reviewed. Also returned, with code REQUEST_IN_PROGRESS, when a request with the same Idempotency-Key is still being processed. */
         Conflict: {
             headers: {
                 "X-Request-Id": components["headers"]["XRequestId"];
@@ -563,6 +657,46 @@ export interface components {
                  *       "error": {
                  *         "code": "CONFLICT",
                  *         "message": "That username is already taken",
+                 *         "requestId": "3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b"
+                 *       }
+                 *     }
+                 */
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        /** @description The caller is signed in but may not do this, such as editing someone else's submission. */
+        Forbidden: {
+            headers: {
+                "X-Request-Id": components["headers"]["XRequestId"];
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "success": false,
+                 *       "error": {
+                 *         "code": "FORBIDDEN",
+                 *         "message": "You can only edit your own submissions",
+                 *         "requestId": "3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b"
+                 *       }
+                 *     }
+                 */
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        /** @description The request was understood but cannot be accepted, such as an Idempotency-Key already used for a different request. */
+        Unprocessable: {
+            headers: {
+                "X-Request-Id": components["headers"]["XRequestId"];
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "success": false,
+                 *       "error": {
+                 *         "code": "IDEMPOTENCY_KEY_REUSED",
+                 *         "message": "This Idempotency-Key was already used for a different request",
                  *         "requestId": "3f1c2a9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b"
                  *       }
                  *     }
@@ -592,6 +726,8 @@ export interface components {
         };
     };
     parameters: {
+        /** @description Makes a retry of this request safe. Send the same key with the same request after a network failure and the original response comes back instead of the work being done twice. 1 to 128 characters: letters, digits, hyphen and underscore, so a UUID fits. A key identifies one attempt, so use a new one whenever the request changes. The same key for a different request is rejected with 422 IDEMPOTENCY_KEY_REUSED, and a request that is still being processed with 409 REQUEST_IN_PROGRESS. Keys belong to one user and one endpoint. */
+        IdempotencyKey: string;
         Page: number;
         /** @description Above 50 is rejected with 400, never clamped. */
         Limit: number;
@@ -862,6 +998,41 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
+    createSubmission: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Makes a retry of this request safe. Send the same key with the same request after a network failure and the original response comes back instead of the work being done twice. 1 to 128 characters: letters, digits, hyphen and underscore, so a UUID fits. A key identifies one attempt, so use a new one whenever the request changes. The same key for a different request is rejected with 422 IDEMPOTENCY_KEY_REUSED, and a request that is still being processed with 409 REQUEST_IN_PROGRESS. Keys belong to one user and one endpoint. */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSubmissionRequest"];
+            };
+        };
+        responses: {
+            /** @description The new submission. */
+            201: {
+                headers: {
+                    "X-Request-Id": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionDetailResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["Unprocessable"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
     getSubmission: {
         parameters: {
             query?: never;
@@ -887,6 +1058,79 @@ export interface operations {
             404: components["responses"]["NotFound"];
             429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
+        };
+    };
+    updateSubmission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSubmissionRequest"];
+            };
+        };
+        responses: {
+            /** @description The updated submission. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionDetailResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createReview: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Makes a retry of this request safe. Send the same key with the same request after a network failure and the original response comes back instead of the work being done twice. 1 to 128 characters: letters, digits, hyphen and underscore, so a UUID fits. A key identifies one attempt, so use a new one whenever the request changes. The same key for a different request is rejected with 422 IDEMPOTENCY_KEY_REUSED, and a request that is still being processed with 409 REQUEST_IN_PROGRESS. Keys belong to one user and one endpoint. */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description The stored review and the reviewer's new karma total. */
+            201: {
+                headers: {
+                    "X-Request-Id": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateReviewResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["Unprocessable"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     listFeed: {
