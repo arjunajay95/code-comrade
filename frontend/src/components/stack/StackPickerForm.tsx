@@ -51,10 +51,7 @@ export function StackPickerForm({ initial, onDone }: StackPickerFormProps) {
         />
 
         {mutation.error && (
-          <p
-            role="alert"
-            className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-destructive"
-          >
+          <p role="alert" className="text-small text-destructive">
             {mutation.error.message}
             {mutation.error instanceof ApiError && mutation.error.requestId && (
               <>
