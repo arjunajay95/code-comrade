@@ -44,6 +44,8 @@
 @theme inline {
   --color-addition: var(--addition);
   --color-pending: var(--pending);
+  --color-code: var(--code-bg);
+  --color-code-foreground: var(--code-fg);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -132,6 +134,23 @@
   --atmosphere-glow: oklch(0.148 0.004 228.8 / 5%);
   /* The fine highlight along the top edge of a glass card. */
   --glass-highlight: oklch(1 0 0 / 100%);
+  /* The code palette (D-41): neutral tones plus two low-chroma accents, a
+     blue for keywords and a rose for strings. Never the addition green or the
+     pending amber. The --sh-* names are the ones sugar-high writes into its
+     token styles. */
+  --code-bg: oklch(0.962 0.003 214);
+  --code-fg: oklch(0.25 0.01 220);
+  --sh-identifier: oklch(0.25 0.01 220);
+  --sh-keyword: oklch(0.45 0.12 265);
+  --sh-string: oklch(0.5 0.1 15);
+  --sh-class: oklch(0.42 0.07 265);
+  --sh-property: oklch(0.3 0.01 220);
+  --sh-entity: oklch(0.42 0.07 265);
+  --sh-jsxliterals: oklch(0.45 0.12 265);
+  --sh-sign: oklch(0.5 0.01 220);
+  --sh-comment: oklch(0.55 0.012 220);
+  --sh-break: inherit;
+  --sh-space: inherit;
 }
 
 .dark {
@@ -171,6 +190,19 @@
   --atmosphere-dot: oklch(0.987 0.002 197.1 / 8%);
   --atmosphere-glow: oklch(94.986% 0.07506 162.94 / 0.07);
   --glass-highlight: oklch(1 0 0 / 8%);
+  --code-bg: oklch(0.17 0.005 228);
+  --code-fg: oklch(0.9 0.005 220);
+  --sh-identifier: oklch(0.9 0.005 220);
+  --sh-keyword: oklch(0.78 0.09 265);
+  --sh-string: oklch(0.78 0.08 20);
+  --sh-class: oklch(0.82 0.05 265);
+  --sh-property: oklch(0.86 0.01 220);
+  --sh-entity: oklch(0.82 0.05 265);
+  --sh-jsxliterals: oklch(0.78 0.09 265);
+  --sh-sign: oklch(0.68 0.01 220);
+  --sh-comment: oklch(0.62 0.012 220);
+  --sh-break: inherit;
+  --sh-space: inherit;
 }
 
 @layer base {
