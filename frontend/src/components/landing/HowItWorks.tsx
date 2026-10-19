@@ -114,10 +114,10 @@ const STEPS: {
   {
     number: "1",
     icon: GitPullRequest,
-    title: "Post a request",
+    title: "Create a post",
     text: "Link a public GitHub repository, say what you want looked at, and choose the criteria reviewers rate.",
     outcome: <MiniFeedCard />,
-    caption: "your request, in the feed",
+    caption: "your post, in the feed",
   },
   {
     number: "2",
@@ -131,7 +131,7 @@ const STEPS: {
     number: "3",
     icon: ListFilter,
     title: "Get a feed that fits",
-    text: "Add your stack, and the For you feed ranks requests by how well they match it.",
+    text: "Add your stack, and the For you feed ranks posts by how well they match it.",
     outcome: <MiniRankedList />,
     caption: "ranked by your stack",
   },

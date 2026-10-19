@@ -49,13 +49,13 @@ export function SiteHeader() {
         <Show when="signed-in">
           <Link
             href="/submissions/new"
-            aria-label="Post a request"
+            aria-label="New post"
             className={buttonVariants()}
           >
             <Plus aria-hidden />
             {/* Icon only on the narrowest screens, so the header fits at
                 320px. */}
-            <span className="hidden min-[400px]:inline">New request</span>
+            <span className="hidden min-[400px]:inline">New post</span>
           </Link>
           <KarmaBadge />
           {/* Clerk's avatar menu, with an extra item for editing the stack. */}

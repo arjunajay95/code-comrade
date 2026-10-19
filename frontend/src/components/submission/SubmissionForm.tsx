@@ -350,10 +350,10 @@ export function SubmissionForm({
         >
           {mutation.isPending
             ? creating
-              ? "Posting"
+              ? "Publishing"
               : "Saving"
             : creating
-              ? "Post for review"
+              ? "Publish post"
               : "Save changes"}
         </Button>
       </div>

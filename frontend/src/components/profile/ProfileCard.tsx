@@ -71,7 +71,7 @@ export function ProfileCard({
 
       {/* A hairline, not a panel, sets the numbers apart. */}
       <dl className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-center">
-        <Stat label="Requests" value={profile.stats.submissions} />
+        <Stat label="Posts" value={profile.stats.submissions} />
         <Stat label="Reviews given" value={profile.stats.reviewsGiven} />
         <Stat label="Reviews received" value={profile.stats.reviewsReceived} />
       </dl>

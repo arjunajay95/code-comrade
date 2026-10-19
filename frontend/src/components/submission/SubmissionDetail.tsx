@@ -21,7 +21,7 @@ export function SubmissionDetail({ id }: { id: number }) {
     if (query.error instanceof ApiError && query.error.status === 404) {
       return (
         <StateCard
-          title="Submission not found"
+          title="Post not found"
           text="It may have been removed, or the link may be wrong."
         >
           <Link href="/feed" className={buttonVariants({ variant: "outline" })}>
@@ -33,7 +33,7 @@ export function SubmissionDetail({ id }: { id: number }) {
 
     return (
       <ErrorCard
-        title="Could not load this submission"
+        title="Could not load this post"
         error={query.error}
         onRetry={() => void query.refetch()}
       />

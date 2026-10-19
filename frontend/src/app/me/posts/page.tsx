@@ -4,7 +4,7 @@ import { MeNav } from "@/components/me/MeNav";
 import { MyRequests } from "@/components/me/MyRequests";
 import { Container } from "@/components/shell/Container";
 
-export const metadata: Metadata = { title: "Your requests" };
+export const metadata: Metadata = { title: "My Posts" };
 
 export default async function MyRequestsPage() {
   await auth.protect();
@@ -12,7 +12,7 @@ export default async function MyRequestsPage() {
   return (
     <Container size="reading">
       <MeNav />
-      <h1 className="mb-4 text-title font-semibold">Your requests</h1>
+      <h1 className="mb-4 text-title font-semibold">My Posts</h1>
       <MyRequests />
     </Container>
   );

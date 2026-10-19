@@ -38,7 +38,7 @@ export function StackPickerForm({ initial, onDone }: StackPickerFormProps) {
         <DialogTitle>Your technology stack</DialogTitle>
         <DialogDescription>
           Pick the technologies you work with. The &quot;For you&quot; feed
-          ranks submissions by how well they match your stack.
+          ranks posts by how well they match your stack.
         </DialogDescription>
       </DialogHeader>
 

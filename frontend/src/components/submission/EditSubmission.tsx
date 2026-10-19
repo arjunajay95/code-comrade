@@ -55,7 +55,7 @@ export function EditSubmission({ id }: { id: number }) {
     ) {
       return (
         <Notice
-          title="Submission not found"
+          title="Post not found"
           text="It may have been removed, or the link may be wrong."
           backHref="/feed"
           backLabel="Back to feed"
@@ -64,7 +64,7 @@ export function EditSubmission({ id }: { id: number }) {
     }
     return (
       <ErrorCard
-        title="Could not load this submission"
+        title="Could not load this post"
         error={submission.error}
         onRetry={() => void submission.refetch()}
       />
@@ -85,10 +85,10 @@ export function EditSubmission({ id }: { id: number }) {
   if (me.data.username !== data.author.username) {
     return (
       <Notice
-        title="You can only edit your own submissions"
+        title="You can only edit your own posts"
         text="This one was posted by someone else."
         backHref={`/submissions/${id}`}
-        backLabel="Back to the submission"
+        backLabel="Back to the post"
       />
     );
   }

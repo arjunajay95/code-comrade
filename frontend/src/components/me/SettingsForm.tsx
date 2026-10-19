@@ -159,7 +159,7 @@ function LoadedSettings({ me }: { me: Me }) {
       <Surface>
         <h2 className="text-heading font-medium">Technology stack</h2>
         <p className="mt-1 text-small text-muted-foreground">
-          The For you feed ranks submissions by how well they match it.
+          The For you feed ranks posts by how well they match it.
         </p>
         <ul className="mt-4 flex min-h-6 flex-wrap gap-1.5">
           {me.technologies.length === 0 ? (

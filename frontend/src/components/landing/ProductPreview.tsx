@@ -73,7 +73,7 @@ export function ProductPreview() {
           </div>
         </Spotlight>
         <p className="mt-4 text-center text-small text-muted-foreground">
-          Example requests, for illustration.
+          Example posts, for illustration.
         </p>
       </Container>
     </section>

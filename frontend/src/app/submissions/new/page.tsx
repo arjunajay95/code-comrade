@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { SubmissionForm } from "@/components/submission/SubmissionForm";
 import { Container } from "@/components/shell/Container";
 
-export const metadata: Metadata = { title: "Post a request" };
+export const metadata: Metadata = { title: "New post" };
 
 export default async function NewSubmissionPage() {
   // Sends a signed-out visitor to sign in. A courtesy: POST /submissions
@@ -12,7 +12,7 @@ export default async function NewSubmissionPage() {
 
   return (
     <Container size="reading">
-      <h1 className="text-title font-semibold">Post a request for review</h1>
+      <h1 className="text-title font-semibold">New post</h1>
       <p className="mt-2 text-body text-muted-foreground">
         Link a public GitHub repository, say what you want looked at, and define
         what reviewers rate.

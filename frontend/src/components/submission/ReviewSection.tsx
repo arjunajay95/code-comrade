@@ -64,7 +64,7 @@ export function ReviewSection({
     return (
       <StateCard
         title="You reviewed this"
-        text="Your review is below. Each submission can be reviewed once."
+        text="Your review is below. Each post can be reviewed once."
       />
     );
   }

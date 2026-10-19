@@ -72,13 +72,13 @@ export function MyProfile() {
           onPageChange={setPage}
           label="your reviews"
           emptyTitle="You have not reviewed anything yet"
-          emptyText="Every review you write earns karma. Pick a submission from the feed."
+          emptyText="Every review you write earns karma. Pick a post from the feed."
           emptyAction={
             <Link
               href="/feed"
               className={buttonVariants({ variant: "outline" })}
             >
-              Browse submissions
+              Browse posts
             </Link>
           }
           skeleton={<ReviewSummarySkeleton />}

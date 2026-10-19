@@ -6,7 +6,7 @@ import { SubmissionDetail } from "@/components/submission/SubmissionDetail";
 import { parseSubmissionId } from "@/lib/ids";
 import { Container } from "@/components/shell/Container";
 
-export const metadata: Metadata = { title: "Submission" };
+export const metadata: Metadata = { title: "Post" };
 
 export default async function SubmissionPage({
   params,
