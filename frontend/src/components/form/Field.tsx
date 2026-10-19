@@ -14,13 +14,13 @@ interface FieldProps {
 export function Field({ label, htmlFor, hint, error, children }: FieldProps) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={htmlFor} className="text-xs font-medium">
+      <label htmlFor={htmlFor} className="text-small font-medium">
         {label}
       </label>
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {hint && <p className="text-small text-muted-foreground">{hint}</p>}
       {children}
       {error && (
-        <p role="alert" className="text-xs text-destructive">
+        <p role="alert" className="text-small text-destructive">
           {error}
         </p>
       )}
@@ -35,12 +35,15 @@ export function FormError({ error }: { error: Error | null }) {
   const requestId = error instanceof ApiError ? error.requestId : null;
 
   return (
-    <p
-      role="alert"
-      className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-destructive"
-    >
+    <p role="alert" className="text-small text-destructive">
       {error.message}
-      {requestId ? ` (reference ${requestId})` : ""}
+      {requestId && (
+        <>
+          {" (reference "}
+          <span className="font-mono">{requestId}</span>
+          {")"}
+        </>
+      )}
     </p>
   );
 }

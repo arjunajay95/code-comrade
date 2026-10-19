@@ -75,7 +75,7 @@ export function TechnologySelect({
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-small text-muted-foreground">
           {label}{" "}
           <span className="tabular-nums">
             ({selected.length}/{max})
@@ -86,7 +86,7 @@ export function TechnologySelect({
           aria-label="Selected technologies"
         >
           {selected.length === 0 && (
-            <li className="text-xs text-muted-foreground">
+            <li className="text-small text-muted-foreground">
               Nothing selected yet.
             </li>
           )}
@@ -97,7 +97,7 @@ export function TechnologySelect({
                 aria-label={`Remove ${name}`}
                 onClick={() => remove(name)}
                 className={cn(
-                  "inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs",
+                  "inline-flex h-7 items-center gap-1 rounded-md border px-2 font-mono text-micro outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                   SELECTED_CHIP,
                 )}
               >
@@ -147,7 +147,7 @@ export function TechnologySelect({
                   isSelected ? remove(technology.name) : add(technology.name)
                 }
                 className={cn(
-                  "inline-flex h-7 items-center rounded-md border px-2 text-xs disabled:opacity-50",
+                  "inline-flex h-7 items-center rounded-md border px-2 font-mono text-micro disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                   isSelected
                     ? SELECTED_CHIP
                     : "bg-muted/50 text-muted-foreground hover:text-foreground",
@@ -163,7 +163,7 @@ export function TechnologySelect({
               type="button"
               disabled={atLimit}
               onClick={() => add(term)}
-              className="inline-flex h-7 items-center gap-1 rounded-md border border-dashed px-2 text-xs text-foreground disabled:opacity-50"
+              className="inline-flex h-7 items-center gap-1 rounded-md border border-dashed px-2 font-mono text-micro text-foreground disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               <Plus className="size-3" aria-hidden />
               Add &quot;{term}&quot;
@@ -172,13 +172,13 @@ export function TechnologySelect({
         </div>
 
         {technologies.isError && (
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2 text-small text-muted-foreground">
             Could not load suggestions. You can still type a name and press
             Enter.
           </p>
         )}
         {atLimit && (
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2 text-small text-muted-foreground">
             You have reached the limit of {max}. Remove one to add another.
           </p>
         )}

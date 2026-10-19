@@ -38,7 +38,7 @@ export function StackPickerForm({ initial, onDone }: StackPickerFormProps) {
         <DialogTitle>Your technology stack</DialogTitle>
         <DialogDescription>
           Pick the technologies you work with. The &quot;For you&quot; feed
-          ranks submissions by how well they match your stack.
+          ranks posts by how well they match your stack.
         </DialogDescription>
       </DialogHeader>
 
@@ -51,14 +51,15 @@ export function StackPickerForm({ initial, onDone }: StackPickerFormProps) {
         />
 
         {mutation.error && (
-          <p
-            role="alert"
-            className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-destructive"
-          >
+          <p role="alert" className="text-small text-destructive">
             {mutation.error.message}
-            {mutation.error instanceof ApiError && mutation.error.requestId
-              ? ` (reference ${mutation.error.requestId})`
-              : ""}
+            {mutation.error instanceof ApiError && mutation.error.requestId && (
+              <>
+                {" (reference "}
+                <span className="font-mono">{mutation.error.requestId}</span>
+                {")"}
+              </>
+            )}
           </p>
         )}
       </div>

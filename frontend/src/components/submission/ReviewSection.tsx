@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { ErrorCard, StateCard } from "@/components/shell/StateCard";
+import { Surface } from "@/components/shell/Surface";
+import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/hooks/useMe";
-import { cn } from "@/lib/utils";
 import type { SubmissionDetail } from "@/services/submissions";
 import { ReviewForm } from "./ReviewForm";
 
@@ -21,87 +21,62 @@ export function ReviewSection({
   const { isLoaded, isSignedIn } = useAuth();
   const me = useMe();
 
+  // A 24px heading line, then the 96px form body.
   if (!isLoaded || (isSignedIn && me.isPending)) {
     return (
-      <Card className="gap-0 py-0" aria-hidden>
-        <CardContent className="p-4">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="mt-3 h-24 w-full" />
-        </CardContent>
-      </Card>
+      <Surface aria-hidden>
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="mt-3 h-24 w-full" />
+      </Surface>
     );
   }
 
   if (!isSignedIn) {
     return (
-      <Card className="gap-0 py-0">
-        <CardContent className="p-4 text-sm">
-          <p className="font-medium">Review this code</p>
-          <p className="mt-1 text-muted-foreground">
-            Sign in to write a review and earn karma.
-          </p>
-          <Link href="/sign-in" className={cn(buttonVariants(), "mt-3")}>
-            Sign in
-          </Link>
-        </CardContent>
-      </Card>
+      <StateCard
+        title="Review this code"
+        text="Sign in to write a review and earn karma."
+      >
+        <Link href="/sign-in" className={buttonVariants()}>
+          Sign in
+        </Link>
+      </StateCard>
     );
   }
 
   if (me.isError) {
     return (
-      <Card role="alert" className="gap-0 py-0">
-        <CardContent className="p-4 text-sm">
-          <p className="font-medium">Could not check your account</p>
-          <p className="mt-1 text-muted-foreground">{me.error.message}</p>
-          <Button
-            variant="outline"
-            className="mt-3"
-            onClick={() => void me.refetch()}
-          >
-            Try again
-          </Button>
-        </CardContent>
-      </Card>
+      <ErrorCard
+        title="Could not check your account"
+        error={me.error}
+        onRetry={() => void me.refetch()}
+      />
     );
   }
 
   const username = me.data?.username;
-  const isAuthor = username === submission.author.username;
+  // On the user's own post the review section is not shown at all. The header
+  // says whose post it is. The API still answers a self-review with 403, so
+  // this is a courtesy only (AUTHORIZATION_MATRIX §6).
+  if (username === submission.author.username) return null;
+
   const ownReview = submission.reviews.find(
     (review) => review.reviewer === username,
   );
 
   if (ownReview) {
     return (
-      <Card className="gap-0 py-0">
-        <CardContent className="p-4 text-sm">
-          <p className="font-medium">You reviewed this</p>
-          <p className="mt-1 text-muted-foreground">
-            Your review is below. Each submission can be reviewed once.
-          </p>
-        </CardContent>
-      </Card>
+      <StateCard
+        title="You reviewed this"
+        text="Your review is below. Each post can be reviewed once."
+      />
     );
   }
 
   return (
-    <div className="space-y-3">
-      {isAuthor && (
-        <Card className="gap-0 py-0">
-          <CardContent className="p-4 text-sm">
-            <p className="font-medium">This is your submission</p>
-            <p className="mt-1 text-muted-foreground">
-              You cannot review your own code. Other developers can.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-      <ReviewForm
-        submissionId={submission.id}
-        criteria={submission.criteria.map(({ id, label }) => ({ id, label }))}
-        disabled={isAuthor}
-      />
-    </div>
+    <ReviewForm
+      submissionId={submission.id}
+      criteria={submission.criteria.map(({ id, label }) => ({ id, label }))}
+    />
   );
 }

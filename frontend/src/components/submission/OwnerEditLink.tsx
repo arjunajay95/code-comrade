@@ -6,8 +6,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { useMe } from "@/hooks/useMe";
 import { cn } from "@/lib/utils";
 
-// Shown to the author only. Courtesy again: the edit page and the API both
-// check ownership on their own.
+// The Edit action, shown to the author only. Courtesy again: the edit page and
+// the API both check ownership on their own.
 export function OwnerEditLink({
   submissionId,
   authorUsername,

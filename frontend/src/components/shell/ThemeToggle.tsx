@@ -3,6 +3,7 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { switchTheme } from "@/lib/themeTransition";
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -12,7 +13,13 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       aria-label="Toggle color theme"
-      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+      onClick={(event) =>
+        switchTheme(
+          setTheme,
+          resolvedTheme === "dark" ? "light" : "dark",
+          event.currentTarget,
+        )
+      }
     >
       {/* Both icons render, and CSS picks one from the .dark class that
           next-themes sets before the page paints. Choosing in JavaScript

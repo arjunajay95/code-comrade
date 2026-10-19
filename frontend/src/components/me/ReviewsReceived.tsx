@@ -5,6 +5,7 @@ import {
   LIST_PAGE_SIZE,
   PagedList,
   ReviewSummaryCard,
+  ReviewSummarySkeleton,
 } from "@/components/profile/ListViews";
 import { useReviewsReceived } from "@/hooks/useMyLists";
 
@@ -19,7 +20,8 @@ export function ReviewsReceived() {
       onPageChange={setPage}
       label="reviews you received"
       emptyTitle="No reviews yet"
-      emptyText="Reviews of your submissions will show up here, newest first."
+      emptyText="Reviews of your posts will show up here, newest first."
+      skeleton={<ReviewSummarySkeleton />}
       renderItem={(review) => <ReviewSummaryCard review={review} />}
     />
   );

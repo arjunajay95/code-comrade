@@ -1,46 +1,45 @@
 import Link from "next/link";
-import { Show } from "@clerk/nextjs";
-import { Plus } from "lucide-react";
-import { UserMenu } from "./UserMenu";
-import { buttonVariants } from "@/components/ui/button";
-import { KarmaBadge } from "./KarmaBadge";
+import { LogoMark } from "@/components/brand/LogoMark";
+import { Wordmark } from "@/components/brand/Wordmark";
+import { Container } from "./Container";
+import { HeaderFrame } from "./HeaderFrame";
+import { HeaderNav } from "./HeaderNav";
+import { HeaderAuth } from "./HeaderAuth";
+import { MobileMenu } from "./MobileMenu";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function SiteHeader() {
   return (
-    <header className="border-b">
-      <div className="mx-auto flex h-14 max-w-3xl items-center gap-2 px-4">
-        <Link href="/" className="text-sm font-medium">
-          <span className="text-muted-foreground">~/</span>codecomrade
+    <HeaderFrame>
+      <Container
+        size="wide"
+        verticalPadding={false}
+        className="flex h-14 items-center gap-2"
+      >
+        <Link
+          href="/"
+          aria-label="CodeComrade"
+          className="flex items-center gap-2 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        >
+          <LogoMark className="size-7" />
+          {/* Dropped below 480px so the signed-in header fits at 320px. */}
+          <Wordmark className="hidden min-[480px]:inline" />
         </Link>
+        <HeaderNav />
 
         {/* Pushes everything after it to the right edge. */}
         <div className="flex-1" />
 
-        <ThemeToggle />
-
-        <Show when="signed-out">
-          <Link href="/sign-in" className={buttonVariants({ size: "sm" })}>
-            Sign in
-          </Link>
-        </Show>
-
-        <Show when="signed-in">
-          <Link
-            href="/submissions/new"
-            aria-label="Post a request"
-            className={buttonVariants({ size: "sm" })}
-          >
-            <Plus aria-hidden />
-            {/* Icon only on the narrowest screens, so the header fits at
-                320px. */}
-            <span className="hidden min-[400px]:inline">New request</span>
-          </Link>
-          <KarmaBadge />
-          {/* Clerk's avatar menu, with an extra item for editing the stack. */}
-          <UserMenu />
-        </Show>
-      </div>
-    </header>
+        {/* The auth items fill in once Clerk has loaded, and they grow to the
+            left, into the spacer. The theme switch (the menu button below sm,
+            where the menu holds the switch) is last, so it stays at the right
+            edge and nothing in the header moves when they appear. */}
+        <HeaderAuth />
+        <MobileMenu />
+        <div className="hidden sm:block">
+          <ThemeToggle />
+        </div>
+      </Container>
+    </HeaderFrame>
   );
 }
