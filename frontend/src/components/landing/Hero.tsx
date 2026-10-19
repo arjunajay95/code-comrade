@@ -45,10 +45,12 @@ export function Hero() {
       </div>
 
       {/* For contrast only. It covers the whole hero and fades out inside it,
-          so no edge of it shows. */}
+          so no edge of it shows. The dark class makes its background token the
+          dark one in both themes. Without it, the light theme would paint a
+          light scrim over text that is always light. */}
       <div
         aria-hidden
-        className="hero-scrim pointer-events-none absolute inset-0 -z-10"
+        className="dark hero-scrim pointer-events-none absolute inset-0 -z-10"
       />
 
       <div className="dark relative flex w-full items-center text-foreground dark:pt-14">
