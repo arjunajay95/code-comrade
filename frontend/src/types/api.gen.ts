@@ -252,7 +252,7 @@ export interface paths {
         };
         /**
          * Personalized feed
-         * @description The most recent 200 submissions by other users, ranked by overlap with the signed-in user's technology stack blended with recency. A user with no technologies gets recency order.  The user's own submissions are excluded; they appear in the public feed and in /users/me/submissions.
+         * @description The most recent 200 submissions by other users, ranked by overlap with the signed-in user's technology stack blended with recency. A user with no technologies gets recency order.  The user's own submissions are excluded; they appear in the public feed and in /users/me/submissions. The same search and technologies filters as the public feed apply inside the window, before scoring, so the window is the most recent 200 matching submissions by other users, and meta.totalItems is its size.
          */
         get: operations["listPersonalizedFeed"];
         put?: never;
@@ -1181,6 +1181,10 @@ export interface operations {
                 page?: components["parameters"]["Page"];
                 /** @description Above 50 is rejected with 400, never clamped. */
                 limit?: components["parameters"]["Limit"];
+                /** @description Case-insensitive match against title and description. */
+                search?: string;
+                /** @description Comma-separated technology names. Returns submissions with any of them. Names are trimmed, lowercased and de-duplicated, up to 10. */
+                technologies?: string;
                 /** @description Set to 1 for a score breakdown per item. Ignored in production. */
                 debug?: "1";
             };
