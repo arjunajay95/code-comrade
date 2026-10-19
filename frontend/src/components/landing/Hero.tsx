@@ -12,9 +12,10 @@ import { HeroReviewCard } from "./HeroReviewCard";
 // 100vw, so the browser picks a candidate that is sharp at that width.
 //
 // Below md the layer is the portrait crop (1680 by 2984, 0.563 wide for its
-// height) at a height of about the hero content (638px with the padding and
-// the 3.5rem under the header) plus the 60vh bleed, and cover scales it by
-// height. The width it renders at is that height times 0.563.
+// height) at a height of about the hero content plus the 60vh bleed, and cover
+// scales it by height. The width it renders at is that height times 0.563. The
+// content is about 550px tall on a 412px phone (measured, with the padding and
+// the 3.5rem under the header), so 560px is used.
 //
 // From md the layer is the landscape photo (4717 by 2984, 1.581) at a height
 // of the hero (min-h, up to 56rem) plus 3.5rem plus the 60vh bleed. It renders
@@ -23,7 +24,7 @@ import { HeroReviewCard } from "./HeroReviewCard";
 // Light mode has no bleed, so it needs less than these. The sizes cover the
 // dark layout, which is the larger one, so light downloads a candidate that is
 // at least as sharp as it needs.
-const MOBILE_SIZES = "calc((638px + 60vh) * 0.563)";
+const MOBILE_SIZES = "calc((560px + 60vh) * 0.563)";
 const DESKTOP_SIZES =
   "max(100vw, calc((min(100vh - 3.5rem, 56rem) + 3.5rem + 60vh) * 1.581))";
 const DESKTOP_MEDIA = "(min-width: 48rem)";
@@ -31,6 +32,7 @@ const MOBILE_MEDIA = "not all and (min-width: 48rem)";
 
 const imageOptions = {
   alt: "",
+  quality: 65,
   fill: true,
   placeholder: "blur",
   loading: "eager",
