@@ -64,6 +64,11 @@ function CopyButton({ code }: { code: string }) {
   );
 }
 
+// The glass surface of D-41, the same wherever a code block appears: a
+// translucent tinted fill, a faint grid, the top highlight and a light border
+// (the code-surface class). It blurs what is behind it only where it sits over
+// imagery, which the caller asks for with blur.
+//
 // A code block that scrolls sideways inside its own box, so a long line never
 // widens the page. The box is min-w-0 and max-w-full for the same reason.
 export function CodeBlock({
@@ -71,6 +76,9 @@ export function CodeBlock({
   language,
   header = true,
   size = "md",
+  maxLines,
+  decorative = false,
+  blur = false,
   className,
 }: {
   code: string;
@@ -78,31 +86,54 @@ export function CodeBlock({
   // Off for small illustrations, which also drops the copy button.
   header?: boolean;
   size?: "md" | "sm";
+  // Only the first lines, for a preview.
+  maxLines?: number;
+  // A preview that is not part of the reading order: hidden from assistive
+  // technology, ignores the pointer so a link around it still works, does not
+  // scroll, and fades out at its right edge.
+  decorative?: boolean;
+  blur?: boolean;
   className?: string;
 }) {
   const lines = tokenizeLines(code, language);
-  const rows = lines.length > 0 ? lines : [null];
+  const all = lines.length > 0 ? lines : [null];
+  const rows = maxLines ? all.slice(0, maxLines) : all;
 
   return (
     <div
+      aria-hidden={decorative || undefined}
       className={cn(
-        "min-w-0 max-w-full overflow-hidden rounded-lg border bg-code text-code-foreground",
+        "code-surface min-w-0 max-w-full overflow-hidden rounded-lg border text-code-foreground",
+        blur && "backdrop-blur-sm",
+        decorative && "pointer-events-none",
         className,
       )}
     >
       {header && (
-        <div className="flex h-9 items-center justify-between gap-3 border-b px-3">
-          <span className="font-mono text-micro text-muted-foreground">
-            {language ?? ""}
-          </span>
+        <div className="flex h-8 items-center justify-between gap-3 border-b px-3">
+          {language ? (
+            <span className="rounded-full border bg-muted/40 px-2 font-mono text-micro text-muted-foreground">
+              {language}
+            </span>
+          ) : (
+            <span />
+          )}
           <CopyButton code={code} />
         </div>
       )}
       <div
-        className="overflow-x-auto"
-        tabIndex={0}
-        role="region"
-        aria-label={language ? `${language} code` : "Code"}
+        className={cn(
+          decorative
+            ? "overflow-hidden mask-[linear-gradient(to_right,#000_75%,transparent)]"
+            : "overflow-x-auto",
+        )}
+        {...(decorative
+          ? {}
+          : {
+              tabIndex: 0,
+              role: "region",
+              "aria-label": language ? `${language} code` : "Code",
+            })}
       >
         <pre
           className={cn(
@@ -116,13 +147,16 @@ export function CodeBlock({
             {rows.map((line, index) => (
               <span
                 key={index}
-                className={cn("flex", size === "md" ? "min-h-6" : "min-h-5")}
+                className={cn(
+                  "code-line flex",
+                  size === "md" ? "min-h-6" : "min-h-5",
+                )}
               >
                 <span
                   aria-hidden
                   className={cn(
-                    "shrink-0 select-none pr-3 text-right text-muted-foreground/70",
-                    size === "md" ? "w-10" : "w-8",
+                    "mr-3 shrink-0 select-none border-r pr-3 text-right text-code-gutter",
+                    size === "md" ? "w-11" : "w-9",
                   )}
                 >
                   {index + 1}

@@ -4,7 +4,8 @@ import Link from "next/link";
 import * as m from "motion/react-m";
 import { CodeXml } from "lucide-react";
 import { KarmaChip } from "@/components/karma/KarmaChip";
-import { excerpt, hasCode } from "@/lib/formattedText";
+import { CodeBlock } from "@/components/text/CodeBlock";
+import { excerpt, firstCodeBlock, proseExcerpt } from "@/lib/formattedText";
 import { timeAgo } from "@/lib/time";
 import type { FeedItem } from "@/services/feed";
 import { ReviewStatus } from "./ReviewStatus";
@@ -23,7 +24,10 @@ const STAGGER_LIMIT = 9;
 // Heights are fixed on purpose, so FeedItemSkeleton can match them exactly:
 // a 24px title line, a 48px description, a 24px tag line, and a 37px author
 // row (1px border, 12px padding, a 24px line). With the 20px padding and the
-// 1px border around it, a card is 215px tall at every width.
+// 1px border around it, a card is 215px tall at every width. A card with code
+// swaps the 48px description for a 24px prose line, if there is prose, and a
+// code preview of up to three lines (78px with three, 58px with two), so it is
+// taller by a fixed amount: 257px in the landing example.
 export function FeedItemRow({
   item,
   index,
@@ -36,6 +40,8 @@ export function FeedItemRow({
   animateIn: boolean;
 }) {
   const matched = new Set(item.matchedTechnologies);
+  const code = firstCodeBlock(item.description);
+  const prose = proseExcerpt(item.description);
 
   return (
     <m.li
@@ -61,20 +67,46 @@ export function FeedItemRow({
           </Link>
         </h2>
         <span className="relative z-10 flex shrink-0 items-center gap-2">
-          {hasCode(item.description) && (
-            <CodeXml
+          {code && (
+            <span
               role="img"
               aria-label="Includes code"
-              className="size-4 text-muted-foreground"
-            />
+              className="inline-flex h-5 items-center gap-1 rounded-full border bg-muted/50 px-2 font-mono text-micro text-muted-foreground"
+            >
+              <CodeXml className="size-3" aria-hidden />
+              {code.language ?? "code"}
+            </span>
           )}
           <ReviewStatus status={item.status} reviewCount={item.reviewCount} />
         </span>
       </div>
 
-      <p className="mt-2 line-clamp-2 h-12 text-body text-muted-foreground">
-        {excerpt(item.description)}
-      </p>
+      {code ? (
+        <>
+          {/* A card with code: one line of prose, if there is any, and a
+              three-line preview of the first block. With no prose the line is
+              left out, so there is no empty gap, and the language is in the
+              badge above. */}
+          {prose && (
+            <p className="mt-2 h-6 truncate text-body text-muted-foreground">
+              {prose}
+            </p>
+          )}
+          <CodeBlock
+            code={code.code}
+            language={code.language}
+            header={false}
+            size="sm"
+            maxLines={3}
+            decorative
+            className="mt-2"
+          />
+        </>
+      ) : (
+        <p className="mt-2 line-clamp-2 h-12 text-body text-muted-foreground">
+          {excerpt(item.description)}
+        </p>
+      )}
 
       <TechnologyTagRow
         technologies={item.technologies}

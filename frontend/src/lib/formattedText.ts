@@ -92,12 +92,22 @@ export function hasCode(input: string): boolean {
   return parseFormattedText(input).some((block) => block.type === "code");
 }
 
+export function firstCodeBlock(
+  input: string,
+): { language: string | null; code: string } | null {
+  for (const block of parseFormattedText(input)) {
+    if (block.type === "code") {
+      return { language: block.language, code: block.code };
+    }
+  }
+  return null;
+}
+
 // Plain text for a preview: code blocks removed, inline backticks dropped but
 // their text kept, whitespace collapsed. If only code is left, the first line
 // of the first code block stands in for it.
-export function excerpt(input: string): string {
-  const blocks = parseFormattedText(input);
-  const text = blocks
+export function proseExcerpt(input: string): string {
+  return parseFormattedText(input)
     .flatMap((block) =>
       block.type === "paragraph"
         ? [block.segments.map((segment) => segment.value).join("")]
@@ -106,9 +116,13 @@ export function excerpt(input: string): string {
     .join(" ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+export function excerpt(input: string): string {
+  const text = proseExcerpt(input);
   if (text) return text;
 
-  for (const block of blocks) {
+  for (const block of parseFormattedText(input)) {
     if (block.type !== "code") continue;
     const first = block.code.split("\n").find((line) => line.trim() !== "");
     if (first) return first.trim();

@@ -15,9 +15,12 @@ const WRAP = "[overflow-wrap:anywhere]";
 export function FormattedText({
   text,
   className,
+  blurCode = false,
 }: {
   text: string;
   className?: string;
+  // Blur behind code blocks, for text that sits over imagery.
+  blurCode?: boolean;
 }) {
   const blocks = parseFormattedText(text);
 
@@ -25,7 +28,12 @@ export function FormattedText({
     <div className={cn("min-w-0 space-y-3", className)}>
       {blocks.map((block, index) =>
         block.type === "code" ? (
-          <CodeBlock key={index} code={block.code} language={block.language} />
+          <CodeBlock
+            key={index}
+            code={block.code}
+            language={block.language}
+            blur={blurCode}
+          />
         ) : (
           <p key={index} className={cn("whitespace-pre-line", WRAP)}>
             {block.segments.map((segment, segmentIndex) =>
