@@ -18,7 +18,7 @@ export function ReviewStatus({
         aria-hidden
         className={cn(
           "size-1.5 rounded-full",
-          pending ? "bg-amber-500" : "bg-addition",
+          pending ? "bg-pending" : "bg-addition",
         )}
       />
       <span className={pending ? "text-foreground" : "text-muted-foreground"}>
