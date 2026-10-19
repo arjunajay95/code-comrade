@@ -22,7 +22,7 @@ export function LandingActions({
         className={cn(
           buttonVariants({ variant: "outline", size: "lg" }),
           overPhoto &&
-            "border-white/25 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white dark:bg-white/10 dark:hover:bg-white/20",
+            "border-foreground/25 bg-foreground/10 text-foreground backdrop-blur-sm hover:bg-foreground/20 hover:text-foreground dark:bg-foreground/10 dark:hover:bg-foreground/20",
         )}
       >
         Sign up

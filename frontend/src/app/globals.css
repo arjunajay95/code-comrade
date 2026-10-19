@@ -46,6 +46,8 @@
   --color-pending: var(--pending);
   --color-code: var(--code-bg);
   --color-code-foreground: var(--code-fg);
+  --color-code-gutter: var(--code-gutter);
+  --color-hero-sky: var(--hero-sky);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -91,38 +93,38 @@
 }
 
 :root {
-  --background: oklch(0.987 0.002 197.1);
-  --foreground: oklch(0.148 0.004 228.8);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.148 0.004 228.8);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.148 0.004 228.8);
+  --background: oklch(0.987 0.006 205);
+  --foreground: oklch(0.148 0.012 205);
+  --card: oklch(0.997 0.003 205);
+  --card-foreground: oklch(0.148 0.012 205);
+  --popover: oklch(0.997 0.003 205);
+  --popover-foreground: oklch(0.148 0.012 205);
   --primary: var(--foreground);
   --primary-foreground: var(--background);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.963 0.002 197.1);
-  --muted-foreground: oklch(0.56 0.021 213.5);
-  --accent: oklch(0.963 0.002 197.1);
-  --accent-foreground: oklch(0.218 0.008 223.9);
+  --secondary: oklch(0.965 0.006 205);
+  --secondary-foreground: oklch(0.21 0.012 205);
+  --muted: oklch(0.963 0.008 205);
+  --muted-foreground: oklch(0.55 0.02 205);
+  --accent: oklch(0.963 0.008 205);
+  --accent-foreground: oklch(0.218 0.012 205);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.925 0.005 214.3);
-  --input: oklch(0.925 0.005 214.3);
-  --ring: oklch(0.723 0.014 214.4);
-  --chart-1: oklch(0.872 0.007 219.6);
-  --chart-2: oklch(0.56 0.021 213.5);
-  --chart-3: oklch(0.45 0.017 213.2);
-  --chart-4: oklch(0.378 0.015 216);
-  --chart-5: oklch(0.275 0.011 216.9);
+  --border: oklch(0.925 0.01 205);
+  --input: oklch(0.925 0.01 205);
+  --ring: oklch(0.723 0.02 205);
+  --chart-1: oklch(0.872 0.01 205);
+  --chart-2: oklch(0.56 0.02 205);
+  --chart-3: oklch(0.45 0.017 205);
+  --chart-4: oklch(0.378 0.015 205);
+  --chart-5: oklch(0.275 0.012 205);
   --radius: 0.625rem;
-  --sidebar: oklch(0.987 0.002 197.1);
-  --sidebar-foreground: oklch(0.148 0.004 228.8);
+  --sidebar: oklch(0.987 0.006 205);
+  --sidebar-foreground: oklch(0.148 0.012 205);
   --sidebar-primary: oklch(0.627 0.194 149.214);
   --sidebar-primary-foreground: oklch(0.982 0.018 155.826);
-  --sidebar-accent: oklch(0.963 0.002 197.1);
-  --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
-  --sidebar-border: oklch(0.925 0.005 214.3);
-  --sidebar-ring: oklch(0.723 0.014 214.4);
+  --sidebar-accent: oklch(0.963 0.008 205);
+  --sidebar-accent-foreground: oklch(0.218 0.012 205);
+  --sidebar-border: oklch(0.925 0.01 205);
+  --sidebar-ring: oklch(0.723 0.02 205);
   /* The green of an added line in a diff. Used for karma, which the platform
      treats as contribution, the same way a review tool shows +12 lines. */
   --addition: oklch(0.527 0.154 150.069);
@@ -130,79 +132,88 @@
   --pending: oklch(0.72 0.17 65);
   /* The page atmosphere (D-40): a dot grid and a glow at the top. Neutral
      on purpose, since green is reserved for contribution. */
-  --atmosphere-dot: oklch(0.148 0.004 228.8 / 10%);
-  --atmosphere-glow: oklch(0.148 0.004 228.8 / 5%);
+  --atmosphere-dot: oklch(0.25 0.03 205 / 10%);
+  --atmosphere-glow: oklch(0.5 0.07 205 / 5%);
   /* The fine highlight along the top edge of a glass card. */
-  --glass-highlight: oklch(1 0 0 / 100%);
+  --glass-highlight: oklch(1 0.01 205 / 100%);
   /* The code palette (D-41): neutral tones plus two low-chroma accents, a
      blue for keywords and a rose for strings. Never the addition green or the
      pending amber. The --sh-* names are the ones sugar-high writes into its
      token styles. */
-  --code-bg: oklch(0.962 0.003 214);
-  --code-fg: oklch(0.25 0.01 220);
-  --sh-identifier: oklch(0.25 0.01 220);
+  --code-bg: oklch(0.955 0.012 205 / 72%);
+  --code-fg: oklch(0.25 0.012 205);
+  --sh-identifier: oklch(0.25 0.012 205);
   --sh-keyword: oklch(0.45 0.12 265);
   --sh-string: oklch(0.5 0.1 15);
   --sh-class: oklch(0.42 0.07 265);
-  --sh-property: oklch(0.3 0.01 220);
+  --sh-property: oklch(0.3 0.012 205);
   --sh-entity: oklch(0.42 0.07 265);
   --sh-jsxliterals: oklch(0.45 0.12 265);
-  --sh-sign: oklch(0.5 0.01 220);
-  --sh-comment: oklch(0.55 0.012 220);
+  --sh-sign: oklch(0.5 0.014 205);
+  --sh-comment: oklch(0.52 0.014 205);
   --sh-break: inherit;
   --sh-space: inherit;
+  /* The sky of the hero photo, sampled from its upper right. The hero sample
+     card glows in it. */
+  --hero-sky: #30616c;
+  --code-grid: oklch(0.3 0.03 205 / 7%);
+  --code-line-hover: oklch(0.3 0.03 205 / 6%);
+  --code-gutter: oklch(0.5 0.015 205);
 }
 
 .dark {
-  --background: oklch(0.148 0.004 228.8);
-  --foreground: oklch(0.987 0.002 197.1);
-  --card: oklch(0.218 0.008 223.9);
-  --card-foreground: oklch(0.987 0.002 197.1);
-  --popover: oklch(0.218 0.008 223.9);
-  --popover-foreground: oklch(0.987 0.002 197.1);
+  --background: oklch(0.148 0.01 205);
+  --foreground: oklch(0.987 0.01 205);
+  --card: oklch(0.218 0.012 205);
+  --card-foreground: oklch(0.987 0.01 205);
+  --popover: oklch(0.218 0.012 205);
+  --popover-foreground: oklch(0.987 0.01 205);
   --primary: var(--foreground);
   --primary-foreground: var(--background);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.275 0.011 216.9);
-  --muted-foreground: oklch(0.723 0.014 214.4);
-  --accent: oklch(0.275 0.011 216.9);
-  --accent-foreground: oklch(0.987 0.002 197.1);
+  --secondary: oklch(0.274 0.01 205);
+  --secondary-foreground: oklch(0.985 0.008 205);
+  --muted: oklch(0.275 0.014 205);
+  --muted-foreground: oklch(0.723 0.02 205);
+  --accent: oklch(0.275 0.014 205);
+  --accent-foreground: oklch(0.987 0.01 205);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.56 0.021 213.5);
-  --chart-1: oklch(0.872 0.007 219.6);
-  --chart-2: oklch(0.56 0.021 213.5);
-  --chart-3: oklch(0.45 0.017 213.2);
-  --chart-4: oklch(0.378 0.015 216);
-  --chart-5: oklch(0.275 0.011 216.9);
-  --sidebar: oklch(0.218 0.008 223.9);
-  --sidebar-foreground: oklch(0.987 0.002 197.1);
+  --border: oklch(0.96 0.03 205 / 10%);
+  --input: oklch(0.96 0.03 205 / 15%);
+  --ring: oklch(0.56 0.025 205);
+  --chart-1: oklch(0.872 0.01 205);
+  --chart-2: oklch(0.56 0.021 205);
+  --chart-3: oklch(0.45 0.017 205);
+  --chart-4: oklch(0.378 0.015 205);
+  --chart-5: oklch(0.275 0.014 205);
+  --sidebar: oklch(0.218 0.012 205);
+  --sidebar-foreground: oklch(0.987 0.01 205);
   --sidebar-primary: oklch(0.723 0.219 149.579);
   --sidebar-primary-foreground: oklch(0.982 0.018 155.826);
-  --sidebar-accent: oklch(0.275 0.011 216.9);
-  --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.56 0.021 213.5);
+  --sidebar-accent: oklch(0.275 0.014 205);
+  --sidebar-accent-foreground: oklch(0.987 0.01 205);
+  --sidebar-border: oklch(0.96 0.03 205 / 10%);
+  --sidebar-ring: oklch(0.56 0.025 205);
   --addition: oklch(0.723 0.219 149.579);
   --pending: oklch(0.8 0.165 75);
-  --atmosphere-dot: oklch(0.987 0.002 197.1 / 8%);
-  --atmosphere-glow: oklch(94.986% 0.07506 162.94 / 0.07);
-  --glass-highlight: oklch(1 0 0 / 8%);
-  --code-bg: oklch(0.17 0.005 228);
-  --code-fg: oklch(0.9 0.005 220);
-  --sh-identifier: oklch(0.9 0.005 220);
+  --atmosphere-dot: oklch(0.95 0.03 205 / 8%);
+  --atmosphere-glow: oklch(0.85 0.09 205 / 7%);
+  --glass-highlight: oklch(0.97 0.025 205 / 10%);
+  --code-bg: oklch(0.26 0.02 205 / 78%);
+  --code-fg: oklch(0.92 0.012 205);
+  --sh-identifier: oklch(0.92 0.012 205);
   --sh-keyword: oklch(0.78 0.09 265);
   --sh-string: oklch(0.78 0.08 20);
   --sh-class: oklch(0.82 0.05 265);
-  --sh-property: oklch(0.86 0.01 220);
+  --sh-property: oklch(0.88 0.012 205);
   --sh-entity: oklch(0.82 0.05 265);
   --sh-jsxliterals: oklch(0.78 0.09 265);
-  --sh-sign: oklch(0.68 0.01 220);
-  --sh-comment: oklch(0.62 0.012 220);
+  --sh-sign: oklch(0.74 0.02 205);
+  --sh-comment: oklch(0.7 0.02 205);
   --sh-break: inherit;
   --sh-space: inherit;
+  --code-grid: oklch(0.95 0.03 205 / 6%);
+  --code-line-hover: oklch(0.95 0.03 205 / 6%);
+  --code-gutter: oklch(0.7 0.02 205);
 }
 
 @layer base {
@@ -414,6 +425,45 @@
 
     .spotlight:hover::before {
       opacity: 1;
+    }
+  }
+}
+
+/* The D-41 code surface: glass with a faint grid. The fill and the grid are
+   tinted neutrals from the theme, so the block sits in the page's colour
+   temperature. Lines light up under a fine pointer only. */
+@layer components {
+  .code-surface {
+    background-color: var(--code-bg);
+    background-image:
+      linear-gradient(var(--code-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--code-grid) 1px, transparent 1px);
+    background-size: 16px 16px;
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .code-line:hover {
+      background-color: var(--code-line-hover);
+    }
+  }
+}
+
+/* The hero sample card (D-40). It rests turned about 12 degrees toward the hero
+   text and tipped 4, and TiltPanel adds up to 3 degrees toward the pointer
+   through --tilt-x and --tilt-y. The transition is dropped under reduced
+   motion, where those variables are never set. */
+@layer components {
+  .hero-tilt {
+    transform: perspective(1400px) rotateY(calc(-12deg + var(--tilt-y, 0deg)))
+      rotateX(calc(4deg + var(--tilt-x, 0deg)));
+    transition: transform 200ms ease-out;
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-tilt {
+      transition: none;
     }
   }
 }
