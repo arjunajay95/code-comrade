@@ -14,15 +14,15 @@ import { cn } from "@/lib/utils";
 import type { SubmissionSummary } from "@/services/users";
 
 // Both asides are timelines with one look: a 1px rail, items indented from it,
-// and a dot on the rail at each item. Every row is the same height whatever
-// its text, and the skeletons use the same classes, so nothing shifts when the
-// data arrives (D-36).
+// and a dot on the rail at each item. The aside is its own column, so rows
+// size to their text and cannot shift the feed. The changelog rows are static
+// and keep one fixed height.
 const TITLE = "text-heading font-medium";
 const MONTH =
   "flex h-5 items-center font-mono text-micro uppercase text-muted-foreground";
 const ROW_LINK =
-  "block h-[68px] rounded-md px-2 py-1.5 -mx-2 outline-none transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 motion-reduce:transition-none";
-const ITEM_TITLE = "line-clamp-2 h-10 text-small";
+  "block rounded-md px-2 py-1.5 -mx-2 outline-none transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 motion-reduce:transition-none";
+const ITEM_TITLE = "line-clamp-2 text-small";
 const ITEM_META = "block h-4 font-mono text-micro text-muted-foreground";
 const FOOTER_LINK =
   "inline-flex items-center gap-1 rounded-sm text-small text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50";
@@ -88,10 +88,11 @@ function PostsSkeleton() {
       <Rail>
         <Skeleton className="my-[2px] h-4 w-20" />
         {Array.from({ length: 2 }, (_, row) => (
-          <div key={row} className="relative h-[68px] py-1.5">
+          <div key={row} className="relative py-1.5">
             <Dot className="bg-muted" />
             <Skeleton className="h-5 w-4/5" />
-            <Skeleton className="mt-[22px] h-4 w-1/2" />
+            <Skeleton className="mt-1 h-5 w-3/5" />
+            <Skeleton className="mt-1 h-4 w-1/2" />
           </div>
         ))}
       </Rail>
@@ -213,11 +214,14 @@ function SignedOutAside() {
             {CHANGELOG.slice(0, 3).map((entry) => (
               <li key={entry.date} className="relative">
                 <Dot className="bg-muted-foreground/60" />
-                <Link href={`/changelog#${entry.date}`} className={ROW_LINK}>
+                <Link
+                  href={`/changelog#${entry.date}`}
+                  className={cn(ROW_LINK, "h-17")}
+                >
                   <span className={ITEM_META}>
                     {dateFormat.format(new Date(`${entry.date}T00:00:00Z`))}
                   </span>
-                  <span className={cn(ITEM_TITLE, "mt-0.5")}>
+                  <span className={cn(ITEM_TITLE, "mt-0.5 h-10")}>
                     {entry.title}
                   </span>
                 </Link>
