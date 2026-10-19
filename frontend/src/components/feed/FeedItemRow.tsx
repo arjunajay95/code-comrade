@@ -10,7 +10,9 @@ import { TechnologyTagRow } from "./TechnologyTagRow";
 
 // The personalized feed adds matchedTechnologies to each item. The public
 // feed does not, and there nothing is highlighted.
-type RowItem = FeedItem & { matchedTechnologies?: readonly string[] };
+export type FeedRowItem = FeedItem & {
+  matchedTechnologies?: readonly string[];
+};
 
 // The stagger stops growing after the tenth card, so a long page never waits.
 const STAGGER_SECONDS = 0.03;
@@ -25,7 +27,7 @@ export function FeedItemRow({
   index,
   animateIn,
 }: {
-  item: RowItem;
+  item: FeedRowItem;
   index: number;
   // False for the first list after the page loads, which can hold the LCP
   // element, so it must not start at zero opacity.

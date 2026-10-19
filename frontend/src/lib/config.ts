@@ -15,3 +15,12 @@ export const API_URL = apiUrl.replace(/\/+$/, "");
 // The public origin of the deployed site. Root metadata resolves relative
 // image and link URLs against it (D-40).
 export const SITE_URL = "https://codecomrade.vercel.app";
+
+export const SITE_DESCRIPTION =
+  "Post your code for review, review other developers' code, and earn karma for every review you write.";
+
+// The credit for the landing page hero photo, which the license asks us to show.
+export const HERO_CREDIT = {
+  name: "Daniel Leone",
+  url: "https://unsplash.com/photos/annapurna-peaks-under-stars-in-nepal-v7daTKlZzaw?utm_source=unsplash&utm_medium=referral&utm_content=creditShareLink",
+} as const;

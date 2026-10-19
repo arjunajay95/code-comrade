@@ -6,7 +6,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/shell/SiteFooter";
 import { SiteHeader } from "@/components/shell/SiteHeader";
-import { SITE_URL } from "@/lib/config";
+import { SITE_DESCRIPTION, SITE_URL } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { StackPickerHost } from "@/components/stack/StackPickerHost";
 
@@ -34,19 +34,16 @@ const instrumentSerif = Instrument_Serif({
   preload: false,
 });
 
-const DESCRIPTION =
-  "Post your code for review, review other developers' code, and earn karma for every review you write.";
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   // Pages set their own title, and it appears as "Sign in | CodeComrade".
   title: { default: "CodeComrade", template: "%s | CodeComrade" },
-  description: DESCRIPTION,
+  description: SITE_DESCRIPTION,
   // The share image comes from opengraph-image.png by file convention.
   openGraph: {
     type: "website",
     siteName: "CodeComrade",
-    description: DESCRIPTION,
+    description: SITE_DESCRIPTION,
   },
   twitter: { card: "summary_large_image" },
 };
