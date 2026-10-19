@@ -233,11 +233,32 @@
       rgb(0 0 0 / 0.97) 45%,
       #000 50%
     );
+    --hero-mask-x-md: linear-gradient(
+      to right,
+      transparent 0%,
+      rgb(0 0 0 / 0.03) 7%,
+      rgb(0 0 0 / 0.1) 14%,
+      rgb(0 0 0 / 0.35) 28%,
+      rgb(0 0 0 / 0.65) 42%,
+      rgb(0 0 0 / 0.9) 56%,
+      rgb(0 0 0 / 0.97) 63%,
+      #000 70%
+    );
   }
 
   .dark .hero-fade {
     -webkit-mask-image: var(--hero-mask-y);
     mask-image: var(--hero-mask-y);
+  }
+
+  /* From md the text is on the left, so the photo fades out on the left. */
+  @media (min-width: 48rem) {
+    .dark .hero-fade {
+      -webkit-mask-image: var(--hero-mask-x-md), var(--hero-mask-y);
+      mask-image: var(--hero-mask-x-md), var(--hero-mask-y);
+      -webkit-mask-composite: source-in;
+      mask-composite: intersect;
+    }
   }
 
   @media (min-width: 64rem) {
@@ -267,7 +288,7 @@
   @media (min-width: 48rem) {
     .hero-scrim {
       background: radial-gradient(
-        ellipse 60% 48% at 42% 50%,
+        ellipse max(55%, 30rem) 48% at 22.5rem 50%,
         color-mix(in oklab, var(--background) 85%, transparent) 0%,
         color-mix(in oklab, var(--background) 60%, transparent) 40%,
         color-mix(in oklab, var(--background) 25%, transparent) 70%,
@@ -280,9 +301,9 @@
     .hero-scrim {
       background: radial-gradient(
         ellipse 46% 48% at 36% 50%,
-        color-mix(in oklab, var(--background) 85%, transparent) 0%,
-        color-mix(in oklab, var(--background) 60%, transparent) 40%,
-        color-mix(in oklab, var(--background) 25%, transparent) 70%,
+        color-mix(in oklab, var(--background) 25%, transparent) 0%,
+        color-mix(in oklab, var(--background) 20%, transparent) 40%,
+        color-mix(in oklab, var(--background) 10%, transparent) 70%,
         transparent 100%
       );
     }
