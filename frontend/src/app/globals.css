@@ -212,11 +212,14 @@
     --hero-mask-y: linear-gradient(
       to bottom,
       #000 0%,
-      #000 55%,
-      rgb(0 0 0 / 0.9) 64%,
-      rgb(0 0 0 / 0.65) 73%,
-      rgb(0 0 0 / 0.35) 82%,
-      rgb(0 0 0 / 0.1) 91%,
+      #000 45%,
+      rgb(0 0 0 / 0.957) 51.9%,
+      rgb(0 0 0 / 0.844) 58.75%,
+      rgb(0 0 0 / 0.684) 65.6%,
+      rgb(0 0 0 / 0.5) 72.5%,
+      rgb(0 0 0 / 0.316) 79.4%,
+      rgb(0 0 0 / 0.156) 86.25%,
+      rgb(0 0 0 / 0.043) 93.1%,
       transparent 100%
     );
     --hero-mask-x: linear-gradient(
@@ -246,27 +249,52 @@
     }
   }
 
-  /* A soft scrim behind the hero text, for contrast only. It fades out
-     with eased stops and ends well inside its box, so it has no edge. */
+  /* A soft scrim behind the hero text, for contrast only. It fills the hero
+     box and its ellipse ends inside that box on every side, so it has no
+     edge. The text block sits left of centre from lg and in the middle below
+     it. */
   .hero-scrim {
-    background: radial-gradient(
-      ellipse 90% 46% at 50% 45%,
+    --hero-scrim: radial-gradient(
+      ellipse 90% 50% at 50% 52%,
       color-mix(in oklab, var(--background) 85%, transparent) 0%,
       color-mix(in oklab, var(--background) 60%, transparent) 40%,
       color-mix(in oklab, var(--background) 25%, transparent) 70%,
       transparent 100%
     );
+    background: var(--hero-scrim);
   }
 
   @media (min-width: 48rem) {
     .hero-scrim {
       background: radial-gradient(
-        ellipse 50% 85% at 30% 50%,
+        ellipse 60% 48% at 42% 50%,
         color-mix(in oklab, var(--background) 85%, transparent) 0%,
         color-mix(in oklab, var(--background) 60%, transparent) 40%,
         color-mix(in oklab, var(--background) 25%, transparent) 70%,
         transparent 100%
       );
     }
+  }
+
+  @media (min-width: 64rem) {
+    .hero-scrim {
+      background: radial-gradient(
+        ellipse 46% 48% at 36% 50%,
+        color-mix(in oklab, var(--background) 85%, transparent) 0%,
+        color-mix(in oklab, var(--background) 60%, transparent) 40%,
+        color-mix(in oklab, var(--background) 25%, transparent) 70%,
+        transparent 100%
+      );
+    }
+  }
+
+  /* The photo is the light source on the landing page in dark, so the page
+     glow goes and only the dot grid stays. */
+  .dark body:has([data-landing])::before {
+    background-image: radial-gradient(
+      var(--atmosphere-dot) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
   }
 }

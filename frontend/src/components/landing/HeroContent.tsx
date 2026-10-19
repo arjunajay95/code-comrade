@@ -12,7 +12,7 @@ export function HeroContent() {
     <div className="mx-auto max-w-2xl text-center md:mx-0 md:text-left">
       <p
         style={delay(0)}
-        className={`${ENTER} font-mono text-micro uppercase tracking-wider text-foreground md:text-muted-foreground`}
+        className={`${ENTER} font-mono text-micro uppercase tracking-wider text-foreground/80`}
       >
         Peer code review
       </p>
@@ -28,7 +28,7 @@ export function HeroContent() {
         developers who know your stack.
       </p>
       <div style={delay(2)} className={`${ENTER} mt-8`}>
-        <LandingActions className="justify-center md:justify-start" />
+        <LandingActions overPhoto className="justify-center md:justify-start" />
       </div>
     </div>
   );
