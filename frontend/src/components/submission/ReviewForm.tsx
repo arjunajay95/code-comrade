@@ -53,6 +53,7 @@ export function ReviewForm({ submissionId, criteria }: ReviewFormProps) {
     register,
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = form;
   const feedback = useWatch({ control, name: "feedback" });
@@ -89,7 +90,17 @@ export function ReviewForm({ submissionId, criteria }: ReviewFormProps) {
             htmlFor="feedback"
             error={errors.feedback?.message}
           >
-            <WritePreview value={feedback} maxLength={2000}>
+            <WritePreview
+              value={feedback}
+              maxLength={2000}
+              textareaId="feedback"
+              onTextChange={(next) =>
+                setValue("feedback", next, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
+            >
               <Textarea
                 id="feedback"
                 rows={6}

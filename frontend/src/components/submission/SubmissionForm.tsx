@@ -191,7 +191,17 @@ export function SubmissionForm({
           hint="Say what the code does and where you want a second pair of eyes."
           error={errors.description?.message}
         >
-          <WritePreview value={description} maxLength={2000}>
+          <WritePreview
+            value={description}
+            maxLength={2000}
+            textareaId="description"
+            onTextChange={(next) =>
+              setValue("description", next, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+          >
             <Textarea
               id="description"
               rows={5}
