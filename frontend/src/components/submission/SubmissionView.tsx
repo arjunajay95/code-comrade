@@ -85,7 +85,7 @@ export function SubmissionView({
               Open on GitHub
             </a>
             {actions}
-            <span className="min-w-0 truncate text-xs text-muted-foreground">
+            <span className="min-w-0 truncate font-mono text-xs text-muted-foreground">
               {repositoryPath}
             </span>
           </div>
@@ -131,7 +131,7 @@ export function SubmissionView({
             </span>
             <time
               dateTime={submission.createdAt}
-              className="shrink-0 text-muted-foreground"
+              className="shrink-0 font-mono text-muted-foreground"
             >
               {timeAgo(submission.createdAt)}
             </time>
@@ -223,7 +223,7 @@ function ReviewCard({
             </Link>
             <time
               dateTime={review.createdAt}
-              className="shrink-0 text-muted-foreground"
+              className="shrink-0 font-mono text-muted-foreground"
             >
               {timeAgo(review.createdAt)}
             </time>

@@ -18,7 +18,7 @@ export function KarmaChip({ value, size = "md", className }: KarmaChipProps) {
       title="Karma, earned by reviewing other people's code"
       aria-label={value === null ? "Loading karma" : `${value} karma`}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-1 rounded-md border bg-muted/50 tabular-nums",
+        "inline-flex shrink-0 items-center justify-center gap-1 rounded-md border bg-muted/50 font-mono tabular-nums",
         size === "md"
           ? "h-7 min-w-12 px-2 text-xs"
           : "h-5 min-w-9 px-1.5 text-[11px]",

@@ -114,7 +114,7 @@ export function FeedFilters() {
                 aria-pressed={isSelected}
                 onClick={() => toggleTechnology(technology.name)}
                 className={cn(
-                  "inline-flex h-7 items-center rounded-md border px-2 text-xs",
+                  "inline-flex h-7 items-center rounded-md border px-2 font-mono text-xs",
                   isSelected
                     ? "border-addition/40 bg-addition/10 text-addition"
                     : "bg-muted/50 text-muted-foreground hover:text-foreground",

@@ -54,7 +54,7 @@ export function PublicProfile({ username }: { username: string }) {
           <p className="mt-1 text-muted-foreground">{query.error.message}</p>
           {requestId && (
             <p className="mt-1 text-xs text-muted-foreground">
-              Reference: {requestId}
+              Reference: <span className="font-mono">{requestId}</span>
             </p>
           )}
           <Button

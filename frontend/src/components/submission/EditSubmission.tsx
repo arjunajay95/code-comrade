@@ -79,7 +79,8 @@ export function EditSubmission({ id }: { id: number }) {
           {submission.error instanceof ApiError &&
             submission.error.requestId && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Reference: {submission.error.requestId}
+                Reference:{" "}
+                <span className="font-mono">{submission.error.requestId}</span>
               </p>
             )}
           <Button

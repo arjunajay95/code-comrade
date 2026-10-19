@@ -61,7 +61,7 @@ export function FeedItemRow({ item }: { item: RowItem }) {
             </span>
             <time
               dateTime={item.createdAt}
-              className="shrink-0 text-muted-foreground"
+              className="shrink-0 font-mono text-muted-foreground"
             >
               {timeAgo(item.createdAt)}
             </time>

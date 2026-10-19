@@ -56,9 +56,13 @@ export function StackPickerForm({ initial, onDone }: StackPickerFormProps) {
             className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-destructive"
           >
             {mutation.error.message}
-            {mutation.error instanceof ApiError && mutation.error.requestId
-              ? ` (reference ${mutation.error.requestId})`
-              : ""}
+            {mutation.error instanceof ApiError && mutation.error.requestId && (
+              <>
+                {" (reference "}
+                <span className="font-mono">{mutation.error.requestId}</span>
+                {")"}
+              </>
+            )}
           </p>
         )}
       </div>

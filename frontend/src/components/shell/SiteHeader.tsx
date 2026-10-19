@@ -10,7 +10,7 @@ export function SiteHeader() {
   return (
     <header className="border-b">
       <div className="mx-auto flex h-14 max-w-3xl items-center gap-2 px-4">
-        <Link href="/" className="text-sm font-medium">
+        <Link href="/" className="font-mono text-sm font-medium">
           <span className="text-muted-foreground">~/</span>codecomrade
         </Link>
 

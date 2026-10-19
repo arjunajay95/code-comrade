@@ -52,7 +52,7 @@ export function PagedList<T extends { id: number }>({
           <p className="mt-1 text-muted-foreground">{query.error.message}</p>
           {requestId && (
             <p className="mt-1 text-xs text-muted-foreground">
-              Reference: {requestId}
+              Reference: <span className="font-mono">{requestId}</span>
             </p>
           )}
           <Button
@@ -184,7 +184,7 @@ export function SubmissionSummaryCard({
           </span>
           <time
             dateTime={submission.createdAt}
-            className="shrink-0 text-muted-foreground"
+            className="shrink-0 font-mono text-muted-foreground"
           >
             {timeAgo(submission.createdAt)}
           </time>
@@ -212,7 +212,7 @@ export function ReviewSummaryCard({ review }: { review: ReviewSummary }) {
           </span>
           <time
             dateTime={review.createdAt}
-            className="shrink-0 text-muted-foreground"
+            className="shrink-0 font-mono text-muted-foreground"
           >
             {timeAgo(review.createdAt)}
           </time>

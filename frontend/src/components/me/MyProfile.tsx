@@ -43,7 +43,8 @@ export function MyProfile() {
             <p className="mt-1 text-muted-foreground">{me.error.message}</p>
             {me.error instanceof ApiError && me.error.requestId && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Reference: {me.error.requestId}
+                Reference:{" "}
+                <span className="font-mono">{me.error.requestId}</span>
               </p>
             )}
             <Button

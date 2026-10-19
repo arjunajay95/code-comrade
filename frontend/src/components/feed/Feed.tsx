@@ -265,7 +265,7 @@ function FeedError({
         </p>
         {requestId && (
           <p className="mt-1 text-xs text-muted-foreground">
-            Reference: {requestId}
+            Reference: <span className="font-mono">{requestId}</span>
           </p>
         )}
         <Button variant="outline" className="mt-3" onClick={onRetry}>

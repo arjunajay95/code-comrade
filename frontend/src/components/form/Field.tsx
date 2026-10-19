@@ -40,7 +40,13 @@ export function FormError({ error }: { error: Error | null }) {
       className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-destructive"
     >
       {error.message}
-      {requestId ? ` (reference ${requestId})` : ""}
+      {requestId && (
+        <>
+          {" (reference "}
+          <span className="font-mono">{requestId}</span>
+          {")"}
+        </>
+      )}
     </p>
   );
 }
