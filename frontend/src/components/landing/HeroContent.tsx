@@ -30,7 +30,7 @@ export function HeroContent() {
       </h1>
       <p
         style={delay(1)}
-        className={`${ENTER} mx-auto mt-6 max-w-xl text-heading text-foreground md:mx-0`}
+        className={`${ENTER} mx-auto mt-5 max-w-[34rem] text-base/[1.65] text-foreground/85 md:mx-0 md:text-[1.0625rem]/[1.65]`}
       >
         Write reviews to earn karma, and get feedback on your own code from
         developers who know your stack.

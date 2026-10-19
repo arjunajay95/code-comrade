@@ -55,7 +55,11 @@ export function ReviewSection({
   }
 
   const username = me.data?.username;
-  const isAuthor = username === submission.author.username;
+  // On the user's own post the review section is not shown at all. The header
+  // says whose post it is. The API still answers a self-review with 403, so
+  // this is a courtesy only (AUTHORIZATION_MATRIX §6).
+  if (username === submission.author.username) return null;
+
   const ownReview = submission.reviews.find(
     (review) => review.reviewer === username,
   );
@@ -73,15 +77,6 @@ export function ReviewSection({
     <ReviewForm
       submissionId={submission.id}
       criteria={submission.criteria.map(({ id, label }) => ({ id, label }))}
-      disabled={isAuthor}
-      notice={
-        isAuthor
-          ? {
-              title: "This is your submission",
-              text: "You cannot review your own code. Other developers can.",
-            }
-          : undefined
-      }
     />
   );
 }
