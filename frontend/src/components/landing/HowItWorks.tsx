@@ -19,8 +19,8 @@ function Well({ children }: { children: ReactNode }) {
     <div
       aria-hidden
       className={cn(
-        "pointer-events-none h-36 overflow-hidden rounded-xl border bg-black/5 p-3 dark:bg-black/30",
-        "shadow-[inset_0_2px_6px_rgb(0_0_0/0.08)] dark:shadow-[inset_0_2px_6px_rgb(0_0_0/0.35)]",
+        "pointer-events-none h-36 overflow-hidden rounded-xl border bg-background/50 p-3",
+        "shadow-[inset_0_2px_6px_oklch(0.2_0.03_205/0.1)] dark:shadow-[inset_0_2px_6px_oklch(0.05_0.02_205/0.5)]",
         "mask-[linear-gradient(to_bottom,#000_60%,transparent)]",
       )}
     >
@@ -76,7 +76,7 @@ const RANKED = [
     hits: 2,
   },
   { title: "Optimistic updates hook", tags: ["react", "typescript"], hits: 2 },
-  { title: "Worker pool with shutdown", tags: ["go", "docker"], hits: 0 },
+  { title: "Worker pool in Go", tags: ["go", "docker"], hits: 0 },
 ];
 
 function MiniRankedList() {
@@ -148,13 +148,16 @@ export function HowItWorks() {
             Three steps, and every review you write counts.
           </p>
         </div>
-        <ol className="mt-12 grid gap-4 md:grid-cols-3">
+        <ol className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
           {STEPS.map((step) => {
             const Icon = step.icon;
             return (
-              <li key={step.number} className="flex">
-                <Spotlight className="w-full rounded-xl">
-                  <Surface glass className="relative flex h-full flex-col p-6">
+              <li key={step.number} className="flex min-w-0">
+                <Spotlight className="w-full min-w-0 rounded-xl">
+                  <Surface
+                    glass
+                    className="relative flex h-full min-w-0 flex-col p-6"
+                  >
                     <span
                       aria-hidden
                       className="absolute top-5 right-6 select-none font-display text-[3.5rem] leading-none text-muted-foreground"
