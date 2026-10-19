@@ -4,6 +4,7 @@ import Link from "next/link";
 import * as m from "motion/react-m";
 import { CodeXml } from "lucide-react";
 import { KarmaChip } from "@/components/karma/KarmaChip";
+import { MonogramAvatar } from "@/components/profile/MonogramAvatar";
 import { CodeBlock } from "@/components/text/CodeBlock";
 import { excerpt, firstCodeBlock, proseExcerpt } from "@/lib/formattedText";
 import { timeAgo } from "@/lib/time";
@@ -13,7 +14,10 @@ import { TechnologyTagRow } from "./TechnologyTagRow";
 
 // The personalized feed adds matchedTechnologies to each item. The public
 // feed does not, and there nothing is highlighted.
-export type FeedRowItem = FeedItem & {
+// The description is optional, so /me/posts can show a post from an API that
+// does not send it yet, and the card then has no description row.
+export type FeedRowItem = Omit<FeedItem, "description"> & {
+  description?: string;
   matchedTechnologies?: readonly string[];
 };
 
@@ -40,8 +44,9 @@ export function FeedItemRow({
   animateIn: boolean;
 }) {
   const matched = new Set(item.matchedTechnologies);
-  const code = firstCodeBlock(item.description);
-  const prose = proseExcerpt(item.description);
+  const { description } = item;
+  const code = description ? firstCodeBlock(description) : null;
+  const prose = description ? proseExcerpt(description) : "";
 
   return (
     <m.li
@@ -52,7 +57,7 @@ export function FeedItemRow({
         ease: "easeOut",
         delay: Math.min(index, STAGGER_LIMIT) * STAGGER_SECONDS,
       }}
-      className="relative rounded-xl border bg-card/60 p-5 transition-colors hover:border-foreground/20 hover:bg-card has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring/50"
+      className="relative rounded-xl border bg-card/60 p-5 transition-[color,background-color,border-color,translate] hover:-translate-y-0.5 hover:border-foreground/30 hover:bg-card motion-reduce:hover:translate-y-0 has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring/50"
     >
       <div className="flex h-6 items-center justify-between gap-3">
         <h2 className="min-w-0 truncate text-heading font-medium">
@@ -81,7 +86,7 @@ export function FeedItemRow({
         </span>
       </div>
 
-      {code ? (
+      {description === undefined ? null : code ? (
         <>
           {/* A card with code: one line of prose, if there is any, and a
               three-line preview of the first block. With no prose the line is
@@ -104,7 +109,7 @@ export function FeedItemRow({
         </>
       ) : (
         <p className="mt-2 line-clamp-2 h-12 text-body text-muted-foreground">
-          {excerpt(item.description)}
+          {excerpt(description)}
         </p>
       )}
 
@@ -116,6 +121,7 @@ export function FeedItemRow({
 
       <div className="mt-4 border-t pt-3">
         <div className="flex h-6 items-center gap-2">
+          <MonogramAvatar username={item.author.username} size={20} />
           <Link
             href={`/profile/${item.author.username}`}
             className="relative z-10 min-w-0 truncate text-small text-foreground underline-offset-4 hover:underline"

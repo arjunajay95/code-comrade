@@ -70,8 +70,8 @@ export function FeedFilters() {
       <div className="flex gap-2">
         <Input
           type="search"
-          aria-label="Search submissions"
-          placeholder="Search submissions"
+          aria-label="Search posts"
+          placeholder="Search posts"
           maxLength={100}
           value={text}
           onChange={(event) => setText(event.target.value)}

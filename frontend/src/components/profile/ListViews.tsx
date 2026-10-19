@@ -1,12 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { CodeXml } from "lucide-react";
 import { FeedPagination } from "@/components/feed/FeedPagination";
-import { ReviewStatus } from "@/components/feed/ReviewStatus";
-import { TechnologyTagRow } from "@/components/feed/TechnologyTagRow";
 import { ErrorCard, StateCard } from "@/components/shell/StateCard";
 import { STRETCHED_LINK, Surface } from "@/components/shell/Surface";
 import { RatingPips } from "@/components/submission/RatingPips";
@@ -16,7 +14,7 @@ import { excerpt, hasCode } from "@/lib/formattedText";
 import { timeAgo } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import type { PageMeta } from "@/services/feed";
-import type { ReviewSummary, SubmissionSummary } from "@/services/users";
+import type { ReviewSummary } from "@/services/users";
 
 export const LIST_PAGE_SIZE = 10;
 
@@ -32,6 +30,9 @@ interface PagedListProps<T> {
   // mirror the card renderItem returns.
   skeleton: ReactNode;
   renderItem: (item: T) => ReactNode;
+  // For items that render their own li, such as FeedItemRow, so the list does
+  // not nest one li in another.
+  bareItems?: boolean;
 }
 
 // Loading, error, empty and loaded states for one paged list, so the three
@@ -46,6 +47,7 @@ export function PagedList<T extends { id: number }>({
   emptyAction,
   skeleton,
   renderItem,
+  bareItems = false,
 }: PagedListProps<T>) {
   if (query.isError) {
     return (
@@ -100,9 +102,13 @@ export function PagedList<T extends { id: number }>({
           query.isPlaceholderData && "opacity-50 transition-opacity",
         )}
       >
-        {items.map((item) => (
-          <li key={item.id}>{renderItem(item)}</li>
-        ))}
+        {items.map((item) =>
+          bareItems ? (
+            <Fragment key={item.id}>{renderItem(item)}</Fragment>
+          ) : (
+            <li key={item.id}>{renderItem(item)}</li>
+          ),
+        )}
       </ul>
       <FeedPagination
         page={meta.currentPage}
@@ -112,28 +118,6 @@ export function PagedList<T extends { id: number }>({
         onPageChange={onPageChange}
       />
     </div>
-  );
-}
-
-// A 24px title row, a 24px tag row and a 37px footer, inside the card's
-// padding and border: 155px, the same as SubmissionSummaryCard.
-export function SubmissionSummarySkeleton() {
-  return (
-    <Surface aria-hidden>
-      <div className="flex h-6 items-center">
-        <Skeleton className="h-5 w-1/2" />
-      </div>
-      <div className="mt-3 flex h-6 items-center gap-1.5">
-        <Skeleton className="h-6 w-16" />
-        <Skeleton className="h-6 w-20" />
-      </div>
-      <div className="mt-4 border-t pt-3">
-        <div className="flex h-6 items-center justify-between gap-3">
-          <Skeleton className="h-5 w-24" />
-          <Skeleton className="h-4 w-16" />
-        </div>
-      </div>
-    </Surface>
   );
 }
 
@@ -153,45 +137,6 @@ export function ReviewSummarySkeleton() {
         <Skeleton className="h-3 w-2/3" />
       </div>
       <Skeleton className="mt-4 h-25 w-full rounded-lg" />
-    </Surface>
-  );
-}
-
-export function SubmissionSummaryCard({
-  submission,
-}: {
-  submission: SubmissionSummary;
-}) {
-  return (
-    <Surface interactive>
-      <h2 className="h-6 truncate text-heading font-medium">
-        {/* The ::after covers the card, so a click anywhere opens it. */}
-        <Link
-          href={`/submissions/${submission.id}`}
-          data-card-link
-          className={STRETCHED_LINK}
-        >
-          {submission.title}
-        </Link>
-      </h2>
-      <TechnologyTagRow
-        technologies={submission.technologies}
-        className="mt-3"
-      />
-      <div className="mt-4 border-t pt-3">
-        <div className="flex h-6 items-center justify-between gap-3">
-          <ReviewStatus
-            status={submission.reviewCount === 0 ? "PENDING" : "REVIEWED"}
-            reviewCount={submission.reviewCount}
-          />
-          <time
-            dateTime={submission.createdAt}
-            className="shrink-0 font-mono text-micro text-muted-foreground"
-          >
-            {timeAgo(submission.createdAt)}
-          </time>
-        </div>
-      </div>
     </Surface>
   );
 }

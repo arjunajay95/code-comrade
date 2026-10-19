@@ -28,7 +28,7 @@ export function Surface({
         GLASS_HIGHLIGHT,
         glass && cn("bg-card/30", GLASS_BLUR),
         interactive &&
-          "relative transition-colors hover:border-foreground/20 hover:bg-card has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring/50",
+          "relative transition-[color,background-color,border-color,translate] hover:-translate-y-0.5 hover:border-foreground/30 hover:bg-card motion-reduce:hover:translate-y-0 has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring/50",
         className,
       )}
       {...props}
