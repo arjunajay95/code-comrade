@@ -13,6 +13,7 @@ import type { FeedItem, PageMeta } from "@/services/feed";
 import { useFeedStore, type FeedView } from "@/stores/feedStore";
 import { ErrorCard, StateCard } from "@/components/shell/StateCard";
 import { FeedFilters } from "./FeedFilters";
+import { FeedRightAside } from "./FeedRightAside";
 import { FeedItemRow } from "./FeedItemRow";
 import { FeedItemSkeleton } from "./FeedItemSkeleton";
 import { FeedPagination } from "./FeedPagination";
@@ -107,8 +108,8 @@ export function Feed() {
         <div className="space-y-3 text-small text-muted-foreground">
           <p>
             {hasNoStack
-              ? "You have not added any technologies yet, so this feed is ordered by recency. Add your stack to rank submissions by how well they match it."
-              : "Ranked by how many of a submission's technologies are in your stack, and how recent it is. Green tags match yours."}
+              ? "You have not added any technologies yet, so this feed is ordered by recency. Add your stack to rank posts by how well they match it."
+              : "Ranked by how many of a post's technologies are in your stack, and how recent it is. Green tags match yours."}
           </p>
           <Button variant="outline" size="sm" onClick={openStackPicker}>
             {hasNoStack ? "Add your technologies" : "Edit stack"}
@@ -118,12 +119,14 @@ export function Feed() {
     ) : null;
 
   return (
-    <div className="lg:grid lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:gap-x-10">
+    <div className="lg:grid lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:gap-x-10 xl:grid-cols-[15.5rem_minmax(0,1fr)_15.5rem] xl:gap-x-8">
       <div className="lg:col-start-2 lg:row-start-1">
         <FeedTabs view={view} onChange={setView} />
       </div>
 
       {sidebar}
+
+      <FeedRightAside signedIn={signedIn} />
 
       <div
         role="tabpanel"
@@ -137,9 +140,7 @@ export function Feed() {
             page={page}
             onPageChange={changePage}
             emptyTitle={
-              hasFilters
-                ? "No submissions match these filters"
-                : "No submissions yet"
+              hasFilters ? "No posts match these filters" : "No posts yet"
             }
             emptyText={
               hasFilters
@@ -154,7 +155,7 @@ export function Feed() {
             page={page}
             onPageChange={changePage}
             emptyTitle="Nothing to show yet"
-            emptyText="Submissions from other developers will show up here."
+            emptyText="Posts from other developers will show up here."
           />
         ) : (
           <SignInPrompt />
@@ -211,11 +212,7 @@ function FeedResults({
 
   if (state.isPending || !state.items || !state.meta) {
     return (
-      <div
-        aria-busy="true"
-        aria-label="Loading submissions"
-        className="space-y-3"
-      >
+      <div aria-busy="true" aria-label="Loading posts" className="space-y-3">
         {Array.from({ length: PAGE_SIZE }, (_, index) => (
           <FeedItemSkeleton key={index} />
         ))}
@@ -278,8 +275,8 @@ function FeedResults({
 function SignInPrompt() {
   return (
     <StateCard
-      title="See submissions ranked for you"
-      text="Sign in and add your technologies. The feed then ranks submissions by how well they match your stack, and how recent they are."
+      title="See posts ranked for you"
+      text="Sign in and add your technologies. The feed then ranks posts by how well they match your stack, and how recent they are."
     >
       <Link href="/sign-in" className={buttonVariants()}>
         Sign in

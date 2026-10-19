@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 // full-bleed sections without the root layout fighting it (D-40).
 const SIZES = {
   reading: "max-w-3xl",
-  wide: "max-w-6xl",
+  wide: "max-w-[80rem]",
 } as const;
 
 interface ContainerProps {
