@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { ErrorCard, StateCard } from "@/components/shell/StateCard";
+import { Surface } from "@/components/shell/Surface";
+import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/hooks/useMe";
 import { useSubmission } from "@/hooks/useSubmission";
-import { cn } from "@/lib/utils";
 import { ApiError } from "@/services/apiClient";
 import { SubmissionForm } from "./SubmissionForm";
 
@@ -22,18 +22,11 @@ function Notice({
   backLabel: string;
 }) {
   return (
-    <Card className="gap-0 py-0">
-      <CardContent className="p-4 text-sm">
-        <p className="font-medium">{title}</p>
-        <p className="mt-1 text-muted-foreground">{text}</p>
-        <Link
-          href={backHref}
-          className={cn(buttonVariants({ variant: "outline" }), "mt-3")}
-        >
-          {backLabel}
-        </Link>
-      </CardContent>
-    </Card>
+    <StateCard title={title} text={text}>
+      <Link href={backHref} className={buttonVariants({ variant: "outline" })}>
+        {backLabel}
+      </Link>
+    </StateCard>
   );
 }
 
@@ -43,15 +36,15 @@ export function EditSubmission({ id }: { id: number }) {
   const submission = useSubmission(id);
   const me = useMe();
 
+  // Mirrors the form's first fields: a 36px input, a 112px textarea and a
+  // 36px input.
   if (submission.isPending || me.isPending) {
     return (
-      <Card className="gap-0 py-0" aria-hidden>
-        <CardContent className="space-y-4 p-4">
-          <Skeleton className="h-7 w-full" />
-          <Skeleton className="h-28 w-full" />
-          <Skeleton className="h-7 w-full" />
-        </CardContent>
-      </Card>
+      <Surface className="space-y-6" aria-hidden>
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-9 w-full" />
+      </Surface>
     );
   }
 
@@ -64,52 +57,27 @@ export function EditSubmission({ id }: { id: number }) {
         <Notice
           title="Submission not found"
           text="It may have been removed, or the link may be wrong."
-          backHref="/"
+          backHref="/feed"
           backLabel="Back to submissions"
         />
       );
     }
     return (
-      <Card role="alert" className="gap-0 py-0">
-        <CardContent className="p-4 text-sm">
-          <p className="font-medium">Could not load this submission</p>
-          <p className="mt-1 text-muted-foreground">
-            {submission.error.message}
-          </p>
-          {submission.error instanceof ApiError &&
-            submission.error.requestId && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                Reference:{" "}
-                <span className="font-mono">{submission.error.requestId}</span>
-              </p>
-            )}
-          <Button
-            variant="outline"
-            className="mt-3"
-            onClick={() => void submission.refetch()}
-          >
-            Try again
-          </Button>
-        </CardContent>
-      </Card>
+      <ErrorCard
+        title="Could not load this submission"
+        error={submission.error}
+        onRetry={() => void submission.refetch()}
+      />
     );
   }
 
   if (me.isError) {
     return (
-      <Card role="alert" className="gap-0 py-0">
-        <CardContent className="p-4 text-sm">
-          <p className="font-medium">Could not check your account</p>
-          <p className="mt-1 text-muted-foreground">{me.error.message}</p>
-          <Button
-            variant="outline"
-            className="mt-3"
-            onClick={() => void me.refetch()}
-          >
-            Try again
-          </Button>
-        </CardContent>
-      </Card>
+      <ErrorCard
+        title="Could not check your account"
+        error={me.error}
+        onRetry={() => void me.refetch()}
+      />
     );
   }
 

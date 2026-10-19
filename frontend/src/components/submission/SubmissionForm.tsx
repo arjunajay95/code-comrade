@@ -7,9 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Plus, X } from "lucide-react";
 import { z } from "zod";
 import { Field, FormError } from "@/components/form/Field";
+import { Surface } from "@/components/shell/Surface";
 import { TechnologySelect } from "@/components/stack/TechnologySelect";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateSubmission } from "@/hooks/useCreateSubmission";
@@ -161,7 +161,7 @@ export function SubmissionForm({
     }
   });
 
-  const cancelHref = creating ? "/" : `/submissions/${submissionId}`;
+  const cancelHref = creating ? "/feed" : `/submissions/${submissionId}`;
   // INVALID_REPO_URL is already shown on its field.
   const formError =
     mutation.error instanceof ApiError &&
@@ -170,74 +170,71 @@ export function SubmissionForm({
       : mutation.error;
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-3">
-      <Card className="gap-0 py-0">
-        <CardContent className="space-y-4 p-4">
-          <Field label="Title" htmlFor="title" error={errors.title?.message}>
-            <Input
-              id="title"
-              autoComplete="off"
-              aria-invalid={errors.title ? true : undefined}
-              {...register("title")}
-            />
-          </Field>
+    <form onSubmit={onSubmit} noValidate className="space-y-6">
+      <Surface className="space-y-6">
+        <Field label="Title" htmlFor="title" error={errors.title?.message}>
+          <Input
+            id="title"
+            autoComplete="off"
+            aria-invalid={errors.title ? true : undefined}
+            {...register("title")}
+          />
+        </Field>
 
-          <Field
-            label="What do you want reviewed?"
-            htmlFor="description"
-            hint="Say what the code does and where you want a second pair of eyes."
-            error={errors.description?.message}
-          >
-            <Textarea
-              id="description"
-              rows={5}
-              aria-invalid={errors.description ? true : undefined}
-              {...register("description")}
-            />
-          </Field>
+        <Field
+          label="What do you want reviewed?"
+          htmlFor="description"
+          hint="Say what the code does and where you want a second pair of eyes."
+          error={errors.description?.message}
+        >
+          <Textarea
+            id="description"
+            rows={5}
+            aria-invalid={errors.description ? true : undefined}
+            {...register("description")}
+          />
+        </Field>
 
-          <Field
-            label="GitHub repository"
-            htmlFor="githubUrl"
-            hint="A public repository, for example https://github.com/owner/repo."
-            error={errors.githubUrl?.message}
-          >
-            <Input
-              id="githubUrl"
-              inputMode="url"
-              autoComplete="off"
-              spellCheck={false}
-              aria-invalid={errors.githubUrl ? true : undefined}
-              {...register("githubUrl")}
-            />
-          </Field>
+        <Field
+          label="GitHub repository"
+          htmlFor="githubUrl"
+          hint="A public repository, for example https://github.com/owner/repo."
+          error={errors.githubUrl?.message}
+        >
+          <Input
+            id="githubUrl"
+            inputMode="url"
+            autoComplete="off"
+            spellCheck={false}
+            aria-invalid={errors.githubUrl ? true : undefined}
+            {...register("githubUrl")}
+          />
+        </Field>
 
-          <Field
-            label="Technologies"
-            htmlFor="technology-search"
-            error={errors.technologies?.message}
-          >
-            <Controller
-              control={control}
-              name="technologies"
-              render={({ field }) => (
-                <TechnologySelect
-                  inputId="technology-search"
-                  value={field.value}
-                  onChange={field.onChange}
-                  max={MAX_TECHNOLOGIES}
-                  label="Used in this code"
-                />
-              )}
-            />
-          </Field>
-        </CardContent>
-      </Card>
+        <Field
+          label="Technologies"
+          htmlFor="technology-search"
+          error={errors.technologies?.message}
+        >
+          <Controller
+            control={control}
+            name="technologies"
+            render={({ field }) => (
+              <TechnologySelect
+                inputId="technology-search"
+                value={field.value}
+                onChange={field.onChange}
+                max={MAX_TECHNOLOGIES}
+                label="Used in this code"
+              />
+            )}
+          />
+        </Field>
 
-      <Card className="gap-0 py-0">
-        <CardContent className="p-4">
-          <h2 className="text-sm font-medium">Criteria</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
+        {/* A hairline sets the criteria apart from the fields above. */}
+        <div className="border-t pt-6">
+          <h2 className="text-small font-medium">Criteria</h2>
+          <p className="mt-1.5 text-small text-muted-foreground">
             What reviewers rate from 1 to 5. Between 1 and {MAX_CRITERIA}.
           </p>
 
@@ -260,6 +257,7 @@ export function SubmissionForm({
                         type="button"
                         variant="ghost"
                         size="icon"
+                        className="size-9"
                         aria-label={`Remove criterion ${index + 1}`}
                         disabled={criteria.fields.length <= 1}
                         onClick={() => criteria.remove(index)}
@@ -268,7 +266,10 @@ export function SubmissionForm({
                       </Button>
                     </div>
                     {errors.criteria?.[index]?.label && (
-                      <p role="alert" className="mt-1 text-xs text-destructive">
+                      <p
+                        role="alert"
+                        className="mt-1 text-small text-destructive"
+                      >
                         {errors.criteria[index].label.message}
                       </p>
                     )}
@@ -285,43 +286,48 @@ export function SubmissionForm({
                 <Plus />
                 Add a criterion
               </Button>
-              <p className="mt-3 text-xs text-muted-foreground">
+              <p className="mt-3 text-small text-muted-foreground">
                 Criteria cannot be changed once you post, because reviews rate
                 them.
               </p>
             </>
           ) : (
             <>
+              {/* Grouped data, so the nested panel is allowed here. */}
               <ul className="mt-3 space-y-2">
                 {initial.criteria.map((criterion, index) => (
                   <li
                     key={index}
-                    className="rounded-lg bg-muted/50 px-3 py-2 text-xs [overflow-wrap:anywhere]"
+                    className="rounded-lg bg-muted/50 px-3 py-2 text-small [overflow-wrap:anywhere]"
                   >
                     {criterion.label}
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Lock className="size-3" aria-hidden />
+              <p className="mt-3 flex items-center gap-1.5 text-small text-muted-foreground">
+                <Lock className="size-3.5" aria-hidden />
                 Locked. Reviews rate these criteria, so they cannot change.
               </p>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
 
       <FormError error={formError} />
 
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Link
           href={cancelHref}
-          className={cn(buttonVariants({ variant: "outline" }))}
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "w-full sm:w-auto",
+          )}
         >
           Cancel
         </Link>
         <Button
           type="submit"
+          className="w-full sm:w-auto"
           disabled={mutation.isPending || mutation.isSuccess}
         >
           {mutation.isPending

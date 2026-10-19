@@ -12,12 +12,12 @@ export default async function NewSubmissionPage() {
 
   return (
     <Container size="reading">
-      <h1 className="text-lg font-medium">Post a request for review</h1>
-      <p className="mt-1 text-xs text-muted-foreground">
+      <h1 className="text-title font-semibold">Post a request for review</h1>
+      <p className="mt-2 text-body text-muted-foreground">
         Link a public GitHub repository, say what you want looked at, and define
         what reviewers rate.
       </p>
-      <div className="mt-4">
+      <div className="mt-6">
         <SubmissionForm mode="create" />
       </div>
     </Container>
