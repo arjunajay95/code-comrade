@@ -25,6 +25,20 @@
   --text-small--line-height: 1.25rem;
   --text-micro: 0.75rem;
   --text-micro--line-height: 1rem;
+
+  /* The landing hero entrance. A CSS animation runs before hydration, so
+     the text is never left hidden if JavaScript is slow (D-40). */
+  --animate-hero-enter: hero-enter 400ms ease-out both;
+  @keyframes hero-enter {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @theme inline {
@@ -186,5 +200,73 @@
       24px 24px,
       100% 100%;
     mask-image: linear-gradient(to bottom, black, transparent 85%);
+  }
+}
+
+/* The landing hero photo dissolves into the page with masks, never with
+   painted colour, so the dot grid and the glow show through (D-40). Dark
+   theme only: the light theme shows the photo whole in an inset panel. The
+   stops follow a smoothstep curve, so the falloff has no visible edge. */
+@layer components {
+  .hero-fade {
+    --hero-mask-y: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 55%,
+      rgb(0 0 0 / 0.9) 64%,
+      rgb(0 0 0 / 0.65) 73%,
+      rgb(0 0 0 / 0.35) 82%,
+      rgb(0 0 0 / 0.1) 91%,
+      transparent 100%
+    );
+    --hero-mask-x: linear-gradient(
+      to right,
+      transparent 0%,
+      rgb(0 0 0 / 0.03) 5%,
+      rgb(0 0 0 / 0.1) 10%,
+      rgb(0 0 0 / 0.35) 20%,
+      rgb(0 0 0 / 0.65) 30%,
+      rgb(0 0 0 / 0.9) 40%,
+      rgb(0 0 0 / 0.97) 45%,
+      #000 50%
+    );
+  }
+
+  .dark .hero-fade {
+    -webkit-mask-image: var(--hero-mask-y);
+    mask-image: var(--hero-mask-y);
+  }
+
+  @media (min-width: 64rem) {
+    .dark .hero-fade {
+      -webkit-mask-image: var(--hero-mask-x), var(--hero-mask-y);
+      mask-image: var(--hero-mask-x), var(--hero-mask-y);
+      -webkit-mask-composite: source-in;
+      mask-composite: intersect;
+    }
+  }
+
+  /* A soft scrim behind the hero text, for contrast only. It fades out
+     with eased stops and ends well inside its box, so it has no edge. */
+  .hero-scrim {
+    background: radial-gradient(
+      ellipse 90% 46% at 50% 45%,
+      color-mix(in oklab, var(--background) 85%, transparent) 0%,
+      color-mix(in oklab, var(--background) 60%, transparent) 40%,
+      color-mix(in oklab, var(--background) 25%, transparent) 70%,
+      transparent 100%
+    );
+  }
+
+  @media (min-width: 48rem) {
+    .hero-scrim {
+      background: radial-gradient(
+        ellipse 50% 85% at 30% 50%,
+        color-mix(in oklab, var(--background) 85%, transparent) 0%,
+        color-mix(in oklab, var(--background) 60%, transparent) 40%,
+        color-mix(in oklab, var(--background) 25%, transparent) 70%,
+        transparent 100%
+      );
+    }
   }
 }

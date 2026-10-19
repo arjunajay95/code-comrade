@@ -1,49 +1,35 @@
-"use client";
-
-import { useReducedMotion } from "motion/react";
-import * as m from "motion/react-m";
 import { LandingActions } from "./LandingActions";
 
-const STAGGER_SECONDS = 0.06;
+// Each line is delayed by a further 60ms. The class applies only under
+// prefers-reduced-motion: no-preference, so reduced motion shows everything at
+// once. The h1 has no entrance: it can be the LCP element, and an element that
+// starts at zero opacity cannot be (D-40).
+const ENTER = "motion-safe:animate-hero-enter";
+const delay = (step: number) => ({ animationDelay: `${step * 60}ms` });
 
-// The eyebrow, the paragraph and the actions rise 4px as they fade in, one
-// after the other. The h1 never animates: it can be the LCP element, and an
-// element that starts at zero opacity cannot be (D-40).
 export function HeroContent() {
-  const reduceMotion = useReducedMotion();
-
-  const enter = (step: number) => ({
-    initial: reduceMotion ? (false as const) : { opacity: 0, y: 4 },
-    animate: { opacity: 1, y: 0 },
-    transition: {
-      duration: 0.25,
-      ease: "easeOut" as const,
-      delay: step * STAGGER_SECONDS,
-    },
-  });
-
   return (
-    <div className="max-w-2xl">
-      <m.p
-        {...enter(0)}
-        className="font-mono text-micro uppercase tracking-wider text-muted-foreground"
+    <div className="mx-auto max-w-2xl text-center md:mx-0 md:text-left">
+      <p
+        style={delay(0)}
+        className={`${ENTER} font-mono text-micro uppercase tracking-wider text-foreground md:text-muted-foreground`}
       >
         Peer code review
-      </m.p>
+      </p>
       <h1 className="mt-4 font-display text-display">
         <span className="block">Review code,</span>
         <span className="block italic text-addition">get reviewed.</span>
       </h1>
-      <m.p
-        {...enter(1)}
-        className="mt-6 max-w-xl text-heading text-muted-foreground"
+      <p
+        style={delay(1)}
+        className={`${ENTER} mx-auto mt-6 max-w-xl text-heading text-foreground md:mx-0`}
       >
         Write reviews to earn karma, and get feedback on your own code from
         developers who know your stack.
-      </m.p>
-      <m.div {...enter(2)} className="mt-8">
-        <LandingActions />
-      </m.div>
+      </p>
+      <div style={delay(2)} className={`${ENTER} mt-8`}>
+        <LandingActions className="justify-center md:justify-start" />
+      </div>
     </div>
   );
 }

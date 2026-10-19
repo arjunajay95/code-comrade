@@ -22,12 +22,15 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section className="py-24">
+    // z-10 keeps this section above the hero photo, which runs 40vh into it.
+    <section className="relative z-10 py-24">
       <Container size="wide" verticalPadding={false}>
-        <SectionTitle>How it works</SectionTitle>
-        <p className="mt-3 text-body text-muted-foreground">
-          Three steps, and every review you write counts.
-        </p>
+        <div className="text-center md:text-left">
+          <SectionTitle>How it works</SectionTitle>
+          <p className="mt-3 text-body text-muted-foreground">
+            Three steps, and every review you write counts.
+          </p>
+        </div>
         <ol className="mt-12 grid gap-4 md:grid-cols-3">
           {STEPS.map((step) => (
             <li key={step.number}>

@@ -24,10 +24,12 @@ export function ProductPreview() {
   return (
     <section className="py-24">
       <Container size="wide" verticalPadding={false}>
-        <SectionTitle>A feed that knows your stack</SectionTitle>
-        <p className="mt-3 text-body text-muted-foreground">
-          Green tags are the ones that match yours.
-        </p>
+        <div className="text-center md:text-left">
+          <SectionTitle>A feed that knows your stack</SectionTitle>
+          <p className="mt-3 text-body text-muted-foreground">
+            Green tags are the ones that match yours.
+          </p>
+        </div>
 
         {/* inert takes everything inside out of the tab order and the
             accessibility tree, so the example links cannot be reached. */}
