@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import * as m from "motion/react-m";
+import { CodeXml } from "lucide-react";
 import { KarmaChip } from "@/components/karma/KarmaChip";
+import { excerpt, hasCode } from "@/lib/formattedText";
 import { timeAgo } from "@/lib/time";
 import type { FeedItem } from "@/services/feed";
 import { ReviewStatus } from "./ReviewStatus";
@@ -58,13 +60,20 @@ export function FeedItemRow({
             {item.title}
           </Link>
         </h2>
-        <span className="relative z-10 shrink-0">
+        <span className="relative z-10 flex shrink-0 items-center gap-2">
+          {hasCode(item.description) && (
+            <CodeXml
+              role="img"
+              aria-label="Includes code"
+              className="size-4 text-muted-foreground"
+            />
+          )}
           <ReviewStatus status={item.status} reviewCount={item.reviewCount} />
         </span>
       </div>
 
       <p className="mt-2 line-clamp-2 h-12 text-body text-muted-foreground">
-        {item.description}
+        {excerpt(item.description)}
       </p>
 
       <TechnologyTagRow

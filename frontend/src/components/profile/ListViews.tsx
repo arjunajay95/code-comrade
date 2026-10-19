@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { UseQueryResult } from "@tanstack/react-query";
+import { CodeXml } from "lucide-react";
 import { FeedPagination } from "@/components/feed/FeedPagination";
 import { ReviewStatus } from "@/components/feed/ReviewStatus";
 import { TechnologyTagRow } from "@/components/feed/TechnologyTagRow";
@@ -11,6 +12,7 @@ import { STRETCHED_LINK, Surface } from "@/components/shell/Surface";
 import { RatingPips } from "@/components/submission/RatingPips";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { excerpt, hasCode } from "@/lib/formattedText";
 import { timeAgo } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import type { PageMeta } from "@/services/feed";
@@ -213,12 +215,21 @@ export function ReviewSummaryCard({ review }: { review: ReviewSummary }) {
             {review.submission.title}
           </Link>
         </span>
-        <time
-          dateTime={review.createdAt}
-          className="shrink-0 font-mono text-micro text-muted-foreground"
-        >
-          {timeAgo(review.createdAt)}
-        </time>
+        <span className="flex shrink-0 items-center gap-2">
+          {hasCode(review.feedback) && (
+            <CodeXml
+              role="img"
+              aria-label="Includes code"
+              className="size-4 text-muted-foreground"
+            />
+          )}
+          <time
+            dateTime={review.createdAt}
+            className="font-mono text-micro text-muted-foreground"
+          >
+            {timeAgo(review.createdAt)}
+          </time>
+        </span>
       </div>
       <p className="mt-1 text-small text-muted-foreground">
         by{" "}
@@ -234,8 +245,9 @@ export function ReviewSummaryCard({ review }: { review: ReviewSummary }) {
         </Link>
       </p>
 
-      <p className="mt-3 whitespace-pre-line text-body [overflow-wrap:anywhere]">
-        {review.feedback}
+      {/* A plain excerpt: code is left out, and the icon says it was there. */}
+      <p className="mt-3 line-clamp-3 text-body [overflow-wrap:anywhere]">
+        {excerpt(review.feedback)}
       </p>
 
       {/* Grouped data: one rating per criterion. */}

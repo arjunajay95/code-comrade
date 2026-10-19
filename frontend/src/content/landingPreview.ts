@@ -12,7 +12,7 @@ export function createPreviewItems(now: number = Date.now()): FeedRowItem[] {
       id: 1,
       title: "Rate limiter middleware for Express",
       description:
-        "Sliding window limiter backed by Redis. I am not sure the key expiry handles bursts at the window edge.",
+        "Sliding window limiter backed by Redis. I am not sure the key expiry handles bursts at the window edge.\n```ts\nconst key = `rl:${ip}`\nawait redis.expire(key, WINDOW_S)\n```",
       githubUrl: "https://github.com/example/express-rate-limiter",
       createdAt: ago(2),
       status: "PENDING",
