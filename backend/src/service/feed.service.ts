@@ -53,7 +53,10 @@ export const feedService = {
   ) {
     const [techIds, window] = await Promise.all([
       userRepository.findTechnologyIds(userId),
-      submissionRepository.listRecentWindow(FEED_WINDOW, userId),
+      submissionRepository.listRecentWindow(FEED_WINDOW, userId, {
+        search: query.search,
+        technologies: query.technologies,
+      }),
     ]);
 
     const stack = new Set(techIds);
@@ -99,7 +102,8 @@ export const feedService = {
             },
           }),
         })),
-      // The total is the window size, not every submission ever posted.
+      // The total is the filtered window's size, not every submission ever
+      // posted.
       meta: buildMeta(ranked.length, query),
     };
   },
