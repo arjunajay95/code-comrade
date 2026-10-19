@@ -20,7 +20,7 @@ export default async function ProfilePage({
   return (
     <Container size="reading">
       <Link
-        href="/"
+        href="/feed"
         className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" aria-hidden />

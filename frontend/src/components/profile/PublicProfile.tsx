@@ -35,7 +35,7 @@ export function PublicProfile({ username }: { username: string }) {
               No one has the username &quot;{username}&quot;.
             </p>
             <Link
-              href="/"
+              href="/feed"
               className={cn(buttonVariants({ variant: "outline" }), "mt-3")}
             >
               Back to submissions

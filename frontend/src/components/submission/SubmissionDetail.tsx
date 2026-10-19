@@ -28,7 +28,7 @@ export function SubmissionDetail({ id }: { id: number }) {
               It may have been removed, or the link may be wrong.
             </p>
             <Link
-              href="/"
+              href="/feed"
               className={cn(buttonVariants({ variant: "outline" }), "mt-3")}
             >
               Back to submissions

@@ -95,7 +95,7 @@ export function MyProfile() {
           emptyText="Every review you write earns karma. Pick a submission from the feed."
           emptyAction={
             <Link
-              href="/"
+              href="/feed"
               className={cn(buttonVariants({ variant: "outline" }), "mt-3")}
             >
               Browse submissions

@@ -14,7 +14,7 @@ export default function NotFound() {
             This page does not exist, or it has moved.
           </p>
           <Link
-            href="/"
+            href="/feed"
             className={cn(buttonVariants({ variant: "outline" }), "mt-3")}
           >
             Back to submissions

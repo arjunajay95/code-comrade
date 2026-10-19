@@ -23,11 +23,11 @@ export default async function SubmissionPage({
           page and filters, so a visitor who came from it lands back where they
           were. */}
       <Link
-        href="/"
+        href="/feed"
         className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" aria-hidden />
-        Back to submissions
+        Back to feed
       </Link>
       <div className="mt-4">
         <SubmissionDetail id={id} />
