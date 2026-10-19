@@ -3,28 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-
-// The submission pages are reached from the feed, so they count as being in it.
-const LINKS = [
-  {
-    href: "/feed",
-    label: "Feed",
-    isCurrent: (pathname: string) =>
-      pathname === "/feed" || pathname.startsWith("/submissions"),
-  },
-  {
-    href: "/changelog",
-    label: "What's new",
-    isCurrent: (pathname: string) => pathname === "/changelog",
-  },
-] as const;
+import { NAV_LINKS } from "./navLinks";
 
 export function HeaderNav() {
   const pathname = usePathname();
 
   return (
     <nav aria-label="Main" className="ml-2 hidden gap-4 sm:flex">
-      {LINKS.map((link) => {
+      {NAV_LINKS.map((link) => {
         const current = link.isCurrent(pathname);
         return (
           <Link
@@ -32,7 +18,7 @@ export function HeaderNav() {
             href={link.href}
             aria-current={current ? "page" : undefined}
             className={cn(
-              "text-small transition-colors",
+              "rounded-sm text-small outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
               current
                 ? "text-foreground"
                 : "text-muted-foreground hover:text-foreground",
