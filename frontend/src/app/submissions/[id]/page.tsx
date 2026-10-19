@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { SubmissionDetail } from "@/components/submission/SubmissionDetail";
 import { parseSubmissionId } from "@/lib/ids";
+import { Container } from "@/components/shell/Container";
 
 export const metadata: Metadata = { title: "Submission" };
 
@@ -16,7 +17,7 @@ export default async function SubmissionPage({
   if (id === null) notFound();
 
   return (
-    <>
+    <Container size="reading">
       {/* Links to the feed instead of using history.back(), so it also works
           when the page was opened from a shared link. The feed remembers its
           page and filters, so a visitor who came from it lands back where they
@@ -31,6 +32,6 @@ export default async function SubmissionPage({
       <div className="mt-4">
         <SubmissionDetail id={id} />
       </div>
-    </>
+    </Container>
   );
 }

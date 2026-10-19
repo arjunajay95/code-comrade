@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/ui/themes";
-import { Geist, JetBrains_Mono } from "next/font/google";
+import { Geist, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/shell/SiteFooter";
@@ -9,14 +9,27 @@ import { SiteHeader } from "@/components/shell/SiteHeader";
 import { cn } from "@/lib/utils";
 import { StackPickerHost } from "@/components/stack/StackPickerHost";
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
-
+// Three families (D-40). Only Geist is preloaded, since it sets the interface
+// and body text. The other two load when a page uses them.
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  display: "swap",
+  preload: false,
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
   preload: false,
 });
 
@@ -54,15 +67,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           "antialiased",
           geistSans.variable,
           jetbrainsMono.variable,
-          "font-mono",
+          instrumentSerif.variable,
         )}
       >
         <body className="min-h-full flex flex-col">
           <Providers>
             <SiteHeader />
-            <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
-              {children}
-            </main>
+            {/* Each page sets its own width through Container (D-40). */}
+            <main className="flex-1">{children}</main>
             <SiteFooter />
             <StackPickerHost />
           </Providers>

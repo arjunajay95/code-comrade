@@ -5,6 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { ArrowLeft } from "lucide-react";
 import { EditSubmission } from "@/components/submission/EditSubmission";
 import { parseSubmissionId } from "@/lib/ids";
+import { Container } from "@/components/shell/Container";
 
 export const metadata: Metadata = { title: "Edit request" };
 
@@ -19,7 +20,7 @@ export default async function EditSubmissionPage({
   await auth.protect();
 
   return (
-    <>
+    <Container size="reading">
       <Link
         href={`/submissions/${id}`}
         className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
@@ -31,6 +32,6 @@ export default async function EditSubmissionPage({
       <div className="mt-4">
         <EditSubmission id={id} />
       </div>
-    </>
+    </Container>
   );
 }

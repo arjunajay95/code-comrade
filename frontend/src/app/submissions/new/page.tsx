@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { SubmissionForm } from "@/components/submission/SubmissionForm";
+import { Container } from "@/components/shell/Container";
 
 export const metadata: Metadata = { title: "Post a request" };
 
@@ -10,7 +11,7 @@ export default async function NewSubmissionPage() {
   await auth.protect();
 
   return (
-    <>
+    <Container size="reading">
       <h1 className="text-lg font-medium">Post a request for review</h1>
       <p className="mt-1 text-xs text-muted-foreground">
         Link a public GitHub repository, say what you want looked at, and define
@@ -19,6 +20,6 @@ export default async function NewSubmissionPage() {
       <div className="mt-4">
         <SubmissionForm mode="create" />
       </div>
-    </>
+    </Container>
   );
 }
