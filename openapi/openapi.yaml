@@ -809,11 +809,13 @@ components:
 
     SubmissionSummary:
       type: object
-      required: [id, title, githubUrl, createdAt, technologies, reviewCount]
+      required:
+        [id, title, description, githubUrl, createdAt, technologies, reviewCount]
       additionalProperties: false
       properties:
         id: { type: integer }
         title: { type: string }
+        description: { type: string }
         githubUrl: { type: string, format: uri }
         createdAt: { type: string, format: date-time }
         technologies:

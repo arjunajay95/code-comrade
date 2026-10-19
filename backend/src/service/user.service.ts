@@ -17,6 +17,7 @@ type ReviewRow = Awaited<
 const toSubmissionSummary = (row: SubmissionRow) => ({
   id: row.id,
   title: row.title,
+  description: row.description,
   githubUrl: row.githubUrl,
   createdAt: row.createdAt,
   technologies: row.technologies,

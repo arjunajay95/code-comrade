@@ -72,6 +72,7 @@ const feedWhere = ({
 const submissionSummarySelect = {
   id: true,
   title: true,
+  description: true,
   githubUrl: true,
   createdAt: true,
   technologies: { select: { id: true, name: true }, orderBy: { name: "asc" } },
