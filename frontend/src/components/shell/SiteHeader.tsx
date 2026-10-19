@@ -1,18 +1,33 @@
 import Link from "next/link";
 import { Show } from "@clerk/nextjs";
 import { Plus } from "lucide-react";
-import { UserMenu } from "./UserMenu";
+import { LogoMark } from "@/components/brand/LogoMark";
+import { Wordmark } from "@/components/brand/Wordmark";
 import { buttonVariants } from "@/components/ui/button";
+import { Container } from "./Container";
+import { HeaderNav } from "./HeaderNav";
 import { KarmaBadge } from "./KarmaBadge";
 import { ThemeToggle } from "./ThemeToggle";
+import { UserMenu } from "./UserMenu";
 
 export function SiteHeader() {
   return (
-    <header className="border-b">
-      <div className="mx-auto flex h-14 max-w-3xl items-center gap-2 px-4">
-        <Link href="/" className="font-mono text-sm font-medium">
-          <span className="text-muted-foreground">~/</span>codecomrade
+    <header className="sticky top-0 z-40 border-b bg-background/75 backdrop-blur">
+      <Container
+        size="wide"
+        verticalPadding={false}
+        className="flex h-14 items-center gap-2"
+      >
+        <Link
+          href="/"
+          aria-label="CodeComrade"
+          className="flex items-center gap-2"
+        >
+          <LogoMark className="size-7" />
+          {/* Dropped below 480px so the signed-in header fits at 320px. */}
+          <Wordmark className="hidden min-[480px]:inline" />
         </Link>
+        <HeaderNav />
 
         {/* Pushes everything after it to the right edge. */}
         <div className="flex-1" />
@@ -20,7 +35,7 @@ export function SiteHeader() {
         <ThemeToggle />
 
         <Show when="signed-out">
-          <Link href="/sign-in" className={buttonVariants({ size: "sm" })}>
+          <Link href="/sign-in" className={buttonVariants()}>
             Sign in
           </Link>
         </Show>
@@ -29,7 +44,7 @@ export function SiteHeader() {
           <Link
             href="/submissions/new"
             aria-label="Post a request"
-            className={buttonVariants({ size: "sm" })}
+            className={buttonVariants()}
           >
             <Plus aria-hidden />
             {/* Icon only on the narrowest screens, so the header fits at
@@ -40,7 +55,7 @@ export function SiteHeader() {
           {/* Clerk's avatar menu, with an extra item for editing the stack. */}
           <UserMenu />
         </Show>
-      </div>
+      </Container>
     </header>
   );
 }
