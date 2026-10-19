@@ -13,6 +13,7 @@ import {
   ProfileCard,
   ProfileCardSkeleton,
 } from "@/components/profile/ProfileCard";
+import { OwnAvatar } from "@/components/profile/OwnAvatar";
 import { ErrorCard } from "@/components/shell/StateCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useMe } from "@/hooks/useMe";
@@ -39,6 +40,12 @@ export function MyProfile() {
       ) : (
         <ProfileCard
           profile={me.data}
+          avatar={<OwnAvatar username={me.data.username} />}
+          statLinks={{
+            posts: "/me/posts",
+            given: "/me#given-heading",
+            received: "/me/reviews-received",
+          }}
           actions={
             <>
               <Link
@@ -82,7 +89,9 @@ export function MyProfile() {
             </Link>
           }
           skeleton={<ReviewSummarySkeleton />}
-          renderItem={(review) => <ReviewSummaryCard review={review} />}
+          renderItem={(review) => (
+            <ReviewSummaryCard review={review} hideReviewer />
+          )}
         />
       </section>
     </div>

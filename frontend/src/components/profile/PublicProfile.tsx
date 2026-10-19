@@ -5,6 +5,7 @@ import { ErrorCard, StateCard } from "@/components/shell/StateCard";
 import { buttonVariants } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { ApiError } from "@/services/apiClient";
+import { MonogramAvatar } from "./MonogramAvatar";
 import { ProfileCard, ProfileCardSkeleton } from "./ProfileCard";
 
 export function PublicProfile({ username }: { username: string }) {
@@ -35,5 +36,10 @@ export function PublicProfile({ username }: { username: string }) {
     );
   }
 
-  return <ProfileCard profile={query.data} />;
+  return (
+    <ProfileCard
+      profile={query.data}
+      avatar={<MonogramAvatar username={query.data.username} size={64} />}
+    />
+  );
 }

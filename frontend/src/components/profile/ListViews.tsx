@@ -143,7 +143,14 @@ export function ReviewSummarySkeleton() {
 
 // A review in a list. The submission it belongs to is always shown, because
 // a list of reviews with no context is not useful.
-export function ReviewSummaryCard({ review }: { review: ReviewSummary }) {
+export function ReviewSummaryCard({
+  review,
+  hideReviewer = false,
+}: {
+  review: ReviewSummary;
+  // On the user's own written reviews the reviewer is always them.
+  hideReviewer?: boolean;
+}) {
   const personLink =
     "relative z-10 text-foreground underline-offset-4 hover:underline";
 
@@ -177,11 +184,17 @@ export function ReviewSummaryCard({ review }: { review: ReviewSummary }) {
         </span>
       </div>
       <p className="mt-1 text-small text-muted-foreground">
-        by{" "}
-        <Link href={`/profile/${review.reviewer}`} className={personLink}>
-          {review.reviewer}
-        </Link>
-        , on code by{" "}
+        {hideReviewer ? (
+          "On code by "
+        ) : (
+          <>
+            by{" "}
+            <Link href={`/profile/${review.reviewer}`} className={personLink}>
+              {review.reviewer}
+            </Link>
+            , on code by{" "}
+          </>
+        )}
         <Link
           href={`/profile/${review.submission.author}`}
           className={personLink}

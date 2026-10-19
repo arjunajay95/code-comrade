@@ -29,6 +29,28 @@ export function FeedFilters() {
     setSearch(debounced);
   }, [debounced, setSearch]);
 
+  // Pressing / focuses the search, unless focus is already in a field.
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+      ) {
+        return;
+      }
+      event.preventDefault();
+      searchRef.current?.focus();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   const technologies = useTechnologies({ page: 1, limit: 50 });
   const hasFilters = storedSearch !== "" || selected.length > 0;
 
@@ -68,15 +90,27 @@ export function FeedFilters() {
       </h2>
 
       <div className="flex gap-2">
-        <Input
-          type="search"
-          aria-label="Search posts"
-          placeholder="Search posts"
-          maxLength={100}
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          className="min-w-0 flex-1"
-        />
+        <div className="relative min-w-0 flex-1">
+          <Input
+            ref={searchRef}
+            type="search"
+            aria-label="Search posts"
+            placeholder="Search posts"
+            maxLength={100}
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            className="min-w-0 pr-9"
+          />
+          {/* The shortcut hint, for a fine pointer and an empty box. */}
+          {text === "" && (
+            <kbd
+              aria-hidden
+              className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border px-1.5 font-mono text-micro text-muted-foreground [@media(hover:hover)_and_(pointer:fine)]:block"
+            >
+              /
+            </kbd>
+          )}
+        </div>
         {hasFilters && (
           <Button variant="ghost" onClick={clearFilters}>
             Clear

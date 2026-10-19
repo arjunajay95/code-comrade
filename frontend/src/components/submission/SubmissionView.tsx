@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { ReviewStatus } from "@/components/feed/ReviewStatus";
 import { TechnologyTag } from "@/components/feed/TechnologyTag";
 import { KarmaChip } from "@/components/karma/KarmaChip";
+import { MonogramAvatar } from "@/components/profile/MonogramAvatar";
 import { FormattedText } from "@/components/text/FormattedText";
 import { StateCard } from "@/components/shell/StateCard";
 import { Surface } from "@/components/shell/Surface";
@@ -209,12 +210,15 @@ function ReviewCard({
     <li>
       <Surface>
         <div className="flex items-center justify-between gap-3">
-          <Link
-            href={`/profile/${review.reviewer}`}
-            className="min-w-0 truncate text-small text-foreground underline-offset-4 hover:underline"
-          >
-            {review.reviewer}
-          </Link>
+          <span className="flex min-w-0 items-center gap-2">
+            <MonogramAvatar username={review.reviewer} size={20} />
+            <Link
+              href={`/profile/${review.reviewer}`}
+              className="min-w-0 truncate text-small text-foreground underline-offset-4 hover:underline"
+            >
+              {review.reviewer}
+            </Link>
+          </span>
           <time
             dateTime={review.createdAt}
             className="shrink-0 font-mono text-micro text-muted-foreground"

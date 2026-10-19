@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Layers } from "lucide-react";
+import { Check, Layers } from "lucide-react";
 import { z } from "zod";
 import { TechnologyTag } from "@/components/feed/TechnologyTag";
 import { Field, FormError } from "@/components/form/Field";
@@ -63,6 +64,12 @@ export function SettingsForm() {
 function LoadedSettings({ me }: { me: Me }) {
   const mutation = useUpdateProfile();
   const openStackPicker = useUiStore((state) => state.openStackPicker);
+  const [justSaved, setJustSaved] = useState(false);
+  useEffect(() => {
+    if (!justSaved) return;
+    const timer = setTimeout(() => setJustSaved(false), 2000);
+    return () => clearTimeout(timer);
+  }, [justSaved]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -87,8 +94,11 @@ function LoadedSettings({ me }: { me: Me }) {
     if (Object.keys(body).length === 0) return;
 
     mutation.mutate(body, {
-      onSuccess: (saved) =>
-        reset({ username: saved.username, bio: saved.bio ?? "" }),
+      onSuccess: (saved) => {
+        reset({ username: saved.username, bio: saved.bio ?? "" });
+        // The button says Saved for two seconds, then goes back.
+        setJustSaved(true);
+      },
       onError: (error) => {
         // 409 is the database unique constraint speaking: someone has it.
         if (error instanceof ApiError && error.status === 409) {
@@ -137,21 +147,25 @@ function LoadedSettings({ me }: { me: Me }) {
           {!usernameTaken && <FormError error={mutation.error} />}
 
           <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
-            {mutation.isSuccess && !isDirty && (
-              <span
-                role="status"
-                className="text-center text-small text-muted-foreground"
-              >
-                Saved
-              </span>
-            )}
             <Button
               type="submit"
-              className="w-full sm:w-auto"
-              disabled={!isDirty || mutation.isPending}
+              className="w-full disabled:opacity-100 sm:w-auto"
+              disabled={(!isDirty && !justSaved) || mutation.isPending}
             >
-              {mutation.isPending ? "Saving" : "Save changes"}
+              {mutation.isPending ? (
+                "Saving"
+              ) : justSaved ? (
+                <>
+                  <Check aria-hidden />
+                  Saved
+                </>
+              ) : (
+                "Save changes"
+              )}
             </Button>
+            <span role="status" className="sr-only">
+              {justSaved ? "Saved" : ""}
+            </span>
           </div>
         </Surface>
       </form>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { TechnologyTag } from "@/components/feed/TechnologyTag";
 import { KarmaChip } from "@/components/karma/KarmaChip";
@@ -23,12 +24,19 @@ const joined = new Intl.DateTimeFormat("en", {
 export function ProfileCard({
   profile,
   actions,
+  avatar,
+  statLinks,
 }: {
   profile: ProfileData;
   actions?: ReactNode;
+  // A 64px picture or monogram above the username.
+  avatar?: ReactNode;
+  // Where each number leads, for the signed-in user's own profile.
+  statLinks?: { posts: string; given: string; received: string };
 }) {
   return (
     <Surface>
+      {avatar && <div className="mb-4">{avatar}</div>}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-title font-semibold [overflow-wrap:anywhere]">
@@ -71,9 +79,21 @@ export function ProfileCard({
 
       {/* A hairline, not a panel, sets the numbers apart. */}
       <dl className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-center">
-        <Stat label="Posts" value={profile.stats.submissions} />
-        <Stat label="Reviews given" value={profile.stats.reviewsGiven} />
-        <Stat label="Reviews received" value={profile.stats.reviewsReceived} />
+        <Stat
+          label="Posts"
+          value={profile.stats.submissions}
+          href={statLinks?.posts}
+        />
+        <Stat
+          label="Reviews given"
+          value={profile.stats.reviewsGiven}
+          href={statLinks?.given}
+        />
+        <Stat
+          label="Reviews received"
+          value={profile.stats.reviewsReceived}
+          href={statLinks?.received}
+        />
       </dl>
 
       {actions && <div className="mt-5 flex flex-wrap gap-2">{actions}</div>}
@@ -81,18 +101,42 @@ export function ProfileCard({
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: number;
+  href?: string;
+}) {
   return (
-    <div>
+    <div
+      className={cn(
+        "relative rounded-md py-1",
+        href && "transition-colors hover:bg-muted/60",
+      )}
+    >
       <dd className="font-mono text-heading font-medium tabular-nums">
         {value}
       </dd>
-      <dt className="text-small text-muted-foreground">{label}</dt>
+      <dt className="text-small text-muted-foreground">
+        {href ? (
+          <Link
+            href={href}
+            className="rounded-sm outline-none after:absolute after:inset-0 focus-visible:ring-2 focus-visible:ring-ring/50"
+          >
+            {label}
+          </Link>
+        ) : (
+          label
+        )}
+      </dt>
     </div>
   );
 }
 
-// The same rows as ProfileCard: a 34px name, a 20px joined line, a two-line
+// The same rows as ProfileCard: a 64px avatar with 16px below it, a 34px name, a 20px joined line, a two-line
 // 48px bio, a 24px tag line, and a 44px stats row under a hairline, and for
 // the signed-in user's own profile a 28px actions row. A profile with no bio
 // is 64px shorter than this, which no skeleton can know in advance.
@@ -103,6 +147,7 @@ export function ProfileCardSkeleton({
 }) {
   return (
     <Surface aria-hidden>
+      <Skeleton className="mb-4 size-16 rounded-full" />
       <div className="flex items-start justify-between gap-3">
         <div>
           <Skeleton className="h-8.5 w-40" />
