@@ -12,7 +12,7 @@ export default async function SettingsPage() {
   return (
     <Container size="reading">
       <MeNav />
-      <h1 className="mb-3 text-lg font-medium">Settings</h1>
+      <h1 className="mb-4 text-title font-semibold">Settings</h1>
       <SettingsForm />
     </Container>
   );

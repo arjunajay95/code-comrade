@@ -7,15 +7,16 @@ import {
   LIST_PAGE_SIZE,
   PagedList,
   ReviewSummaryCard,
+  ReviewSummarySkeleton,
 } from "@/components/profile/ListViews";
-import { ProfileCard } from "@/components/profile/ProfileCard";
+import {
+  ProfileCard,
+  ProfileCardSkeleton,
+} from "@/components/profile/ProfileCard";
+import { ErrorCard } from "@/components/shell/StateCard";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/hooks/useMe";
 import { useMyReviews } from "@/hooks/useMyLists";
-import { cn } from "@/lib/utils";
-import { ApiError } from "@/services/apiClient";
 import { useUiStore } from "@/stores/uiStore";
 
 // The signed-in user's own profile, then the reviews they have written.
@@ -26,36 +27,15 @@ export function MyProfile() {
   const reviews = useMyReviews({ page, limit: LIST_PAGE_SIZE });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {me.isPending ? (
-        <Card className="gap-0 py-0" aria-hidden>
-          <CardContent className="p-4">
-            <Skeleton className="h-5 w-40" />
-            <Skeleton className="mt-2 h-3 w-24" />
-            <Skeleton className="mt-4 h-6 w-2/3" />
-            <Skeleton className="mt-4 h-16 w-full" />
-          </CardContent>
-        </Card>
+        <ProfileCardSkeleton withActions />
       ) : me.isError ? (
-        <Card role="alert" className="gap-0 py-0">
-          <CardContent className="p-4 text-sm">
-            <p className="font-medium">Could not load your profile</p>
-            <p className="mt-1 text-muted-foreground">{me.error.message}</p>
-            {me.error instanceof ApiError && me.error.requestId && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                Reference:{" "}
-                <span className="font-mono">{me.error.requestId}</span>
-              </p>
-            )}
-            <Button
-              variant="outline"
-              className="mt-3"
-              onClick={() => void me.refetch()}
-            >
-              Try again
-            </Button>
-          </CardContent>
-        </Card>
+        <ErrorCard
+          title="Could not load your profile"
+          error={me.error}
+          onRetry={() => void me.refetch()}
+        />
       ) : (
         <ProfileCard
           profile={me.data}
@@ -63,13 +43,13 @@ export function MyProfile() {
             <>
               <Link
                 href={`/profile/${me.data.username}`}
-                className={cn(buttonVariants({ variant: "outline" }))}
+                className={buttonVariants({ variant: "outline" })}
               >
                 View public profile
               </Link>
               <Link
                 href="/settings"
-                className={cn(buttonVariants({ variant: "outline" }))}
+                className={buttonVariants({ variant: "outline" })}
               >
                 Edit profile
               </Link>
@@ -83,7 +63,7 @@ export function MyProfile() {
       )}
 
       <section aria-labelledby="given-heading">
-        <h2 id="given-heading" className="mb-3 text-sm font-medium">
+        <h2 id="given-heading" className="mb-4 text-heading font-medium">
           Reviews you have written
         </h2>
         <PagedList
@@ -96,11 +76,12 @@ export function MyProfile() {
           emptyAction={
             <Link
               href="/feed"
-              className={cn(buttonVariants({ variant: "outline" }), "mt-3")}
+              className={buttonVariants({ variant: "outline" })}
             >
               Browse submissions
             </Link>
           }
+          skeleton={<ReviewSummarySkeleton />}
           renderItem={(review) => <ReviewSummaryCard review={review} />}
         />
       </section>

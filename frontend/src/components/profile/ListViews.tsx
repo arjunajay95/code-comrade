@@ -4,14 +4,15 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { FeedPagination } from "@/components/feed/FeedPagination";
-import { TechnologyTag } from "@/components/feed/TechnologyTag";
+import { ReviewStatus } from "@/components/feed/ReviewStatus";
+import { TechnologyTagRow } from "@/components/feed/TechnologyTagRow";
+import { ErrorCard, StateCard } from "@/components/shell/StateCard";
+import { STRETCHED_LINK, Surface } from "@/components/shell/Surface";
 import { RatingPips } from "@/components/submission/RatingPips";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { timeAgo } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { ApiError } from "@/services/apiClient";
 import type { PageMeta } from "@/services/feed";
 import type { ReviewSummary, SubmissionSummary } from "@/services/users";
 
@@ -25,6 +26,9 @@ interface PagedListProps<T> {
   emptyTitle: string;
   emptyText: string;
   emptyAction?: ReactNode;
+  // One placeholder, shown three times while the first page loads. It should
+  // mirror the card renderItem returns.
+  skeleton: ReactNode;
   renderItem: (item: T) => ReactNode;
 }
 
@@ -38,32 +42,16 @@ export function PagedList<T extends { id: number }>({
   emptyTitle,
   emptyText,
   emptyAction,
+  skeleton,
   renderItem,
 }: PagedListProps<T>) {
   if (query.isError) {
-    // The request id is what to quote when reporting a problem. It matches
-    // the server's log lines for that request.
-    const requestId =
-      query.error instanceof ApiError ? query.error.requestId : null;
     return (
-      <Card role="alert" className="gap-0 py-0">
-        <CardContent className="p-4 text-sm">
-          <p className="font-medium">Could not load {label}</p>
-          <p className="mt-1 text-muted-foreground">{query.error.message}</p>
-          {requestId && (
-            <p className="mt-1 text-xs text-muted-foreground">
-              Reference: <span className="font-mono">{requestId}</span>
-            </p>
-          )}
-          <Button
-            variant="outline"
-            className="mt-3"
-            onClick={() => void query.refetch()}
-          >
-            Try again
-          </Button>
-        </CardContent>
-      </Card>
+      <ErrorCard
+        title={`Could not load ${label}`}
+        error={query.error}
+        onRetry={() => void query.refetch()}
+      />
     );
   }
 
@@ -75,7 +63,7 @@ export function PagedList<T extends { id: number }>({
         className="space-y-3"
       >
         {Array.from({ length: 3 }, (_, index) => (
-          <ListItemSkeleton key={index} />
+          <div key={index}>{skeleton}</div>
         ))}
       </div>
     );
@@ -87,30 +75,17 @@ export function PagedList<T extends { id: number }>({
     // A page past the end comes back empty, not as an error.
     if (page > 1) {
       return (
-        <Card className="gap-0 py-0">
-          <CardContent className="p-4 text-sm">
-            <p className="text-muted-foreground">
-              There is nothing on this page.
-            </p>
-            <Button
-              variant="outline"
-              className="mt-3"
-              onClick={() => onPageChange(1)}
-            >
-              Back to page 1
-            </Button>
-          </CardContent>
-        </Card>
+        <StateCard title="There is nothing on this page.">
+          <Button variant="outline" onClick={() => onPageChange(1)}>
+            Back to page 1
+          </Button>
+        </StateCard>
       );
     }
     return (
-      <Card className="gap-0 py-0">
-        <CardContent className="p-4 text-sm">
-          <p className="font-medium">{emptyTitle}</p>
-          <p className="mt-1 text-muted-foreground">{emptyText}</p>
-          {emptyAction}
-        </CardContent>
-      </Card>
+      <StateCard title={emptyTitle} text={emptyText}>
+        {emptyAction}
+      </StateCard>
     );
   }
 
@@ -138,18 +113,45 @@ export function PagedList<T extends { id: number }>({
   );
 }
 
-function ListItemSkeleton() {
+// A 24px title row, a 24px tag row and a 37px footer, inside the card's
+// padding and border: 155px, the same as SubmissionSummaryCard.
+export function SubmissionSummarySkeleton() {
   return (
-    <Card className="gap-0 py-0" aria-hidden>
-      <CardContent className="p-4">
-        <Skeleton className="h-4 w-1/2" />
-        <div className="mt-3 flex min-h-6 items-center gap-1.5">
-          <Skeleton className="h-6 w-16" />
-          <Skeleton className="h-6 w-20" />
+    <Surface aria-hidden>
+      <div className="flex h-6 items-center">
+        <Skeleton className="h-5 w-1/2" />
+      </div>
+      <div className="mt-3 flex h-6 items-center gap-1.5">
+        <Skeleton className="h-6 w-16" />
+        <Skeleton className="h-6 w-20" />
+      </div>
+      <div className="mt-4 border-t pt-3">
+        <div className="flex h-6 items-center justify-between gap-3">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-4 w-16" />
         </div>
-        <Skeleton className="mt-3 h-9 w-full rounded-lg" />
-      </CardContent>
-    </Card>
+      </div>
+    </Surface>
+  );
+}
+
+// A review's height depends on its feedback and its criteria. This one holds a
+// 20px header, a 20px byline, a two-line 48px body and a 100px ratings panel,
+// which is a typical review, not every review.
+export function ReviewSummarySkeleton() {
+  return (
+    <Surface aria-hidden>
+      <div className="flex h-5 items-center justify-between gap-3">
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="h-4 w-16" />
+      </div>
+      <Skeleton className="mt-1 h-4 w-1/3" />
+      <div className="mt-3 flex h-12 flex-col justify-center gap-3">
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-2/3" />
+      </div>
+      <Skeleton className="mt-4 h-25 w-full rounded-lg" />
+    </Surface>
   );
 }
 
@@ -159,99 +161,97 @@ export function SubmissionSummaryCard({
   submission: SubmissionSummary;
 }) {
   return (
-    <Card className="gap-0 py-0">
-      <CardContent className="p-4">
-        <h2 className="text-base font-medium [overflow-wrap:anywhere]">
-          <Link
-            href={`/submissions/${submission.id}`}
-            className="underline-offset-4 hover:underline"
-          >
-            {submission.title}
-          </Link>
-        </h2>
-        <ul className="mt-3 flex min-h-6 flex-wrap gap-1.5">
-          {submission.technologies.map((technology) => (
-            <li key={technology.id}>
-              <TechnologyTag name={technology.name} />
-            </li>
-          ))}
-        </ul>
-        <div className="mt-3 flex h-9 items-center justify-between gap-3 rounded-lg bg-muted/50 px-3 text-xs">
-          <span className="text-muted-foreground">
-            {submission.reviewCount === 0
-              ? "needs a review"
-              : `${submission.reviewCount} ${submission.reviewCount === 1 ? "review" : "reviews"}`}
-          </span>
+    <Surface interactive>
+      <h2 className="h-6 truncate text-heading font-medium">
+        {/* The ::after covers the card, so a click anywhere opens it. */}
+        <Link
+          href={`/submissions/${submission.id}`}
+          data-card-link
+          className={STRETCHED_LINK}
+        >
+          {submission.title}
+        </Link>
+      </h2>
+      <TechnologyTagRow
+        technologies={submission.technologies}
+        className="mt-3"
+      />
+      <div className="mt-4 border-t pt-3">
+        <div className="flex h-6 items-center justify-between gap-3">
+          <ReviewStatus
+            status={submission.reviewCount === 0 ? "PENDING" : "REVIEWED"}
+            reviewCount={submission.reviewCount}
+          />
           <time
             dateTime={submission.createdAt}
-            className="shrink-0 font-mono text-muted-foreground"
+            className="shrink-0 font-mono text-micro text-muted-foreground"
           >
             {timeAgo(submission.createdAt)}
           </time>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Surface>
   );
 }
 
 // A review in a list. The submission it belongs to is always shown, because
 // a list of reviews with no context is not useful.
 export function ReviewSummaryCard({ review }: { review: ReviewSummary }) {
+  const personLink =
+    "relative z-10 text-foreground underline-offset-4 hover:underline";
+
   return (
-    <Card className="gap-0 py-0">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-3 text-xs">
-          <span className="min-w-0 truncate text-muted-foreground">
-            Review of{" "}
-            <Link
-              href={`/submissions/${review.submission.id}`}
-              className="text-foreground underline-offset-4 hover:underline"
-            >
-              {review.submission.title}
-            </Link>
-          </span>
-          <time
-            dateTime={review.createdAt}
-            className="shrink-0 font-mono text-muted-foreground"
-          >
-            {timeAgo(review.createdAt)}
-          </time>
-        </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          by{" "}
+    <Surface interactive>
+      <div className="flex items-center justify-between gap-3">
+        <span className="min-w-0 truncate text-small text-muted-foreground">
+          Review of{" "}
           <Link
-            href={`/profile/${review.reviewer}`}
-            className="text-foreground underline-offset-4 hover:underline"
+            href={`/submissions/${review.submission.id}`}
+            data-card-link
+            className={cn(STRETCHED_LINK, "text-foreground")}
           >
-            {review.reviewer}
+            {review.submission.title}
           </Link>
-          , on code by{" "}
-          <Link
-            href={`/profile/${review.submission.author}`}
-            className="text-foreground underline-offset-4 hover:underline"
+        </span>
+        <time
+          dateTime={review.createdAt}
+          className="shrink-0 font-mono text-micro text-muted-foreground"
+        >
+          {timeAgo(review.createdAt)}
+        </time>
+      </div>
+      <p className="mt-1 text-small text-muted-foreground">
+        by{" "}
+        <Link href={`/profile/${review.reviewer}`} className={personLink}>
+          {review.reviewer}
+        </Link>
+        , on code by{" "}
+        <Link
+          href={`/profile/${review.submission.author}`}
+          className={personLink}
+        >
+          {review.submission.author}
+        </Link>
+      </p>
+
+      <p className="mt-3 whitespace-pre-line text-body [overflow-wrap:anywhere]">
+        {review.feedback}
+      </p>
+
+      {/* Grouped data: one rating per criterion. */}
+      <ul className="mt-4 space-y-2 rounded-lg bg-muted/50 p-3">
+        {review.ratings.map((rating) => (
+          <li
+            key={rating.criterion}
+            className="flex items-center justify-between gap-3 text-small"
           >
-            {review.submission.author}
-          </Link>
-        </p>
-
-        <p className="mt-2 whitespace-pre-line text-sm/6 [overflow-wrap:anywhere]">
-          {review.feedback}
-        </p>
-
-        <ul className="mt-3 space-y-2 rounded-lg bg-muted/50 p-3">
-          {review.ratings.map((rating) => (
-            <li
-              key={rating.criterion}
-              className="flex items-center justify-between gap-3 text-xs"
-            >
-              <span className="min-w-0 truncate text-muted-foreground">
-                {rating.criterion}
-              </span>
-              <RatingPips value={rating.rating} label={rating.criterion} />
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
+            <span className="min-w-0 truncate text-muted-foreground">
+              {rating.criterion}
+            </span>
+            <RatingPips value={rating.rating} label={rating.criterion} />
+          </li>
+        ))}
+      </ul>
+    </Surface>
   );
 }

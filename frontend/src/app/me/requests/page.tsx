@@ -12,7 +12,7 @@ export default async function MyRequestsPage() {
   return (
     <Container size="reading">
       <MeNav />
-      <h1 className="mb-3 text-lg font-medium">Your requests</h1>
+      <h1 className="mb-4 text-title font-semibold">Your requests</h1>
       <MyRequests />
     </Container>
   );

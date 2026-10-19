@@ -12,7 +12,7 @@ export default async function ReviewsReceivedPage() {
   return (
     <Container size="reading">
       <MeNav />
-      <h1 className="mb-3 text-lg font-medium">Reviews you received</h1>
+      <h1 className="mb-4 text-title font-semibold">Reviews you received</h1>
       <ReviewsReceived />
     </Container>
   );
