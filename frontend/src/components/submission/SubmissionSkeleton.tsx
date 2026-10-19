@@ -2,8 +2,8 @@ import { Surface } from "@/components/shell/Surface";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // The same structure as SubmissionView, row for row: a 34px title line, a 20px
-// meta line, a two-line 48px description, a 24px tag line and a 28px actions
-// row, closed by a hairline with 32px below it. A title, a description or a
+// meta line, a two-line 48px description, a 24px tag line and a 32px GitHub
+// button, closed by a hairline with 32px below it. A title, a description or a
 // criteria list that runs longer than one of these rows grows past it, which
 // no skeleton can predict. Three criteria are shown, the middle of 1 to 5.
 export function SubmissionSkeleton() {
@@ -27,7 +27,7 @@ export function SubmissionSkeleton() {
           <Skeleton className="h-6 w-20" />
           <Skeleton className="h-6 w-16" />
         </div>
-        <Skeleton className="mt-6 h-7 w-40" />
+        <Skeleton className="mt-6 h-8 w-56 max-w-full" />
       </div>
 
       <div className="mt-8">

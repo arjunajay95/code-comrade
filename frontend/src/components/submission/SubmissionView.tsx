@@ -22,13 +22,27 @@ type Review = SubmissionDetail["reviews"][number];
 // page wider than the screen.
 const WRAP = "[overflow-wrap:anywhere]";
 
+// lucide-react has no brand icons, so this is the GitHub mark drawn inline.
+function GithubMark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      aria-hidden
+      className={className}
+    >
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+    </svg>
+  );
+}
+
 export function SubmissionView({
   submission,
   actions,
   reviewSlot,
 }: {
   submission: SubmissionDetail;
-  // Buttons for the signed-in viewer, next to the GitHub link.
+  // Buttons for the signed-in viewer, at the right of the title.
   actions?: ReactNode;
   // The review form or the reason there is none, above the review list.
   reviewSlot?: ReactNode;
@@ -49,9 +63,15 @@ export function SubmissionView({
       {/* The page opens on the title, not a card. SubmissionSkeleton mirrors
           this block's rows. */}
       <header className="border-b pb-8">
-        <h1 className={cn("text-title font-semibold", WRAP)}>
-          {submission.title}
-        </h1>
+        {/* Top-aligned, so the button stays beside the first line when a long
+            title wraps. min-w-0 lets the title shrink instead of pushing the
+            button off a 320px screen. */}
+        <div className="flex items-start justify-between gap-3">
+          <h1 className={cn("min-w-0 text-title font-semibold", WRAP)}>
+            {submission.title}
+          </h1>
+          {actions}
+        </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
           <Link
@@ -89,28 +109,27 @@ export function SubmissionView({
           ))}
         </ul>
 
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          {/* Opens in a new tab. noopener stops the opened page from
-              controlling this one through window.opener. */}
-          <a
-            href={submission.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(buttonVariants({ variant: "outline" }), "shrink-0")}
-          >
-            <ExternalLink className="size-4" aria-hidden />
-            Open on GitHub
-          </a>
-          {actions}
-          <span
-            className={cn(
-              "min-w-0 font-mono text-small text-muted-foreground",
-              WRAP,
-            )}
-          >
+        {/* One button holds the repository path, so a long path truncates
+            inside it and the full path stays in the title. Opens in a new tab;
+            noopener stops the opened page from controlling this one through
+            window.opener. */}
+        <a
+          href={submission.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Open ${repositoryPath} on GitHub`}
+          title={repositoryPath}
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "mt-6 max-w-full",
+          )}
+        >
+          <GithubMark className="size-4 shrink-0" />
+          <span className="min-w-0 truncate font-mono text-small">
             {repositoryPath}
           </span>
-        </div>
+          <ExternalLink className="size-4 shrink-0" aria-hidden />
+        </a>
 
         {/* GitHub metadata is fetched in Phase 7. Until then, and whenever a
             fetch fails, there is no snapshot, so nothing is rendered. */}
