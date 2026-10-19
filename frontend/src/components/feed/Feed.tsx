@@ -6,13 +6,12 @@ import { useAuth } from "@clerk/nextjs";
 import { useReducedMotion } from "motion/react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { usePersonalizedFeed, usePublicFeed } from "@/hooks/useFeed";
 import { useMe } from "@/hooks/useMe";
 import { cn } from "@/lib/utils";
-import { ApiError } from "@/services/apiClient";
 import type { FeedItem, PageMeta } from "@/services/feed";
 import { useFeedStore, type FeedView } from "@/stores/feedStore";
+import { ErrorCard, StateCard } from "@/components/shell/StateCard";
 import { FeedFilters } from "./FeedFilters";
 import { FeedItemRow } from "./FeedItemRow";
 import { FeedItemSkeleton } from "./FeedItemSkeleton";
@@ -201,7 +200,13 @@ function FeedResults({
   const animateIn = seen.count > 1 && !reduceMotion;
 
   if (state.isError) {
-    return <FeedError error={state.error} onRetry={state.refetch} />;
+    return (
+      <ErrorCard
+        title="Could not load the feed"
+        error={state.error}
+        onRetry={state.refetch}
+      />
+    );
   }
 
   if (state.isPending || !state.items || !state.meta) {
@@ -223,34 +228,21 @@ function FeedResults({
     // if the remembered page no longer exists.
     if (page > 1) {
       return (
-        <Card className="gap-0 py-0">
-          <CardContent className="p-4 text-body">
-            <p className="text-muted-foreground">
-              There is nothing on this page.
-            </p>
-            <Button
-              variant="outline"
-              className="mt-3"
-              onClick={() => onPageChange(1)}
-            >
-              Back to page 1
-            </Button>
-          </CardContent>
-        </Card>
+        <StateCard title="There is nothing on this page.">
+          <Button variant="outline" onClick={() => onPageChange(1)}>
+            Back to page 1
+          </Button>
+        </StateCard>
       );
     }
     return (
-      <Card className="gap-0 py-0">
-        <CardContent className="p-4 text-body">
-          <p className="font-medium">{emptyTitle}</p>
-          <p className="mt-1 text-small text-muted-foreground">{emptyText}</p>
-          {onClearFilters && (
-            <Button variant="outline" className="mt-3" onClick={onClearFilters}>
-              Clear filters
-            </Button>
-          )}
-        </CardContent>
-      </Card>
+      <StateCard title={emptyTitle} text={emptyText}>
+        {onClearFilters && (
+          <Button variant="outline" onClick={onClearFilters}>
+            Clear filters
+          </Button>
+        )}
+      </StateCard>
     );
   }
 
@@ -283,50 +275,15 @@ function FeedResults({
   );
 }
 
-function FeedError({
-  error,
-  onRetry,
-}: {
-  error: Error | null;
-  onRetry: () => void;
-}) {
-  // The request id is what to quote when reporting a problem. It matches the
-  // server's log lines for that request.
-  const requestId = error instanceof ApiError ? error.requestId : null;
-
-  return (
-    <Card role="alert" className="gap-0 py-0">
-      <CardContent className="p-4 text-body">
-        <p className="font-medium">Could not load the feed</p>
-        <p className="mt-1 text-small text-muted-foreground">
-          {error?.message ?? "Something went wrong."}
-        </p>
-        {requestId && (
-          <p className="mt-1 text-small text-muted-foreground">
-            Reference: <span className="font-mono">{requestId}</span>
-          </p>
-        )}
-        <Button variant="outline" className="mt-3" onClick={onRetry}>
-          Try again
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
 function SignInPrompt() {
   return (
-    <Card className="gap-0 py-0">
-      <CardContent className="p-4 text-body">
-        <p className="font-medium">See submissions ranked for you</p>
-        <p className="mt-1 text-small text-muted-foreground">
-          Sign in and add your technologies. The feed then ranks submissions by
-          how well they match your stack, and how recent they are.
-        </p>
-        <Link href="/sign-in" className={cn(buttonVariants(), "mt-3")}>
-          Sign in
-        </Link>
-      </CardContent>
-    </Card>
+    <StateCard
+      title="See submissions ranked for you"
+      text="Sign in and add your technologies. The feed then ranks submissions by how well they match your stack, and how recent they are."
+    >
+      <Link href="/sign-in" className={buttonVariants()}>
+        Sign in
+      </Link>
+    </StateCard>
   );
 }

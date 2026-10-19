@@ -6,13 +6,11 @@ import { KarmaChip } from "@/components/karma/KarmaChip";
 import { timeAgo } from "@/lib/time";
 import type { FeedItem } from "@/services/feed";
 import { ReviewStatus } from "./ReviewStatus";
-import { TechnologyTag } from "./TechnologyTag";
+import { TechnologyTagRow } from "./TechnologyTagRow";
 
 // The personalized feed adds matchedTechnologies to each item. The public
 // feed does not, and there nothing is highlighted.
 type RowItem = FeedItem & { matchedTechnologies?: readonly string[] };
-
-const MAX_TAGS = 3;
 
 // The stagger stops growing after the tenth card, so a long page never waits.
 const STAGGER_SECONDS = 0.03;
@@ -34,13 +32,6 @@ export function FeedItemRow({
   animateIn: boolean;
 }) {
   const matched = new Set(item.matchedTechnologies);
-
-  // Matched tags first, so a match is never hidden behind the +N chip. The
-  // sort is stable, so the rest keep the API's order.
-  const tags = [...item.technologies].sort(
-    (a, b) => Number(matched.has(b.name)) - Number(matched.has(a.name)),
-  );
-  const hiddenCount = tags.length - MAX_TAGS;
 
   return (
     <m.li
@@ -74,21 +65,11 @@ export function FeedItemRow({
         {item.description}
       </p>
 
-      <ul className="mt-4 flex h-6 gap-1.5 overflow-hidden">
-        {tags.slice(0, MAX_TAGS).map((technology) => (
-          <li key={technology.id} className="shrink-0">
-            <TechnologyTag
-              name={technology.name}
-              matched={matched.has(technology.name)}
-            />
-          </li>
-        ))}
-        {hiddenCount > 0 && (
-          <li className="shrink-0">
-            <TechnologyTag name={`+${hiddenCount}`} />
-          </li>
-        )}
-      </ul>
+      <TechnologyTagRow
+        technologies={item.technologies}
+        matchedNames={matched}
+        className="mt-4"
+      />
 
       <div className="mt-4 border-t pt-3">
         <div className="flex h-6 items-center gap-2">
