@@ -110,7 +110,8 @@ interface SubmissionFormProps {
 const EMPTY: FormValues = {
   title: "",
   description: "",
-  githubUrl: "",
+  // Starts with the scheme, so a pasted address without one is already complete.
+  githubUrl: "https://",
   technologies: [],
   criteria: [{ label: "" }],
 };
@@ -135,6 +136,7 @@ export function SubmissionForm({
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = form;
   const criteria = useFieldArray({ control, name: "criteria" });
@@ -211,6 +213,18 @@ export function SubmissionForm({
             autoComplete="off"
             spellCheck={false}
             aria-invalid={errors.githubUrl ? true : undefined}
+            // A pasted address that already has a scheme replaces the field,
+            // instead of landing after the prefilled one. One without a scheme
+            // pastes in as usual, after "https://".
+            onPaste={(event) => {
+              const pasted = event.clipboardData.getData("text").trim();
+              if (!/^https?:\/\//i.test(pasted)) return;
+              event.preventDefault();
+              setValue("githubUrl", pasted, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            }}
             {...register("githubUrl")}
           />
         </Field>
