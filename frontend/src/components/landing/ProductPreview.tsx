@@ -1,7 +1,14 @@
 import { FeedItemRow } from "@/components/feed/FeedItemRow";
 import { Container } from "@/components/shell/Container";
+import { GLASS_BLUR, GLASS_HIGHLIGHT } from "@/components/shell/Surface";
 import { createPreviewItems } from "@/content/landingPreview";
+import { SITE_URL } from "@/lib/config";
+import { cn } from "@/lib/utils";
 import { SectionTitle } from "./SectionTitle";
+import { Spotlight } from "./Spotlight";
+
+// The window label shows the real host, so it cannot drift from SITE_URL.
+const PREVIEW_ADDRESS = `${new URL(SITE_URL).host}/feed`;
 
 // A still copy of the tab pill, with For you selected. It has the same classes
 // as FeedTabs but none of its roles or handlers.
@@ -33,32 +40,38 @@ export function ProductPreview() {
 
         {/* inert takes everything inside out of the tab order and the
             accessibility tree, so the example links cannot be reached. */}
-        <div
-          inert
-          className="pointer-events-none mx-auto mt-12 max-w-3xl select-none overflow-hidden rounded-2xl border bg-card/40"
-        >
-          <div className="flex h-10 items-center gap-2 border-b px-4">
-            <span className="size-2.5 rounded-full bg-muted-foreground/30" />
-            <span className="size-2.5 rounded-full bg-muted-foreground/30" />
-            <span className="size-2.5 rounded-full bg-muted-foreground/30" />
-            <span className="ml-2 font-mono text-micro text-muted-foreground">
-              codecomrade.app/feed
-            </span>
+        <Spotlight className="mx-auto mt-12 max-w-3xl rounded-2xl">
+          <div
+            inert
+            className={cn(
+              "select-none overflow-hidden rounded-2xl border bg-card/40",
+              GLASS_HIGHLIGHT,
+              GLASS_BLUR,
+            )}
+          >
+            <div className="flex h-10 items-center gap-2 border-b px-4">
+              <span className="size-2.5 rounded-full bg-muted-foreground/30" />
+              <span className="size-2.5 rounded-full bg-muted-foreground/30" />
+              <span className="size-2.5 rounded-full bg-muted-foreground/30" />
+              <span className="ml-2 font-mono text-micro text-muted-foreground">
+                {PREVIEW_ADDRESS}
+              </span>
+            </div>
+            <div className="p-4 sm:p-6">
+              <PreviewTabs />
+              <ul className="mt-4 space-y-3">
+                {items.map((item, index) => (
+                  <FeedItemRow
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    animateIn={false}
+                  />
+                ))}
+              </ul>
+            </div>
           </div>
-          <div className="p-4 sm:p-6">
-            <PreviewTabs />
-            <ul className="mt-4 space-y-3">
-              {items.map((item, index) => (
-                <FeedItemRow
-                  key={item.id}
-                  item={item}
-                  index={index}
-                  animateIn={false}
-                />
-              ))}
-            </ul>
-          </div>
-        </div>
+        </Spotlight>
         <p className="mt-4 text-center text-small text-muted-foreground">
           Example requests, for illustration.
         </p>
