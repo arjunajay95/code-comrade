@@ -70,18 +70,18 @@ export function ReviewSection({
   }
 
   return (
-    <div className="space-y-6">
-      {isAuthor && (
-        <StateCard
-          title="This is your submission"
-          text="You cannot review your own code. Other developers can."
-        />
-      )}
-      <ReviewForm
-        submissionId={submission.id}
-        criteria={submission.criteria.map(({ id, label }) => ({ id, label }))}
-        disabled={isAuthor}
-      />
-    </div>
+    <ReviewForm
+      submissionId={submission.id}
+      criteria={submission.criteria.map(({ id, label }) => ({ id, label }))}
+      disabled={isAuthor}
+      notice={
+        isAuthor
+          ? {
+              title: "This is your submission",
+              text: "You cannot review your own code. Other developers can.",
+            }
+          : undefined
+      }
+    />
   );
 }

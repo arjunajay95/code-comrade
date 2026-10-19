@@ -20,8 +20,9 @@ interface ReviewFormProps {
   submissionId: number;
   criteria: Criterion[];
   // The author's own submission: the form is shown, switched off, with the
-  // reason above it. The API refuses it anyway (INV-2).
+  // reason at the top of the same card. The API refuses it anyway (INV-2).
   disabled?: boolean;
+  notice?: { title: string; text: string };
 }
 
 // One rating per criterion, in the criteria's order. 0 is the unchosen state,
@@ -50,6 +51,7 @@ export function ReviewForm({
   submissionId,
   criteria,
   disabled = false,
+  notice,
 }: ReviewFormProps) {
   const mutation = useCreateReview(submissionId);
   const form = useForm<FormValues>({
@@ -82,6 +84,12 @@ export function ReviewForm({
 
   return (
     <Surface>
+      {notice && (
+        <div className="mb-5 border-b pb-4">
+          <p className="text-body font-medium">{notice.title}</p>
+          <p className="mt-1 text-small text-muted-foreground">{notice.text}</p>
+        </div>
+      )}
       <h2 className="text-heading font-medium">Review this code</h2>
       <p className="mt-1 text-small text-muted-foreground">
         Write what you would tell the author, then rate each criterion from 1 to
