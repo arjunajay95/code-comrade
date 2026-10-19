@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { ErrorCard, StateCard } from "@/components/shell/StateCard";
+import { buttonVariants } from "@/components/ui/button";
 import { useSubmission } from "@/hooks/useSubmission";
-import { cn } from "@/lib/utils";
 import { ApiError } from "@/services/apiClient";
 import { OwnerEditLink } from "./OwnerEditLink";
 import { ReviewSection } from "./ReviewSection";
@@ -21,47 +20,23 @@ export function SubmissionDetail({ id }: { id: number }) {
     // request failing. Only a failure is worth retrying.
     if (query.error instanceof ApiError && query.error.status === 404) {
       return (
-        <Card className="gap-0 py-0">
-          <CardContent className="p-4 text-sm">
-            <p className="font-medium">Submission not found</p>
-            <p className="mt-1 text-muted-foreground">
-              It may have been removed, or the link may be wrong.
-            </p>
-            <Link
-              href="/"
-              className={cn(buttonVariants({ variant: "outline" }), "mt-3")}
-            >
-              Back to submissions
-            </Link>
-          </CardContent>
-        </Card>
+        <StateCard
+          title="Post not found"
+          text="It may have been removed, or the link may be wrong."
+        >
+          <Link href="/feed" className={buttonVariants({ variant: "outline" })}>
+            Back to feed
+          </Link>
+        </StateCard>
       );
     }
 
-    // The request id is what to quote when reporting a problem. It matches the
-    // server's log lines for that request.
-    const requestId =
-      query.error instanceof ApiError ? query.error.requestId : null;
-
     return (
-      <Card role="alert" className="gap-0 py-0">
-        <CardContent className="p-4 text-sm">
-          <p className="font-medium">Could not load this submission</p>
-          <p className="mt-1 text-muted-foreground">{query.error.message}</p>
-          {requestId && (
-            <p className="mt-1 text-xs text-muted-foreground">
-              Reference: {requestId}
-            </p>
-          )}
-          <Button
-            variant="outline"
-            className="mt-3"
-            onClick={() => void query.refetch()}
-          >
-            Try again
-          </Button>
-        </CardContent>
-      </Card>
+      <ErrorCard
+        title="Could not load this post"
+        error={query.error}
+        onRetry={() => void query.refetch()}
+      />
     );
   }
 

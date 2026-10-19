@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, type KeyboardEvent } from "react";
+import * as m from "motion/react-m";
 import { cn } from "@/lib/utils";
 import type { FeedView } from "@/stores/feedStore";
 
@@ -55,13 +56,22 @@ export function FeedTabs({
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(tab.id)}
             className={cn(
-              "h-7 rounded-md px-3 text-sm transition-colors",
+              "relative h-7 rounded-md px-3 text-small outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
               selected
-                ? "bg-background text-foreground ring-1 ring-foreground/10"
+                ? "text-foreground"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {tab.label}
+            {selected && (
+              // One shared layoutId, so the highlight slides from the old tab
+              // to the new one instead of fading in place.
+              <m.span
+                layoutId="feed-tab-indicator"
+                transition={{ type: "spring", duration: 0.25, bounce: 0 }}
+                className="absolute inset-0 rounded-md bg-background ring-1 ring-foreground/10"
+              />
+            )}
+            <span className="relative">{tab.label}</span>
           </button>
         );
       })}

@@ -29,10 +29,10 @@ export function RatingInput({
         <label
           key={score}
           className={cn(
-            "flex size-7 cursor-pointer items-center justify-center rounded-md border text-xs tabular-nums transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/30",
+            "flex size-7 cursor-pointer items-center justify-center rounded-md border font-mono text-micro tabular-nums transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/50",
             "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50",
             score <= value
-              ? "border-addition/40 bg-addition/10 text-addition"
+              ? "border-foreground bg-foreground text-background"
               : "bg-muted/50 text-muted-foreground hover:text-foreground",
           )}
         >

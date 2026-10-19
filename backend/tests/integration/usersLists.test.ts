@@ -46,12 +46,14 @@ describe("the lists under /users/me", () => {
     });
     expect(keysOf(res.body.data[0])).toEqual([
       "createdAt",
+      "description",
       "githubUrl",
       "id",
       "reviewCount",
       "technologies",
       "title",
     ]);
+    expect(typeof res.body.data[0].description).toBe("string");
     expect(res.body.data[0].reviewCount).toBe(1);
     expect(res.body.data[1].reviewCount).toBe(0);
   });

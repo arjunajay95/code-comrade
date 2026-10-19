@@ -29,21 +29,26 @@ const technologiesFilter = z
       .max(FEED_FILTER_MAX_TECHNOLOGIES),
   );
 
+// The two optional filters, shared by both feeds so they validate the same way.
+const feedFilterShape = {
+  search: z.string().trim().min(1).max(FEED_SEARCH_MAX_LENGTH).optional(),
+  technologies: technologiesFilter.optional(),
+};
+
 // Pagination plus the two optional filters, in one strict object, so any
 // other query parameter is still rejected (D-11).
 const feedQuery = z
   .object({
     ...paginationQuery.shape,
-    search: z.string().trim().min(1).max(FEED_SEARCH_MAX_LENGTH).optional(),
-    technologies: technologiesFilter.optional(),
+    ...feedFilterShape,
   })
   .strict();
 
-// Pagination and the optional debug flag. No search or technology filters:
-// the spec defines those for the public feed only.
+// The same, plus the optional debug flag.
 const personalizedFeedQuery = z
   .object({
     ...paginationQuery.shape,
+    ...feedFilterShape,
     debug: z.literal("1").optional(),
   })
   .strict();

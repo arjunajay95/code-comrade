@@ -5,8 +5,9 @@ import { auth } from "@clerk/nextjs/server";
 import { ArrowLeft } from "lucide-react";
 import { EditSubmission } from "@/components/submission/EditSubmission";
 import { parseSubmissionId } from "@/lib/ids";
+import { Container } from "@/components/shell/Container";
 
-export const metadata: Metadata = { title: "Edit request" };
+export const metadata: Metadata = { title: "Edit post" };
 
 export default async function EditSubmissionPage({
   params,
@@ -19,18 +20,18 @@ export default async function EditSubmissionPage({
   await auth.protect();
 
   return (
-    <>
+    <Container size="reading">
       <Link
         href={`/submissions/${id}`}
-        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-small text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" aria-hidden />
-        Back to the submission
+        Back to the post
       </Link>
-      <h1 className="mt-4 text-lg font-medium">Edit your request</h1>
-      <div className="mt-4">
+      <h1 className="mt-4 text-title font-semibold">Edit your post</h1>
+      <div className="mt-6">
         <EditSubmission id={id} />
       </div>
-    </>
+    </Container>
   );
 }

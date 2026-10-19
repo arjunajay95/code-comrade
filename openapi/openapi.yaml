@@ -568,12 +568,27 @@ paths:
         with the signed-in user's technology stack blended with recency.
         A user with no technologies gets recency order. 
         The user's own submissions are excluded; they appear in the
-        public feed and in /users/me/submissions.
+        public feed and in /users/me/submissions. The same search and
+        technologies filters as the public feed apply inside the window,
+        before scoring, so the window is the most recent 200 matching
+        submissions by other users, and meta.totalItems is its size.
       security:
         - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Limit"
+        - name: search
+          in: query
+          required: false
+          description: Case-insensitive match against title and description.
+          schema: { type: string, minLength: 1, maxLength: 100 }
+        - name: technologies
+          in: query
+          required: false
+          description: >
+            Comma-separated technology names. Returns submissions with any of
+            them. Names are trimmed, lowercased and de-duplicated, up to 10.
+          schema: { type: string, minLength: 1 }
         - name: debug
           in: query
           required: false
@@ -809,11 +824,13 @@ components:
 
     SubmissionSummary:
       type: object
-      required: [id, title, githubUrl, createdAt, technologies, reviewCount]
+      required:
+        [id, title, description, githubUrl, createdAt, technologies, reviewCount]
       additionalProperties: false
       properties:
         id: { type: integer }
         title: { type: string }
+        description: { type: string }
         githubUrl: { type: string, format: uri }
         createdAt: { type: string, format: date-time }
         technologies:

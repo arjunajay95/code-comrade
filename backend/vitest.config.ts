@@ -47,6 +47,7 @@ export default defineConfig({
       thresholds: {
         "src/service/**": { lines: 90, branches: 85 },
         "src/repository/**": { lines: 90, branches: 85 },
+        "src/controller/**": { lines: 60, branches: 50 },
         "src/utils/feedScoring.ts": {
           lines: 100,
           branches: 100,
