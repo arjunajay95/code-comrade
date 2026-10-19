@@ -30,13 +30,15 @@ export function SiteHeader() {
         {/* Pushes everything after it to the right edge. */}
         <div className="flex-1" />
 
-        {/* Below sm the menu holds the theme switch, so it leaves the header. */}
+        {/* The auth items fill in once Clerk has loaded, and they grow to the
+            left, into the spacer. The theme switch (the menu button below sm,
+            where the menu holds the switch) is last, so it stays at the right
+            edge and nothing in the header moves when they appear. */}
+        <HeaderAuth />
         <MobileMenu />
         <div className="hidden sm:block">
           <ThemeToggle />
         </div>
-
-        <HeaderAuth />
       </Container>
     </HeaderFrame>
   );
