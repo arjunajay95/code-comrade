@@ -63,7 +63,7 @@ export function MobileMenu() {
         <DialogPrimitive.Backdrop className="fixed inset-x-0 top-14 bottom-0 z-50 bg-black/40 duration-150 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 motion-reduce:animate-none sm:hidden" />
         <DialogPrimitive.Popup
           id={MENU_ID}
-          className="fixed inset-x-0 top-14 z-50 border-b bg-card p-2 outline-none duration-150 data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-top-2 data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-top-2 motion-reduce:animate-none sm:hidden"
+          className="fixed inset-x-0 top-14 z-50 border-b bg-card/80 p-2 shadow-[inset_0_1px_0_0_var(--glass-highlight)] backdrop-blur-md outline-none duration-150 data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-top-2 data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-top-2 motion-reduce:animate-none sm:hidden"
         >
           <DialogPrimitive.Title className="sr-only">
             Menu
