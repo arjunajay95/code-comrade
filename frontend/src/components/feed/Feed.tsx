@@ -7,7 +7,6 @@ import { useReducedMotion } from "motion/react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { usePersonalizedFeed, usePublicFeed } from "@/hooks/useFeed";
-import { useMe } from "@/hooks/useMe";
 import { cn } from "@/lib/utils";
 import type { FeedItem, PageMeta } from "@/services/feed";
 import { useFeedStore, type FeedView } from "@/stores/feedStore";
@@ -18,7 +17,7 @@ import { FeedItemRow } from "./FeedItemRow";
 import { FeedItemSkeleton } from "./FeedItemSkeleton";
 import { FeedPagination } from "./FeedPagination";
 import { FeedTabs } from "./FeedTabs";
-import { useUiStore } from "@/stores/uiStore";
+import { YourStack } from "./YourStack";
 
 const PAGE_SIZE = 10;
 
@@ -52,7 +51,6 @@ function toListState<T extends ListItem>(
 
 export function Feed() {
   const { isLoaded, isSignedIn } = useAuth();
-  const me = useMe();
   const chosenView = useFeedStore((state) => state.view);
   const setView = useFeedStore((state) => state.setView);
   const page = useFeedStore((state) => state.page);
@@ -61,7 +59,6 @@ export function Feed() {
   const technologies = useFeedStore((state) => state.technologies);
   const resetCount = useFeedStore((state) => state.resetCount);
   const clearFilters = useFeedStore((state) => state.clearFilters);
-  const openStackPicker = useUiStore((state) => state.openStackPicker);
 
   // The public feed shows while Clerk is still loading, so visitors who are not
   // signed in, which is most of them, never wait on it. Signed-in users switch
@@ -71,14 +68,13 @@ export function Feed() {
 
   // Known only once the profile has loaded, so the note never flickers in
   // before then.
-  const hasNoStack = me.data?.technologies.length === 0;
 
   const publicFeed = usePublicFeed(
     { page, limit: PAGE_SIZE, search, technologies },
     view === "latest",
   );
   const forYouFeed = usePersonalizedFeed(
-    { page, limit: PAGE_SIZE },
+    { page, limit: PAGE_SIZE, search, technologies },
     view === "for-you" && signedIn,
   );
 
@@ -93,30 +89,15 @@ export function Feed() {
   // between the tabs and the list below it. It carries its own label instead
   // of living in the tab panel, so the panel holds only the list.
   const sidebar =
-    view === "latest" ? (
+    view === "for-you" && !signedIn ? null : (
       <aside
         aria-label="Filters"
         className="mt-4 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-start lg:sticky lg:top-20"
       >
+        {view === "for-you" && <YourStack />}
         <FeedFilters key={resetCount} />
       </aside>
-    ) : signedIn ? (
-      <aside
-        aria-label="About this feed"
-        className="mt-4 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-start lg:sticky lg:top-20"
-      >
-        <div className="space-y-3 text-small text-muted-foreground">
-          <p>
-            {hasNoStack
-              ? "You have not added any technologies yet, so this feed is ordered by recency. Add your stack to rank posts by how well they match it."
-              : "Ranked by how many of a post's technologies are in your stack, and how recent it is. Green tags match yours."}
-          </p>
-          <Button variant="outline" size="sm" onClick={openStackPicker}>
-            {hasNoStack ? "Add your technologies" : "Edit stack"}
-          </Button>
-        </div>
-      </aside>
-    ) : null;
+    );
 
   return (
     <div className="lg:grid lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:gap-x-10 xl:grid-cols-[15.5rem_minmax(0,1fr)_15.5rem] xl:gap-x-8">
@@ -154,8 +135,17 @@ export function Feed() {
             state={toListState(forYouFeed)}
             page={page}
             onPageChange={changePage}
-            emptyTitle="Nothing to show yet"
-            emptyText="Posts from other developers will show up here."
+            emptyTitle={
+              hasFilters
+                ? "No posts match these filters"
+                : "Nothing to show yet"
+            }
+            emptyText={
+              hasFilters
+                ? "Try a different search, or remove a technology."
+                : "Posts from other developers will show up here."
+            }
+            onClearFilters={hasFilters ? clearFilters : undefined}
           />
         ) : (
           <SignInPrompt />

@@ -17,10 +17,7 @@ export interface FeedParams {
   technologies?: string[];
 }
 
-export interface PersonalizedParams {
-  page: number;
-  limit: number;
-}
+export type PersonalizedParams = FeedParams;
 
 export async function getPublicFeed(
   params: FeedParams,
@@ -52,7 +49,15 @@ export async function getPersonalizedFeed(
     getToken,
     "/feed/personalized",
     {
-      query: { page: params.page, limit: params.limit },
+      query: {
+        page: params.page,
+        limit: params.limit,
+        // Left out when empty, as in getPublicFeed.
+        search: params.search || undefined,
+        technologies: params.technologies?.length
+          ? params.technologies.join(",")
+          : undefined,
+      },
       signal,
     },
   );
