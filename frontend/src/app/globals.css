@@ -277,9 +277,9 @@
   .hero-scrim {
     --hero-scrim: radial-gradient(
       ellipse 90% 50% at 50% 52%,
-      color-mix(in oklab, var(--background) 85%, transparent) 0%,
-      color-mix(in oklab, var(--background) 60%, transparent) 40%,
-      color-mix(in oklab, var(--background) 25%, transparent) 70%,
+      color-mix(in oklab, var(--background) 25%, transparent) 0%,
+      color-mix(in oklab, var(--background) 20%, transparent) 40%,
+      color-mix(in oklab, var(--background) 10%, transparent) 70%,
       transparent 100%
     );
     background: var(--hero-scrim);
@@ -289,9 +289,9 @@
     .hero-scrim {
       background: radial-gradient(
         ellipse max(55%, 30rem) 48% at 22.5rem 50%,
-        color-mix(in oklab, var(--background) 85%, transparent) 0%,
-        color-mix(in oklab, var(--background) 60%, transparent) 40%,
-        color-mix(in oklab, var(--background) 25%, transparent) 70%,
+        color-mix(in oklab, var(--background) 25%, transparent) 0%,
+        color-mix(in oklab, var(--background) 20%, transparent) 40%,
+        color-mix(in oklab, var(--background) 10%, transparent) 70%,
         transparent 100%
       );
     }

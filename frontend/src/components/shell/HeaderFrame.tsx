@@ -7,10 +7,12 @@ import { usePathname } from "next/navigation";
 const HEADER_HEIGHT = 56;
 
 // On the landing page in dark, the hero runs under the header. The header
-// reports whether it still overlaps it through data-over-hero, and the styles
-// below change colours only, never size or position (D-36). The value starts
-// true on / so the first paint is already right, and a sentinel at the hero's
-// bottom edge turns it off once that edge scrolls up past the header.
+// reports whether it is still clear of the hero text through data-over-hero,
+// and the styles below change colours only, never size or position (D-36). The
+// value starts true on / so the first paint is already right. A sentinel at
+// the top of the hero text turns it off once the text scrolls up to the
+// header, and the blur then fades in over 300ms. That is a transition fired
+// at one point, not an effect tied to the scroll position (D-40).
 export function HeaderFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [pastHero, setPastHero] = useState(false);
@@ -37,7 +39,7 @@ export function HeaderFrame({ children }: { children: ReactNode }) {
   return (
     <header
       data-over-hero={overHero}
-      className="sticky top-0 z-40 border-b bg-background/75 backdrop-blur transition-[background-color,border-color,backdrop-filter] duration-200 before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:-z-10 before:h-[calc(100%+1.5rem)] before:bg-linear-to-b before:from-background/60 before:to-transparent before:opacity-0 before:transition-opacity before:duration-200 dark:data-[over-hero=true]:border-transparent dark:data-[over-hero=true]:bg-transparent dark:data-[over-hero=true]:backdrop-blur-none dark:data-[over-hero=true]:before:opacity-100"
+      className="sticky top-0 z-40 border-b bg-background/75 backdrop-blur transition-[background-color,border-color,backdrop-filter] duration-300 before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:-z-10 before:h-[calc(100%+2.5rem)] before:bg-linear-to-b before:from-background/40 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300 dark:data-[over-hero=true]:border-transparent dark:data-[over-hero=true]:bg-transparent dark:data-[over-hero=true]:backdrop-blur-[0px] dark:data-[over-hero=true]:before:opacity-100"
     >
       {children}
     </header>

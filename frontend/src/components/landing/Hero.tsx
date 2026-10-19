@@ -51,14 +51,6 @@ export function Hero() {
         className="hero-scrim pointer-events-none absolute inset-0 -z-10"
       />
 
-      {/* The hero's bottom edge, which the header watches to know when it no
-          longer overlaps the photo. */}
-      <div
-        aria-hidden
-        data-hero-sentinel
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
-      />
-
       <div className="dark relative flex w-full items-center text-foreground dark:pt-14">
         <Container
           size="wide"

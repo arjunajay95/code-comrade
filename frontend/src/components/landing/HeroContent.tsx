@@ -9,7 +9,15 @@ const delay = (step: number) => ({ animationDelay: `${step * 60}ms` });
 
 export function HeroContent() {
   return (
-    <div className="mx-auto max-w-2xl text-center md:mx-0 md:text-left">
+    <div className="relative mx-auto max-w-2xl text-center md:mx-0 md:text-left">
+      {/* The top of the text, which the header watches. Once it scrolls up to
+          the header, the header turns its blur on, so the text never runs
+          behind bare header items. It is out of flow, so it moves nothing. */}
+      <div
+        aria-hidden
+        data-hero-sentinel
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+      />
       <p
         style={delay(0)}
         className={`${ENTER} font-mono text-micro uppercase tracking-wider text-foreground/80`}
