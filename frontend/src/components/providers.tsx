@@ -2,8 +2,15 @@
 
 import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { LazyMotion, MotionConfig } from "motion/react";
 import { ThemeProvider } from "next-themes";
 import { ApiError } from "@/services/apiClient";
+
+// domMax, loaded after first paint. The layout animations on the feed tabs and
+// the technology chips need it, and domAnimation has no layout support. Loading
+// it lazily keeps it out of the initial bundle.
+const loadMotionFeatures = () =>
+  import("@/lib/motionFeatures").then((module) => module.default);
 
 export function Providers({ children }: { children: ReactNode }) {
   // Created once per browser session. Holding it in state stops React from
@@ -46,7 +53,16 @@ export function Providers({ children }: { children: ReactNode }) {
       // Stops every color from animating at once when the theme flips.
       disableTransitionOnChange
     >
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        {/* reducedMotion "user" follows the operating system setting for every
+            m component below (D-40). Strict mode makes a stray motion.*
+            component throw, so only the lazy m components ship. */}
+        <MotionConfig reducedMotion="user">
+          <LazyMotion features={loadMotionFeatures} strict>
+            {children}
+          </LazyMotion>
+        </MotionConfig>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
