@@ -8,7 +8,7 @@ export function createHeroRequest(now: number = Date.now()) {
     title: "Rate limiter middleware for Express",
     author: { username: "mira_dev", karma: 14 },
     createdAt: new Date(now - 2 * HOUR).toISOString(),
-    reviewCount: 1,
+    reviewCount: 2,
     technologies: [
       { id: 1, name: "express" },
       { id: 2, name: "typescript" },
