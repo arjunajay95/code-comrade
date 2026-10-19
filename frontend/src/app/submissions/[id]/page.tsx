@@ -24,12 +24,12 @@ export default async function SubmissionPage({
           were. */}
       <Link
         href="/feed"
-        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-small text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" aria-hidden />
         Back to feed
       </Link>
-      <div className="mt-4">
+      <div className="mt-6">
         <SubmissionDetail id={id} />
       </div>
     </Container>

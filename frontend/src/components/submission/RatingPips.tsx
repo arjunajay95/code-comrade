@@ -29,7 +29,7 @@ export function RatingPips({ value, label }: { value: number; label: string }) {
           number is dropped to give the criterion name room to fit. */}
       <span
         aria-hidden
-        className="hidden w-7 text-right text-xs tabular-nums text-muted-foreground min-[380px]:inline"
+        className="hidden w-7 text-right font-mono text-micro tabular-nums text-muted-foreground min-[380px]:inline"
       >
         {value}/{MAX_RATING}
       </span>

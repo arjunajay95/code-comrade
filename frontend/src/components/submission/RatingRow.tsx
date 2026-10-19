@@ -49,9 +49,9 @@ interface RatingRowProps {
 export function RatingRow({ label, value, valueText }: RatingRowProps) {
   return (
     <div>
-      <div className="flex items-baseline justify-between gap-3 text-xs">
+      <div className="flex items-baseline justify-between gap-3 text-small">
         <span className="min-w-0 truncate text-foreground">{label}</span>
-        <span className="shrink-0 tabular-nums text-muted-foreground">
+        <span className="shrink-0 font-mono tabular-nums text-muted-foreground">
           {valueText}
         </span>
       </div>
