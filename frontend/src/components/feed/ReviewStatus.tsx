@@ -21,7 +21,13 @@ export function ReviewStatus({
           pending ? "bg-pending" : "bg-addition",
         )}
       />
-      <span className={pending ? "text-foreground" : "text-muted-foreground"}>
+      {/* The badge's own 10px size is too small to read as running text. */}
+      <span
+        className={cn(
+          "text-micro",
+          pending ? "text-foreground" : "text-muted-foreground",
+        )}
+      >
         {pending
           ? "needs a review"
           : `${reviewCount} ${reviewCount === 1 ? "review" : "reviews"}`}

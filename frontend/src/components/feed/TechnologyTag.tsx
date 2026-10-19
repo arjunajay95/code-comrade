@@ -12,7 +12,7 @@ export function TechnologyTag({
   return (
     <span
       className={cn(
-        "inline-flex h-6 items-center rounded-md border px-2 font-mono text-xs",
+        "inline-flex h-6 items-center rounded-md border px-2 font-mono text-micro",
         matched
           ? "border-addition/40 bg-addition/10 text-addition"
           : "bg-muted/50 text-muted-foreground",

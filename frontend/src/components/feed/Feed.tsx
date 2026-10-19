@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { useReducedMotion } from "motion/react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -87,61 +89,74 @@ export function Feed() {
     window.scrollTo({ top: 0 });
   };
 
+  // What belongs to the current tab sits beside the list at lg and above, and
+  // between the tabs and the list below it. It carries its own label instead
+  // of living in the tab panel, so the panel holds only the list.
+  const sidebar =
+    view === "latest" ? (
+      <aside
+        aria-label="Filters"
+        className="mt-4 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-start lg:sticky lg:top-20"
+      >
+        <FeedFilters key={resetCount} />
+      </aside>
+    ) : signedIn ? (
+      <aside
+        aria-label="About this feed"
+        className="mt-4 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-start lg:sticky lg:top-20"
+      >
+        <div className="space-y-3 text-small text-muted-foreground">
+          <p>
+            {hasNoStack
+              ? "You have not added any technologies yet, so this feed is ordered by recency. Add your stack to rank submissions by how well they match it."
+              : "Ranked by how many of a submission's technologies are in your stack, and how recent it is. Green tags match yours."}
+          </p>
+          <Button variant="outline" size="sm" onClick={openStackPicker}>
+            {hasNoStack ? "Add your technologies" : "Edit stack"}
+          </Button>
+        </div>
+      </aside>
+    ) : null;
+
   return (
-    <div>
-      <FeedTabs view={view} onChange={setView} />
+    <div className="lg:grid lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:gap-x-10">
+      <div className="lg:col-start-2 lg:row-start-1">
+        <FeedTabs view={view} onChange={setView} />
+      </div>
+
+      {sidebar}
 
       <div
         role="tabpanel"
         id="feed-panel"
         aria-labelledby={`feed-tab-${view}`}
-        className="mt-4 space-y-3"
+        className="mt-4 lg:col-start-2 lg:row-start-2"
       >
         {view === "latest" ? (
-          <>
-            <FeedFilters key={resetCount} />
-            <FeedResults
-              state={toListState(publicFeed)}
-              page={page}
-              onPageChange={changePage}
-              emptyTitle={
-                hasFilters
-                  ? "No submissions match these filters"
-                  : "No submissions yet"
-              }
-              emptyText={
-                hasFilters
-                  ? "Try a different search, or remove a technology."
-                  : "Code posted for review will show up here."
-              }
-              onClearFilters={hasFilters ? clearFilters : undefined}
-            />
-          </>
+          <FeedResults
+            state={toListState(publicFeed)}
+            page={page}
+            onPageChange={changePage}
+            emptyTitle={
+              hasFilters
+                ? "No submissions match these filters"
+                : "No submissions yet"
+            }
+            emptyText={
+              hasFilters
+                ? "Try a different search, or remove a technology."
+                : "Code posted for review will show up here."
+            }
+            onClearFilters={hasFilters ? clearFilters : undefined}
+          />
         ) : signedIn ? (
-          <>
-            <div className="flex flex-col gap-2 rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-              <p>
-                {hasNoStack
-                  ? "You have not added any technologies yet, so this feed is ordered by recency. Add your stack to rank submissions by how well they match it."
-                  : "Ranked by how many of a submission's technologies are in your stack, and how recent it is. Green tags match yours."}
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0"
-                onClick={openStackPicker}
-              >
-                {hasNoStack ? "Add your technologies" : "Edit stack"}
-              </Button>
-            </div>
-            <FeedResults
-              state={toListState(forYouFeed)}
-              page={page}
-              onPageChange={changePage}
-              emptyTitle="Nothing to show yet"
-              emptyText="Submissions from other developers will show up here."
-            />
-          </>
+          <FeedResults
+            state={toListState(forYouFeed)}
+            page={page}
+            onPageChange={changePage}
+            emptyTitle="Nothing to show yet"
+            emptyText="Submissions from other developers will show up here."
+          />
         ) : (
           <SignInPrompt />
         )}
@@ -167,6 +182,24 @@ function FeedResults({
   emptyText,
   onClearFilters,
 }: FeedResultsProps) {
+  const reduceMotion = useReducedMotion();
+
+  // The first list after the page loads renders with no entrance, because its
+  // first card can be the LCP element. Every list after it, whether from a
+  // filter, a search, a tab or a page change, enters. The same component
+  // stays mounted across tabs, so a tab change counts as a later list.
+  // Lists are told apart by their ids, so the dimmed previous page, which is
+  // the same list, is not counted again.
+  const listKey =
+    state.items && state.items.length > 0
+      ? state.items.map((item) => item.id).join(",")
+      : null;
+  const [seen, setSeen] = useState({ key: null as string | null, count: 0 });
+  if (listKey !== null && listKey !== seen.key) {
+    setSeen({ key: listKey, count: seen.count + 1 });
+  }
+  const animateIn = seen.count > 1 && !reduceMotion;
+
   if (state.isError) {
     return <FeedError error={state.error} onRetry={state.refetch} />;
   }
@@ -191,7 +224,7 @@ function FeedResults({
     if (page > 1) {
       return (
         <Card className="gap-0 py-0">
-          <CardContent className="p-4 text-sm">
+          <CardContent className="p-4 text-body">
             <p className="text-muted-foreground">
               There is nothing on this page.
             </p>
@@ -208,9 +241,9 @@ function FeedResults({
     }
     return (
       <Card className="gap-0 py-0">
-        <CardContent className="p-4 text-sm">
+        <CardContent className="p-4 text-body">
           <p className="font-medium">{emptyTitle}</p>
-          <p className="mt-1 text-muted-foreground">{emptyText}</p>
+          <p className="mt-1 text-small text-muted-foreground">{emptyText}</p>
           {onClearFilters && (
             <Button variant="outline" className="mt-3" onClick={onClearFilters}>
               Clear filters
@@ -231,8 +264,13 @@ function FeedResults({
           state.isPlaceholderData && "opacity-50 transition-opacity",
         )}
       >
-        {state.items.map((item) => (
-          <FeedItemRow key={item.id} item={item} />
+        {state.items.map((item, index) => (
+          <FeedItemRow
+            key={item.id}
+            item={item}
+            index={index}
+            animateIn={animateIn}
+          />
         ))}
       </ul>
       <FeedPagination
@@ -258,13 +296,13 @@ function FeedError({
 
   return (
     <Card role="alert" className="gap-0 py-0">
-      <CardContent className="p-4 text-sm">
+      <CardContent className="p-4 text-body">
         <p className="font-medium">Could not load the feed</p>
-        <p className="mt-1 text-muted-foreground">
+        <p className="mt-1 text-small text-muted-foreground">
           {error?.message ?? "Something went wrong."}
         </p>
         {requestId && (
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-small text-muted-foreground">
             Reference: <span className="font-mono">{requestId}</span>
           </p>
         )}
@@ -279,9 +317,9 @@ function FeedError({
 function SignInPrompt() {
   return (
     <Card className="gap-0 py-0">
-      <CardContent className="p-4 text-sm">
+      <CardContent className="p-4 text-body">
         <p className="font-medium">See submissions ranked for you</p>
-        <p className="mt-1 text-muted-foreground">
+        <p className="mt-1 text-small text-muted-foreground">
           Sign in and add your technologies. The feed then ranks submissions by
           how well they match your stack, and how recent they are.
         </p>

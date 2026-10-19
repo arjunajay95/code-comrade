@@ -29,7 +29,7 @@ export function FeedPagination({
       >
         Previous
       </Button>
-      <span className="text-xs tabular-nums text-muted-foreground">
+      <span className="text-small tabular-nums text-muted-foreground">
         Page {page} of {totalPages}
       </span>
       <Button
