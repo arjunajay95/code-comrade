@@ -1,9 +1,10 @@
 "use client";
 
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Field, FormError } from "@/components/form/Field";
+import { WritePreview } from "@/components/form/WritePreview";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/shell/Surface";
 import { Textarea } from "@/components/ui/textarea";
@@ -61,6 +62,7 @@ export function ReviewForm({
     handleSubmit,
     formState: { errors },
   } = form;
+  const feedback = useWatch({ control, name: "feedback" });
 
   const onSubmit = handleSubmit((values) => {
     // A double click sends one request: the second is dropped here, and the
@@ -94,12 +96,14 @@ export function ReviewForm({
             htmlFor="feedback"
             error={errors.feedback?.message}
           >
-            <Textarea
-              id="feedback"
-              rows={6}
-              aria-invalid={errors.feedback ? true : undefined}
-              {...register("feedback")}
-            />
+            <WritePreview value={feedback} maxLength={2000}>
+              <Textarea
+                id="feedback"
+                rows={6}
+                aria-invalid={errors.feedback ? true : undefined}
+                {...register("feedback")}
+              />
+            </WritePreview>
           </Field>
 
           <div className="space-y-3">

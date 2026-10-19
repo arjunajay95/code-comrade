@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Plus, X } from "lucide-react";
 import { z } from "zod";
 import { Field, FormError } from "@/components/form/Field";
+import { WritePreview } from "@/components/form/WritePreview";
 import { Surface } from "@/components/shell/Surface";
 import { TechnologySelect } from "@/components/stack/TechnologySelect";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -137,6 +138,7 @@ export function SubmissionForm({
     formState: { errors },
   } = form;
   const criteria = useFieldArray({ control, name: "criteria" });
+  const description = useWatch({ control, name: "description" });
 
   const onSubmit = handleSubmit((values) => {
     // A second click while the first request is in flight is ignored, in
@@ -187,12 +189,14 @@ export function SubmissionForm({
           hint="Say what the code does and where you want a second pair of eyes."
           error={errors.description?.message}
         >
-          <Textarea
-            id="description"
-            rows={5}
-            aria-invalid={errors.description ? true : undefined}
-            {...register("description")}
-          />
+          <WritePreview value={description} maxLength={2000}>
+            <Textarea
+              id="description"
+              rows={5}
+              aria-invalid={errors.description ? true : undefined}
+              {...register("description")}
+            />
+          </WritePreview>
         </Field>
 
         <Field

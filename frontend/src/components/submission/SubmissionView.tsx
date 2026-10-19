@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { ReviewStatus } from "@/components/feed/ReviewStatus";
 import { TechnologyTag } from "@/components/feed/TechnologyTag";
 import { KarmaChip } from "@/components/karma/KarmaChip";
+import { FormattedText } from "@/components/text/FormattedText";
 import { StateCard } from "@/components/shell/StateCard";
 import { Surface } from "@/components/shell/Surface";
 import { buttonVariants } from "@/components/ui/button";
@@ -74,14 +75,10 @@ export function SubmissionView({
           />
         </div>
 
-        <p
-          className={cn(
-            "mt-4 whitespace-pre-line text-body text-foreground",
-            WRAP,
-          )}
-        >
-          {submission.description}
-        </p>
+        <FormattedText
+          text={submission.description}
+          className="mt-4 text-body text-foreground"
+        />
 
         <ul className="mt-4 flex flex-wrap gap-1.5">
           {submission.technologies.map((technology) => (
@@ -226,9 +223,7 @@ function ReviewCard({
           </time>
         </div>
 
-        <p className={cn("mt-3 whitespace-pre-line text-body", WRAP)}>
-          {review.feedback}
-        </p>
+        <FormattedText text={review.feedback} className="mt-3 text-body" />
 
         {/* Grouped data: one rating per criterion. */}
         <ul className="mt-4 space-y-2 rounded-lg bg-muted/50 p-3">
