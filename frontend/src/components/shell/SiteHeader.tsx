@@ -1,16 +1,12 @@
 import Link from "next/link";
-import { Show } from "@clerk/nextjs";
-import { Plus } from "lucide-react";
 import { LogoMark } from "@/components/brand/LogoMark";
 import { Wordmark } from "@/components/brand/Wordmark";
-import { buttonVariants } from "@/components/ui/button";
 import { Container } from "./Container";
 import { HeaderFrame } from "./HeaderFrame";
 import { HeaderNav } from "./HeaderNav";
-import { KarmaBadge } from "./KarmaBadge";
+import { HeaderAuth } from "./HeaderAuth";
 import { MobileMenu } from "./MobileMenu";
 import { ThemeToggle } from "./ThemeToggle";
-import { UserMenu } from "./UserMenu";
 
 export function SiteHeader() {
   return (
@@ -40,27 +36,7 @@ export function SiteHeader() {
           <ThemeToggle />
         </div>
 
-        <Show when="signed-out">
-          <Link href="/sign-in" className={buttonVariants()}>
-            Sign in
-          </Link>
-        </Show>
-
-        <Show when="signed-in">
-          <Link
-            href="/submissions/new"
-            aria-label="New post"
-            className={buttonVariants()}
-          >
-            <Plus aria-hidden />
-            {/* Icon only on the narrowest screens, so the header fits at
-                320px. */}
-            <span className="hidden min-[400px]:inline">New post</span>
-          </Link>
-          <KarmaBadge />
-          {/* Clerk's avatar menu, with an extra item for editing the stack. */}
-          <UserMenu />
-        </Show>
+        <HeaderAuth />
       </Container>
     </HeaderFrame>
   );

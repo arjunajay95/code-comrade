@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
 import { ClosingCta } from "@/components/landing/ClosingCta";
 import { Hero } from "@/components/landing/Hero";
 import { HowItWorks } from "@/components/landing/HowItWorks";
@@ -13,12 +11,12 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
 };
 
-// The page makes no API call (PROJECT_BLUEPRINT §13), so its first paint never
-// waits on the API. A signed-in visitor is sent on before anything renders.
-export default async function Home() {
-  const { userId } = await auth();
-  if (userId) redirect("/feed");
+// Regenerated hourly, so the preview's relative times stay current. The page
+// makes no API call (PROJECT_BLUEPRINT §13) and does not read the session: the
+// middleware sends a signed-in visitor to /feed before this renders.
+export const revalidate = 3600;
 
+export default function Home() {
   return (
     <>
       <Hero />
