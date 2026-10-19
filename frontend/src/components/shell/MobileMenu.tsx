@@ -7,6 +7,7 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { Menu, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { switchTheme } from "@/lib/themeTransition";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "./navLinks";
 
@@ -100,8 +101,12 @@ export function MobileMenu() {
             <button
               type="button"
               aria-label="Toggle color theme"
-              onClick={() =>
-                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              onClick={(event) =>
+                switchTheme(
+                  setTheme,
+                  resolvedTheme === "dark" ? "light" : "dark",
+                  event.currentTarget,
+                )
               }
               className={cn(row, "justify-between")}
             >

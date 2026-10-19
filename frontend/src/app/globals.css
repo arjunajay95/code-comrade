@@ -467,3 +467,38 @@
     }
   }
 }
+
+/* The theme switch (D-40): a circle that grows from the toggle, drawn by the
+   View Transitions API. The default cross-fade is turned off, so only the
+   clip-path animation set in themeTransition.ts shows. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* A landing section that starts below the fold fades up once, as it enters the
+   viewport. Reveal sets data-reveal after the first paint and only when the
+   section is not already in view, so content is never hidden without
+   JavaScript, and a translate and an opacity move no layout (D-36). */
+@layer components {
+  .reveal[data-reveal] {
+    transition:
+      opacity 400ms ease-out,
+      translate 400ms ease-out;
+  }
+
+  .reveal[data-reveal="pending"] {
+    opacity: 0;
+    translate: 0 16px;
+  }
+
+  .reveal[data-reveal="shown"] {
+    opacity: 1;
+    translate: none;
+  }
+}
