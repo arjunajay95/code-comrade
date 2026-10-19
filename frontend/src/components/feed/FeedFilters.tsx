@@ -126,7 +126,7 @@ export function FeedFilters() {
                 aria-pressed={isSelected}
                 onClick={() => toggleTechnology(technology.name)}
                 className={cn(
-                  "inline-flex h-7 items-center rounded-md border px-2 font-mono text-micro",
+                  "inline-flex h-7 items-center rounded-md border px-2 font-mono text-micro outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                   isSelected
                     ? "border-addition/40 bg-addition/10 text-addition"
                     : "bg-muted/50 text-muted-foreground hover:text-foreground",
@@ -147,7 +147,7 @@ export function FeedFilters() {
             type="button"
             aria-expanded={expanded}
             onClick={() => setExpanded((value) => !value)}
-            className="text-small text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            className="rounded-sm text-small text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
           >
             {expanded ? "Show fewer" : `Show all ${ordered.length}`}
           </button>

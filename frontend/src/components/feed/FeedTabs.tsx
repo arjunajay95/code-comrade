@@ -56,7 +56,7 @@ export function FeedTabs({
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(tab.id)}
             className={cn(
-              "relative h-7 rounded-md px-3 text-small transition-colors",
+              "relative h-7 rounded-md px-3 text-small outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
               selected
                 ? "text-foreground"
                 : "text-muted-foreground hover:text-foreground",
