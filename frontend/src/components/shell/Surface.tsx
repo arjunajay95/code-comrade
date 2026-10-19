@@ -28,7 +28,7 @@ export function Surface({
         GLASS_HIGHLIGHT,
         glass && cn("bg-card/30", GLASS_BLUR),
         interactive &&
-          "relative transition-[color,background-color,border-color,translate] hover:-translate-y-0.5 hover:border-foreground/30 hover:bg-card motion-reduce:hover:translate-y-0 has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring/50",
+          "group/card relative transition-[color,background-color,border-color,translate] hover:-translate-y-0.5 hover:border-foreground/30 hover:bg-card motion-reduce:hover:translate-y-0 has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring/50",
         className,
       )}
       {...props}
@@ -36,5 +36,9 @@ export function Surface({
   );
 }
 
+// The title's underline is a 1px line, drawn in from the left when the card
+// (the group/card ancestor) is hovered or the link has keyboard focus. It is a
+// background, so it moves no layout, and it appears at once under reduced
+// motion.
 export const STRETCHED_LINK =
-  "underline-offset-4 outline-none after:absolute after:inset-0 hover:underline";
+  "bg-linear-to-r from-foreground/40 to-foreground/40 bg-size-[0%_1px] bg-bottom-left bg-no-repeat outline-none transition-[background-size] duration-250 ease-out after:absolute after:inset-0 group-hover/card:bg-size-[100%_1px] focus-visible:bg-size-[100%_1px] motion-reduce:transition-none";

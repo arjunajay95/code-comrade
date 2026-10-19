@@ -5,6 +5,7 @@ import * as m from "motion/react-m";
 import { CodeXml } from "lucide-react";
 import { KarmaChip } from "@/components/karma/KarmaChip";
 import { MonogramAvatar } from "@/components/profile/MonogramAvatar";
+import { STRETCHED_LINK } from "@/components/shell/Surface";
 import { CodeBlock } from "@/components/text/CodeBlock";
 import { excerpt, firstCodeBlock, proseExcerpt } from "@/lib/formattedText";
 import { timeAgo } from "@/lib/time";
@@ -57,7 +58,7 @@ export function FeedItemRow({
         ease: "easeOut",
         delay: Math.min(index, STAGGER_LIMIT) * STAGGER_SECONDS,
       }}
-      className="relative rounded-xl border bg-card/60 p-5 transition-[color,background-color,border-color,translate] hover:-translate-y-0.5 hover:border-foreground/30 hover:bg-card motion-reduce:hover:translate-y-0 has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring/50"
+      className="group/card relative rounded-xl border bg-card/60 p-5 transition-[color,background-color,border-color,translate] hover:-translate-y-0.5 hover:border-foreground/30 hover:bg-card motion-reduce:hover:translate-y-0 has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring/50"
     >
       <div className="flex h-6 items-center justify-between gap-3">
         <h2 className="min-w-0 truncate text-heading font-medium">
@@ -66,7 +67,7 @@ export function FeedItemRow({
           <Link
             href={`/submissions/${item.id}`}
             data-card-link
-            className="underline-offset-4 outline-none after:absolute after:inset-0 hover:underline"
+            className={STRETCHED_LINK}
           >
             {item.title}
           </Link>
