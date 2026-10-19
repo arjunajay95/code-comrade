@@ -1,66 +1,105 @@
 import type { ReactNode } from "react";
 import { GitPullRequest, ListFilter, MessageSquareCode } from "lucide-react";
 import { TechnologyTag } from "@/components/feed/TechnologyTag";
-import { TechnologyTagRow } from "@/components/feed/TechnologyTagRow";
 import { KarmaChip } from "@/components/karma/KarmaChip";
 import { Container } from "@/components/shell/Container";
 import { Surface } from "@/components/shell/Surface";
 import { RatingPips } from "@/components/submission/RatingPips";
-import { Spotlight } from "./Spotlight";
+import { CodeBlock } from "@/components/text/CodeBlock";
+import { cn } from "@/lib/utils";
 import { SectionTitle } from "./SectionTitle";
+import { Spotlight } from "./Spotlight";
 
-// Small illustrations built from the app's own components. They are
-// decoration, so they are hidden from assistive technology, and each has a
-// fixed height so the cards do not shift as the page loads (D-36).
-function PostIllustration() {
+// Each card ends in a small outcome, built from the app's own components at
+// small sizes, in a recessed well. The well has one fixed height for all three,
+// is hidden from assistive technology, ignores the pointer, and fades out at
+// its bottom edge, so nothing in it can shift the card (D-36).
+function Well({ children }: { children: ReactNode }) {
   return (
-    <div aria-hidden className="h-18">
-      <div className="flex h-9 items-center rounded-md border bg-input/20 px-3 font-mono text-micro text-muted-foreground dark:bg-input/30">
-        github.com/mira/rate-limiter
-      </div>
-      <div className="mt-3 flex h-6 gap-1.5">
-        <TechnologyTag name="readability" />
-        <TechnologyTag name="edge cases" />
-      </div>
+    <div
+      aria-hidden
+      className={cn(
+        "pointer-events-none h-36 overflow-hidden rounded-xl border bg-black/5 p-3 dark:bg-black/30",
+        "shadow-[inset_0_2px_6px_rgb(0_0_0/0.08)] dark:shadow-[inset_0_2px_6px_rgb(0_0_0/0.35)]",
+        "mask-[linear-gradient(to_bottom,#000_60%,transparent)]",
+      )}
+    >
+      {children}
     </div>
   );
 }
 
-function ReviewIllustration() {
-  const rows = [
-    { label: "Readability", value: 4 },
-    { label: "Edge cases", value: 3 },
-  ];
+function MiniFeedCard() {
   return (
-    <div aria-hidden className="flex h-12 items-center justify-between gap-4">
-      <div className="min-w-0 flex-1 space-y-2">
-        {rows.map((row) => (
-          <div
-            key={row.label}
-            className="flex h-5 items-center justify-between gap-3 text-small"
-          >
-            <span className="truncate text-muted-foreground">{row.label}</span>
-            <RatingPips value={row.value} label={row.label} />
-          </div>
-        ))}
-      </div>
-      <KarmaChip value={16} />
-    </div>
-  );
-}
-
-function FeedIllustration() {
-  return (
-    <div aria-hidden className="h-6">
-      <TechnologyTagRow
-        technologies={[
-          { id: 1, name: "react" },
-          { id: 2, name: "typescript" },
-          { id: 3, name: "go" },
-        ]}
-        matchedNames={new Set(["react", "typescript"])}
+    <Well>
+      <p className="truncate text-small font-medium">Rate limiter middleware</p>
+      <CodeBlock
+        code={"const key = `rl:${ip}`\nawait redis.expire(key, 60)"}
+        language="ts"
+        header={false}
+        size="sm"
+        className="mt-2"
       />
-    </div>
+      <div className="mt-2 flex h-6 gap-1.5">
+        <TechnologyTag name="express" />
+        <TechnologyTag name="redis" />
+      </div>
+    </Well>
+  );
+}
+
+function MiniReview() {
+  return (
+    <Well>
+      <div className="flex h-7 items-center gap-2">
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted font-mono text-micro font-medium">
+          L
+        </span>
+        <span className="min-w-0 flex-1 truncate text-small">leo_codes</span>
+        <KarmaChip value={16} size="sm" />
+      </div>
+      <p className="mt-2 truncate text-small text-muted-foreground">
+        Put the window start in the key.
+      </p>
+      <div className="mt-3 flex h-5 items-center justify-between gap-3 text-small">
+        <span className="text-muted-foreground">Correctness</span>
+        <RatingPips value={4} label="Correctness" />
+      </div>
+    </Well>
+  );
+}
+
+const RANKED = [
+  {
+    title: "Rate limiter middleware",
+    tags: ["express", "typescript"],
+    hits: 2,
+  },
+  { title: "Optimistic updates hook", tags: ["react", "typescript"], hits: 2 },
+  { title: "Worker pool with shutdown", tags: ["go", "docker"], hits: 0 },
+];
+
+function MiniRankedList() {
+  return (
+    <Well>
+      <ol className="space-y-1">
+        {RANKED.map((row, index) => (
+          <li key={row.title} className="flex h-8 items-center gap-2">
+            <span className="w-3 shrink-0 font-mono text-micro text-muted-foreground">
+              {index + 1}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-small">
+              {row.title}
+            </span>
+            <span className="flex shrink-0 gap-1">
+              {row.tags.map((tag) => (
+                <TechnologyTag key={tag} name={tag} matched={row.hits > 0} />
+              ))}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </Well>
   );
 }
 
@@ -69,28 +108,32 @@ const STEPS: {
   icon: typeof GitPullRequest;
   title: string;
   text: string;
-  illustration: ReactNode;
+  outcome: ReactNode;
+  caption: string;
 }[] = [
   {
-    number: "01",
+    number: "1",
     icon: GitPullRequest,
     title: "Post a request",
     text: "Link a public GitHub repository, say what you want looked at, and choose the criteria reviewers rate.",
-    illustration: <PostIllustration />,
+    outcome: <MiniFeedCard />,
+    caption: "your request, in the feed",
   },
   {
-    number: "02",
+    number: "2",
     icon: MessageSquareCode,
     title: "Review someone else's code",
     text: "Rate each criterion from 1 to 5 and write what you would tell the author. Every review earns you karma.",
-    illustration: <ReviewIllustration />,
+    outcome: <MiniReview />,
+    caption: "a review, and karma for writing it",
   },
   {
-    number: "03",
+    number: "3",
     icon: ListFilter,
     title: "Get a feed that fits",
     text: "Add your stack, and the For you feed ranks requests by how well they match it.",
-    illustration: <FeedIllustration />,
+    outcome: <MiniRankedList />,
+    caption: "ranked by your stack",
   },
 ];
 
@@ -111,25 +154,34 @@ export function HowItWorks() {
             return (
               <li key={step.number} className="flex">
                 <Spotlight className="w-full rounded-xl">
-                  <Surface glass className="flex h-full flex-col p-6">
+                  <Surface glass className="relative flex h-full flex-col p-6">
+                    <span
+                      aria-hidden
+                      className="absolute top-5 right-6 select-none font-display text-[3.5rem] leading-none text-muted-foreground"
+                    >
+                      {step.number}
+                    </span>
                     <span
                       aria-hidden
                       className="flex size-10 items-center justify-center rounded-lg border bg-muted/50"
                     >
                       <Icon className="size-5" />
                     </span>
-                    <p className="mt-5 font-mono text-small text-muted-foreground">
-                      {step.number}
-                    </p>
-                    <h3 className="mt-2 text-heading font-medium">
+                    <h3 className="mt-5 text-heading font-medium">
                       {step.title}
                     </h3>
                     <p className="mt-2 text-body text-muted-foreground">
                       {step.text}
                     </p>
-                    {/* mt-auto pushes the illustration to the bottom, so the
-                        three line up whatever the text above them runs to. */}
-                    <div className="mt-auto pt-6">{step.illustration}</div>
+                    {/* mt-auto pushes the outcome and its caption to the
+                        bottom, so the three line up whatever the text above
+                        them runs to. */}
+                    <div className="mt-auto pt-6">
+                      {step.outcome}
+                      <p className="mt-3 font-mono text-micro text-muted-foreground">
+                        {step.caption}
+                      </p>
+                    </div>
                   </Surface>
                 </Spotlight>
               </li>
