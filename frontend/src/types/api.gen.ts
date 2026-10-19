@@ -351,6 +351,7 @@ export interface components {
         SubmissionSummary: {
             id: number;
             title: string;
+            description: string;
             /** Format: uri */
             githubUrl: string;
             /** Format: date-time */
