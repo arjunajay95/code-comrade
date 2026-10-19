@@ -5,7 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
-    <Container size="reading">
+    <Container size="reading" short>
       <LogoMark className="size-10" />
       <h1 className="mt-6 text-title font-semibold">Page not found</h1>
       <p className="mt-2 text-body text-muted-foreground">

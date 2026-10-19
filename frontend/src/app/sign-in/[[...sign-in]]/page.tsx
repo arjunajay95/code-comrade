@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Sign in" };
 
 export default function SignInPage() {
   return (
-    <Container size="reading">
+    <Container size="reading" short>
       <div className="flex justify-center py-8">
         <SignIn />
       </div>

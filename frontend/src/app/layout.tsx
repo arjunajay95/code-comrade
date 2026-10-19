@@ -78,8 +78,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <body className="min-h-full flex flex-col">
           <Providers>
             <SiteHeader />
-            {/* Each page sets its own width through Container (D-40). */}
-            <main className="flex-1">{children}</main>
+            {/* Each page sets its own width through Container (D-40). The
+                minimum height is the screen below the header, so a page that
+                fills in after loading never pulls the footer up into view and
+                then pushes it back down (D-36). A page whose content is short
+                and known opts out with a short Container. */}
+            <main className="min-h-[calc(100svh-3.5rem)] flex-1 has-[[data-short-page]]:min-h-0">
+              {children}
+            </main>
             <SiteFooter />
             <StackPickerHost />
           </Providers>
