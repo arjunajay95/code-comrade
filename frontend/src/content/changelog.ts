@@ -29,6 +29,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       "The feed now lives at /feed, with the filters beside the list on wide screens",
       "Smoother movement in the feed tabs and filters, and a karma number that slides when it changes",
       "This changelog, where every release is listed",
+      "Code snippets in requests and reviews, highlighted, with a copy button",
     ],
   },
   {
