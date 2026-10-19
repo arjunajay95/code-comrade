@@ -25,7 +25,7 @@ export function SubmissionDetail({ id }: { id: number }) {
           text="It may have been removed, or the link may be wrong."
         >
           <Link href="/feed" className={buttonVariants({ variant: "outline" })}>
-            Back to submissions
+            Back to feed
           </Link>
         </StateCard>
       );

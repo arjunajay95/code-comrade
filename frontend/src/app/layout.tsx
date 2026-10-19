@@ -62,9 +62,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         // layer before Tailwind's utilities, so classes like text-addition
         // below win over Clerk's own colors.
         cssLayerName: "clerk",
-        // Clerk colors links with the primary token, which is tuned for button fills and is too dark to read as text on a dark card.
-        // The addition green is the readable one
-        elements: { footerActionLink: "text-addition hover:text-addition" },
       }}
     >
       {/* suppressHydrationWarning: next-themes sets the theme class on <html>

@@ -24,7 +24,7 @@ export default async function ProfilePage({
         className="inline-flex items-center gap-1.5 text-small text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" aria-hidden />
-        Back to submissions
+        Back to feed
       </Link>
       <div className="mt-6">
         <PublicProfile username={username} />

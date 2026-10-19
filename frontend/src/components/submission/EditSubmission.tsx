@@ -58,7 +58,7 @@ export function EditSubmission({ id }: { id: number }) {
           title="Submission not found"
           text="It may have been removed, or the link may be wrong."
           backHref="/feed"
-          backLabel="Back to submissions"
+          backLabel="Back to feed"
         />
       );
     }

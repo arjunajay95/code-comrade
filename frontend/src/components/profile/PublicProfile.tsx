@@ -20,7 +20,7 @@ export function PublicProfile({ username }: { username: string }) {
           text={`No one has the username "${username}".`}
         >
           <Link href="/feed" className={buttonVariants({ variant: "outline" })}>
-            Back to submissions
+            Back to feed
           </Link>
         </StateCard>
       );
