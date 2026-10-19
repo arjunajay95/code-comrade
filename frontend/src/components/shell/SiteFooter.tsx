@@ -27,6 +27,9 @@ export function SiteFooter() {
           <Link href="/feed" className={linkClass}>
             Feed
           </Link>
+          <Link href="/changelog" className={linkClass}>
+            What&apos;s new
+          </Link>
           <a
             href="https://github.com/arjunajay95/code-comrade"
             className={linkClass}
