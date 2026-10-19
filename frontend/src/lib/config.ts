@@ -11,3 +11,7 @@ if (!apiUrl) {
 
 // Without a trailing slash, so paths like "/feed" join cleanly.
 export const API_URL = apiUrl.replace(/\/+$/, "");
+
+// The public origin of the deployed site. Root metadata resolves relative
+// image and link URLs against it (D-40).
+export const SITE_URL = "https://codecomrade.vercel.app";
